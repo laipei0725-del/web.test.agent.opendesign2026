@@ -2,6 +2,7 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: process.env.NODE_ENV === 'production' ? '/web.test.agent.opendesign2026/' : '/',
   build: {
     rollupOptions: {
       input: {
