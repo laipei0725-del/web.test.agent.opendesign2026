@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 聰明工具箱 - 品牌行銷控制台</title>
+  <title>Dance Creator OS - AI Assistant for Dance Teachers & Creators</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,8 @@
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-logo">
-          <span class="logo-icon">🍊</span>
-          <span class="logo-text">AI 聰明工具箱<span class="logo-sub">AI Agent</span></span>
+          <span class="logo-icon">💃</span>
+          <span class="logo-text">Dance Creator<span class="logo-sub">OS</span></span>
         </div>
       </div>
 
@@ -26,38 +26,62 @@
         <ul>
           <li>
             <button class="nav-btn active" id="nav-dashboard" onclick="switchTab('dashboard')">
+              <span class="nav-icon">🏠</span>
+              <span class="nav-text">Creator Dashboard</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-agents" onclick="switchTab('agents')">
+              <span class="nav-icon">🤖</span>
+              <span class="nav-text">AI Agents</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-studio" onclick="switchTab('studio')">
+              <span class="nav-icon">🎬</span>
+              <span class="nav-text">Content Studio</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-chat" onclick="switchTab('chat')">
+              <span class="nav-icon">💬</span>
+              <span class="nav-text">Customer Service</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-social" onclick="switchTab('social')">
+              <span class="nav-icon">📱</span>
+              <span class="nav-text">Social Media</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-crm" onclick="switchTab('crm')">
+              <span class="nav-icon">👥</span>
+              <span class="nav-text">Student CRM</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-automation" onclick="switchTab('automation')">
+              <span class="nav-icon">⚡</span>
+              <span class="nav-text">Automation Center</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-knowledge" onclick="switchTab('knowledge')">
+              <span class="nav-icon">📚</span>
+              <span class="nav-text">Knowledge Base</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-analytics" onclick="switchTab('analytics')">
               <span class="nav-icon">📊</span>
-              <span class="nav-text">數據總覽</span>
+              <span class="nav-text">Analytics</span>
             </button>
           </li>
           <li>
-            <button class="nav-btn" id="nav-calendar" onclick="switchTab('calendar')">
-              <span class="nav-icon">📅</span>
-              <span class="nav-text">排程行事曆</span>
-            </button>
-          </li>
-          <li>
-            <button class="nav-btn" id="nav-generator" onclick="switchTab('generator')">
-              <span class="nav-icon">✍️</span>
-              <span class="nav-text">AI 文案生成器</span>
-            </button>
-          </li>
-          <li>
-            <button class="nav-btn" id="nav-brands" onclick="switchTab('brands')">
-              <span class="nav-icon">🏷️</span>
-              <span class="nav-text">品牌資料庫</span>
-            </button>
-          </li>
-          <li>
-            <button class="nav-btn" id="nav-trends" onclick="switchTab('trends')">
-              <span class="nav-icon">📈</span>
-              <span class="nav-text">趨勢與競品</span>
-            </button>
-          </li>
-          <li>
-            <button class="nav-btn" id="nav-reports" onclick="switchTab('reports')">
-              <span class="nav-icon">📑</span>
-              <span class="nav-text">AI 分析報告</span>
+            <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+              <span class="nav-icon">⚙️</span>
+              <span class="nav-text">Settings</span>
             </button>
           </li>
         </ul>
@@ -67,9 +91,9 @@
         <div class="agent-status-card">
           <div class="status-indicator">
             <span class="pulse-dot"></span>
-            <span class="status-text">Agent 連線中</span>
+            <span class="status-text">AI Brain Online</span>
           </div>
-          <p class="status-details">模型: Gemini 3.5 Flash</p>
+          <p class="status-details">Active Model: Gemini 3.5 Pro</p>
         </div>
       </div>
     </aside>
@@ -79,16 +103,16 @@
       <!-- Top Action & Status Bar -->
       <header class="top-bar">
         <div class="top-bar-left">
-          <h1 class="page-title" id="current-tab-title">數據總覽</h1>
+          <h1 class="page-title" id="current-tab-title">Creator Dashboard</h1>
         </div>
         <div class="top-bar-right">
           <div class="project-tag">
-            <span class="tag-label">專案</span>
-            <span class="tag-value">brand-shopee-87c830</span>
+            <span class="tag-label">Studio</span>
+            <span class="tag-value">Dancehall Hub</span>
           </div>
           <div class="user-profile">
             <span class="user-avatar">沛</span>
-            <span class="user-name">Product Owner</span>
+            <span class="user-name">Dance Teacher</span>
           </div>
         </div>
       </header>
@@ -96,122 +120,352 @@
       <!-- Content Area -->
       <main class="content-container">
         
-        <!-- =================== 1. DASHBOARD TAB =================== -->
+        <!-- =================== 1. CREATOR DASHBOARD =================== -->
         <section class="tab-content active" id="tab-dashboard">
           <div class="dashboard-grid">
-            <!-- KPI Summary Cards -->
+            <!-- Business Overview Rows -->
             <div class="kpi-row">
               <div class="glass-card kpi-card">
-                <span class="kpi-icon">⚡</span>
+                <span class="kpi-icon">👥</span>
                 <div class="kpi-data">
-                  <span class="kpi-num" id="kpi-ai-analyzed">142 筆</span>
-                  <span class="kpi-label">今日 AI 分析</span>
+                  <span class="kpi-num" id="kpi-students">124 名</span>
+                  <span class="kpi-label">活躍學員總數</span>
                 </div>
               </div>
               <div class="glass-card kpi-card">
-                <span class="kpi-icon">📝</span>
+                <span class="kpi-icon">💰</span>
                 <div class="kpi-data">
-                  <span class="kpi-num" id="kpi-content-generated">68 篇</span>
-                  <span class="kpi-label">今日內容生成</span>
+                  <span class="kpi-num" id="kpi-revenue">$156,000</span>
+                  <span class="kpi-label">本月營業收入</span>
                 </div>
               </div>
               <div class="glass-card kpi-card">
-                <span class="kpi-icon">🎯</span>
+                <span class="kpi-icon">📅</span>
                 <div class="kpi-data">
-                  <span class="kpi-num">78.5%</span>
-                  <span class="kpi-label">AI 建議採用率</span>
+                  <span class="kpi-num">12 場</span>
+                  <span class="kpi-label">本月排定課程/工作坊</span>
                 </div>
               </div>
               <div class="glass-card kpi-card">
-                <span class="kpi-icon">🕒</span>
+                <span class="kpi-icon">📈</span>
                 <div class="kpi-data">
-                  <span class="kpi-num">&lt; 3.5m</span>
-                  <span class="kpi-label">平均文案生成時間</span>
+                  <span class="kpi-num" id="kpi-growth">+14.2%</span>
+                  <span class="kpi-label">社群增長率 (週)</span>
                 </div>
               </div>
             </div>
 
-            <!-- Insights and Recommendations -->
+            <!-- Insights and Quick Actions -->
             <div class="grid-2col">
-              <!-- AI Realtime Insights -->
-              <div class="glass-card stream-card">
-                <div class="card-header">
-                  <h3 class="card-title">💡 實時 AI 洞察</h3>
-                  <span class="badge badge-live">LIVE</span>
-                </div>
-                <div class="stream-content" id="ai-insight-stream">
-                  <!-- Streamed items inserted by JS -->
-                </div>
-              </div>
-
-              <!-- Action Recommendations -->
+              <!-- AI Realtime Insights / Recommendations -->
               <div class="glass-card action-card">
                 <div class="card-header">
-                  <h3 class="card-title">⚡ 今日智慧建議</h3>
+                  <h3 class="card-title">💡 AI 每日智慧提醒</h3>
+                  <span class="badge badge-live">Recommendation</span>
                 </div>
                 <div class="action-list">
                   <div class="action-item warning">
-                    <div class="action-icon">🏮</div>
+                    <div class="action-icon">🔥</div>
                     <div class="action-details">
-                      <h4>中元普渡檔期即將到來</h4>
-                      <p>分析顯示「普渡澎派包」、「拜拜箱」搜尋熱度暴增 320%。建議於今日 18:00 前發布相關選品文案。</p>
-                      <button class="action-btn" onclick="quickAction('mid-ghost')">快速生成貼文</button>
+                      <h4>今日黃金排程建議</h4>
+                      <p>分析顯示，您的週三 Dancehall 教學片段的平均互動率比其他內容高出 35%。建議今天下午發布一則新的排舞動作教學 Reels！</p>
+                      <button class="action-btn" onclick="quickAction('dancehall-reels')">快速生成 IG Reels 腳本</button>
                     </div>
                   </div>
                   <div class="action-item info">
-                    <div class="action-icon">📈</div>
+                    <div class="action-icon">🎯</div>
                     <div class="action-details">
-                      <h4>互動率下降警訊 (Nike 品牌頁)</h4>
-                      <p>Nike 聯名鞋款貼文互動較上週同期下滑 12%。建議發起「限時留言抽折價券」的互動型貼文以拉回熱度。</p>
-                      <button class="action-btn" onclick="quickAction('nike-interaction')">規劃互動貼文</button>
+                      <h4>學員跟進提醒</h4>
+                      <p>學員「Leo」已連續缺席 2 次課程，且上月報名之體驗票即將到期。建議立即傳送溫慢的跟進訊息。</p>
+                      <button class="action-btn" onclick="quickAction('reply-student-leo')">生成學員關懷訊息</button>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Quick Operations -->
+              <div class="glass-card">
+                <div class="card-header">
+                  <h3 class="card-title">⚡ 快速 AI 創作工具</h3>
+                </div>
+                <div class="quick-links-grid">
+                  <button class="quick-action-button" onclick="quickAction('dancehall-reels')">🎬 產生 IG 短影音</button>
+                  <button class="quick-action-button" onclick="quickAction('tiktok-script')">🎵 產生 TikTok 腳本</button>
+                  <button class="quick-action-button" onclick="quickAction('lesson-plan')">📚 規劃舞蹈教案</button>
+                  <button class="quick-action-button" onclick="quickAction('workshop-promo')">🔥 規劃工作坊宣傳</button>
+                  <button class="quick-action-button" onclick="switchTab('chat')">💬 智能回覆學員</button>
+                </div>
+              </div>
             </div>
 
-            <!-- Hot rankings preview -->
+            <!-- Daily Work Schedules -->
             <div class="grid-3col">
               <div class="glass-card preview-card">
-                <h4 class="preview-title">🔥 今日熱門關鍵字</h4>
-                <ol class="rank-list" id="rank-keywords">
-                  <!-- JS inserts -->
-                </ol>
+                <h4 class="preview-title">📅 今日課表 & 行事曆</h4>
+                <ul class="task-checklist" id="today-schedules">
+                  <!-- Generated by JS -->
+                </ul>
               </div>
               <div class="glass-card preview-card">
-                <h4 class="preview-title">🛍️ 熱門商品排行</h4>
-                <ol class="rank-list" id="rank-products">
-                  <!-- JS inserts -->
-                </ol>
+                <h4 class="preview-title">🎬 待處理影片與內容任務</h4>
+                <ul class="task-checklist" id="today-content-tasks">
+                  <!-- Generated by JS -->
+                </ul>
               </div>
               <div class="glass-card preview-card">
-                <h4 class="preview-title">🏢 關注品牌熱度</h4>
-                <ol class="rank-list" id="rank-brands">
-                  <!-- JS inserts -->
-                </ol>
+                <h4 class="preview-title">📥 待回覆學員訊息 (跨平台)</h4>
+                <ul class="task-checklist" id="today-inbox-preview">
+                  <!-- Generated by JS -->
+                </ul>
               </div>
             </div>
-
           </div>
         </section>
 
-        <!-- =================== 2. CALENDAR TAB =================== -->
-        <section class="tab-content" id="tab-calendar">
-          <div class="calendar-layout">
-            <div class="calendar-controls">
-              <div class="calendar-title-group">
-                <button class="btn btn-icon" onclick="prevMonth()">◀</button>
-                <h2 class="calendar-month" id="calendar-month-year">2026 年 7 月</h2>
-                <button class="btn btn-icon" onclick="nextMonth()">▶</button>
-              </div>
-              <div class="calendar-view-modes">
-                <button class="btn btn-secondary active">月</button>
-                <button class="btn btn-secondary">週</button>
-                <button class="btn btn-secondary">日</button>
+        <!-- =================== 2. AI AGENTS SYSTEM =================== -->
+        <section class="tab-content" id="tab-agents">
+          <div class="agents-workspace">
+            <!-- Left Panel: Agent Select -->
+            <div class="glass-card agent-select-panel">
+              <h3 class="section-subtitle">選擇專屬 AI 經紀人</h3>
+              <div class="agent-buttons-list" id="agents-list-container">
+                <!-- Populated by JS -->
               </div>
             </div>
 
-            <!-- Calendar Grid -->
+            <!-- Right Panel: Agent Interface -->
+            <div class="glass-card agent-interface-panel" id="agent-workspace-body">
+              <div class="agent-workspace-header">
+                <div class="agent-header-meta">
+                  <span class="agent-header-icon" id="active-agent-icon">🤖</span>
+                  <div>
+                    <h3 id="active-agent-name">選擇一個代理人</h3>
+                    <p id="active-agent-desc">AI 經紀人將協助您處理特定工作流程。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="agent-workspace-section">
+                <h4 class="meta-label">核心角色設定 (System Prompt)</h4>
+                <textarea id="active-agent-prompt" class="form-control text-small" rows="3" readonly></textarea>
+              </div>
+
+              <div class="agent-workspace-section">
+                <h4 class="meta-label">記憶庫 / 背景知識 (Memory Context)</h4>
+                <textarea id="active-agent-memory" class="form-control text-small" rows="2" placeholder="此 Agent 無額外特定背景知識。"></textarea>
+              </div>
+
+              <div class="agent-form-inputs">
+                <div class="form-group">
+                  <label for="agent-input-template">選擇工作模板</label>
+                  <select id="agent-input-template" class="form-control" onchange="onAgentTemplateChange()">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="agent-input-raw">輸入您的具體想法 / 指令</label>
+                  <textarea id="agent-input-raw" class="form-control" rows="4" placeholder="例如：我想針對初學者設計一堂 Dancehall 經典動作教案..."></textarea>
+                </div>
+
+                <button class="btn btn-primary btn-block" id="btn-agent-generate" onclick="generateAgentOutput()">
+                  ✨ 啟動 AI 代理人運算
+                </button>
+              </div>
+
+              <!-- AI Output Sandbox Mockup -->
+              <div class="agent-output-sandbox">
+                <div class="sandbox-header">
+                  <span>🤖 AI 生成結果預覽</span>
+                  <button class="btn btn-secondary btn-xs" onclick="copyAgentOutputText()">📋 複製內容</button>
+                </div>
+                <div class="sandbox-body">
+                  <pre id="agent-output-text">等待您的運算指令...</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================== 3. CONTENT STUDIO =================== -->
+        <section class="tab-content" id="tab-studio">
+          <div class="studio-layout">
+            <!-- Parameters configuration -->
+            <div class="glass-card studio-inputs">
+              <h3 class="section-subtitle">社群影音劇本工作坊</h3>
+              
+              <div class="form-group">
+                <label for="studio-style">舞蹈風格</label>
+                <input type="text" id="studio-style" class="form-control" value="Dancehall (牙買加雷鬼舞)">
+              </div>
+
+              <div class="form-group">
+                <label for="studio-topic">影片核心主題</label>
+                <input type="text" id="studio-topic" class="form-control" placeholder="例如：Dancehall 初學者必學的三個臀部律動技巧">
+              </div>
+
+              <div class="form-group">
+                <label for="studio-audience">受眾定位</label>
+                <select id="studio-audience" class="form-control">
+                  <option value="beginner">初學入門愛好者 (著重基礎拆解與信心激勵)</option>
+                  <option value="advanced">中高階舞者 (著重細節質感、音樂性與編排結構)</option>
+                  <option value="teachers">舞蹈老師與同業 (著重教學心法與課堂氣氛引導)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="studio-idea">影片大綱 / 細節備忘</label>
+                <textarea id="studio-idea" class="form-control" rows="4" placeholder="例如：影片第一段先用音樂做爆點排舞示範，接著拆解 One Drop 律動..."></textarea>
+              </div>
+
+              <button class="btn btn-primary btn-block" onclick="generateStudioScripts()">
+                🎬 一鍵生成多平台全套劇本 (1-to-All)
+              </button>
+            </div>
+
+            <!-- Interactive iPhone Script Previewer -->
+            <div class="preview-mockup-wrapper">
+              <div class="phone-mockup">
+                <div class="phone-speaker"></div>
+                <div class="phone-screen">
+                  <div class="phone-header">
+                    <span class="phone-time">14:06</span>
+                    <div class="phone-icons">📶 🔋</div>
+                  </div>
+                  
+                  <div class="mockup-app-bar">
+                    <span class="mockup-back">◀</span>
+                    <span class="mockup-title" id="studio-mockup-title">Instagram Reels</span>
+                    <span class="mockup-more">•••</span>
+                  </div>
+
+                  <div class="mockup-body">
+                    <div class="post-header">
+                      <div class="post-avatar">💃</div>
+                      <div class="post-meta">
+                        <span class="post-author">Dance Creator OS</span>
+                        <span class="post-time">影音劇本預覽</span>
+                      </div>
+                    </div>
+
+                    <div class="post-visual" style="background: linear-gradient(135deg, rgba(248,208,110,0.1) 0%, rgba(245,61,45,0.2) 100%);">
+                      <div class="visual-img-placeholder">
+                        <span class="visual-icon">🎬</span>
+                        <p>跨平台影音劇本預覽</p>
+                      </div>
+                    </div>
+
+                    <div class="post-content-area">
+                      <div class="studio-platforms-tab-row">
+                        <button class="platform-tab active" id="stab-instagram" onclick="switchStudioPreviewPlatform('instagram')">IG</button>
+                        <button class="platform-tab" id="stab-tiktok" onclick="switchStudioPreviewPlatform('tiktok')">TikTok</button>
+                        <button class="platform-tab" id="stab-youtube" onclick="switchStudioPreviewPlatform('youtube')">Shorts</button>
+                        <button class="platform-tab" id="stab-threads" onclick="switchStudioPreviewPlatform('threads')">Threads</button>
+                      </div>
+                      <p id="studio-mockup-text-content" class="post-text-p text-small font-mono">
+                        輸入您的影片想法並點擊生成，AI 會自動為您拆解各平台專屬的 Hook 鉤子、分鏡腳本與文案...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mockup-actions-row">
+                <button class="btn btn-secondary" onclick="copyStudioScriptText()">📋 複製當前平台腳本</button>
+                <button class="btn btn-primary" onclick="scheduleStudioScript()">📅 直接排程發布</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================== 4. CUSTOMER SERVICE CENTER =================== -->
+        <section class="tab-content" id="tab-chat">
+          <div class="chat-center-layout">
+            <!-- Left: Conversation list -->
+            <div class="glass-card chat-inbox-panel">
+              <h3 class="section-subtitle">學員諮詢收件匣</h3>
+              <div class="chat-thread-list" id="chat-thread-list-container">
+                <!-- Dynamically populated by JS -->
+              </div>
+            </div>
+
+            <!-- Center: Chat window -->
+            <div class="glass-card chat-window-panel">
+              <div class="chat-window-header">
+                <span class="active-chat-avatar" id="active-chat-avatar">👤</span>
+                <div>
+                  <h4 class="active-chat-name" id="active-chat-name">未選擇對話</h4>
+                  <p class="active-chat-platform" id="active-chat-platform">請在左側點選學員進行回覆</p>
+                </div>
+              </div>
+              <div class="chat-messages-container" id="chat-messages-body">
+                <!-- Generated by JS -->
+              </div>
+              <div class="chat-input-row">
+                <input type="text" id="chat-input-box" class="form-control" placeholder="輸入回覆訊息..." onkeydown="if(event.key === 'Enter') sendUserChatMessage()">
+                <button class="btn btn-primary" onclick="sendUserChatMessage()">發送</button>
+              </div>
+            </div>
+
+            <!-- Right: AI Copilot & CRM Summary -->
+            <div class="glass-card chat-copilot-panel">
+              <h3 class="section-subtitle">🎯 AI 回覆小幫手</h3>
+              
+              <!-- Student Info Quick Read -->
+              <div class="chat-copilot-section">
+                <h4 class="meta-label">學員快速檔案</h4>
+                <div class="student-mini-card" id="chat-student-mini-card">
+                  <p>學員姓名: <strong id="c-name">-</strong></p>
+                  <p>能力級別: <span id="c-level">-</span></p>
+                  <p>課堂出席: <span id="c-attendance">-</span></p>
+                  <p>繳費狀況: <span id="c-payment">-</span></p>
+                </div>
+              </div>
+
+              <!-- AI Recommended Reply Box -->
+              <div class="chat-copilot-section">
+                <div class="copilot-action-header">
+                  <h4 class="meta-label">AI 擬定建議回覆</h4>
+                  <button class="btn btn-secondary btn-xs" onclick="regenerateAICopilotReply()">🔄 重新整理</button>
+                </div>
+                <div class="ai-recommended-reply-box" id="ai-recommended-reply-body">
+                  選擇左側對話，AI 將自動根據學員的檔案與諮詢內容產生適合的推薦回覆...
+                </div>
+                <div class="copilot-buttons-grid">
+                  <button class="btn btn-primary btn-xs" onclick="applyCopilotReply()">✍️ 填入輸入框</button>
+                  <button class="btn btn-secondary btn-xs" onclick="modifyCopilotTone('warmer')">❤️ 更溫暖些</button>
+                  <button class="btn btn-secondary btn-xs" onclick="modifyCopilotTone('shorter')">⚡ 精簡長度</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================== 5. SOCIAL MEDIA MANAGER =================== -->
+        <section class="tab-content" id="tab-social">
+          <div class="social-manager-layout">
+            <div class="glass-card social-controls">
+              <h3 class="card-title">📱 跨平台發布行事曆</h3>
+              <p class="section-intro">在此檢視與管理所有社群平台 (Instagram, TikTok, FB, Threads, YouTube Shorts) 的內容排程與發布狀態。</p>
+              
+              <!-- API Connection Status -->
+              <div class="api-status-row">
+                <span class="api-tag status-connected">Instagram API Connected</span>
+                <span class="api-tag status-connected">TikTok API Connected</span>
+                <span class="api-tag status-pending">Threads API (Mocked)</span>
+                <span class="api-tag status-connected">Facebook API Connected</span>
+              </div>
+            </div>
+
+            <!-- Calendar controls -->
+            <div class="calendar-controls">
+              <div class="calendar-title-group">
+                <button class="btn btn-icon" onclick="prevMonth()">◀</button>
+                <h2 class="calendar-month" id="social-calendar-month-year">2026 年 7 月</h2>
+                <button class="btn btn-icon" onclick="nextMonth()">▶</button>
+              </div>
+            </div>
+
             <div class="glass-card calendar-card">
               <div class="calendar-grid-header">
                 <div>週一</div>
@@ -222,253 +476,210 @@
                 <div>週六</div>
                 <div>週日</div>
               </div>
-              <div class="calendar-grid-body" id="calendar-grid-body">
+              <div class="calendar-grid-body" id="social-calendar-grid-body">
                 <!-- Generated by JS -->
               </div>
             </div>
           </div>
         </section>
 
-        <!-- =================== 3. GENERATOR TAB =================== -->
-        <section class="tab-content" id="tab-generator">
-          <div class="generator-layout">
-            <!-- Left panel: Generator Inputs -->
-            <div class="glass-card generator-inputs">
-              <h3 class="section-subtitle">文案生成參數配置</h3>
-              
-              <div class="form-group">
-                <label for="gen-brand">選擇品牌專區</label>
-                <select id="gen-brand" class="form-control" onchange="onGeneratorBrandChange()">
-                  <option value="nike">Nike (運動潮流)</option>
-                  <option value="apple">Apple (科技生活)</option>
-                  <option value="dyson">Dyson (智能家電)</option>
-                  <option value="uniqlo">UNIQLO (簡約美學)</option>
-                </select>
+        <!-- =================== 6. STUDENT CRM =================== -->
+        <section class="tab-content" id="tab-crm">
+          <div class="crm-layout">
+            <!-- Filter and actions -->
+            <div class="glass-card crm-controls">
+              <div class="crm-controls-left">
+                <h3 class="card-title">👥 學員關係管理 (Student CRM)</h3>
               </div>
+              <div class="crm-controls-right">
+                <button class="btn btn-primary" onclick="openNewStudentModal()">➕ 新增學員資料</button>
+              </div>
+            </div>
 
-              <div class="form-group">
-                <label for="gen-product">關聯商品名稱</label>
-                <select id="gen-product" class="form-control">
+            <!-- Student Database Table -->
+            <div class="glass-card table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>學員姓名</th>
+                    <th>舞蹈能力</th>
+                    <th>風格偏好</th>
+                    <th>出席率</th>
+                    <th>繳費狀態</th>
+                    <th>生日</th>
+                    <th>備註標籤</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="crm-table-body">
+                  <!-- Generated by JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- AI CRM Assistance Panel -->
+            <div class="glass-card crm-ai-assistance">
+              <h4 class="preview-title">🧠 AI 學員關懷策略大腦</h4>
+              <p class="text-small">選取下方特定學員分析，AI 將自動生成追蹤對話或關懷計畫。</p>
+              <div class="crm-ai-selector-row">
+                <select id="crm-ai-student-select" class="form-control">
                   <!-- Populated by JS -->
                 </select>
+                <button class="btn btn-secondary" onclick="generateStudentCrmStrategy()">啟動 AI 學員分析</button>
               </div>
-
-              <div class="form-group">
-                <label for="gen-platform">發布目標平台</label>
-                <div class="platform-selector">
-                  <input type="radio" id="plat-shopee" name="gen-platform" value="聰明工具箱 Feed" checked>
-                  <label for="plat-shopee">🍊 聰明工具箱 Feed</label>
-                  
-                  <input type="radio" id="plat-ig" name="gen-platform" value="Instagram">
-                  <label for="plat-ig">📸 Instagram</label>
-                  
-                  <input type="radio" id="plat-fb" name="gen-platform" value="Facebook">
-                  <label for="plat-fb">📘 Facebook</label>
-                  
-                  <input type="radio" id="plat-threads" name="gen-platform" value="Threads">
-                  <label for="plat-threads">🧵 Threads</label>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="gen-tone">AI 文案語氣風格</label>
-                <select id="gen-tone" class="form-control">
-                  <option value="energetic">🔥 熱情銷售風 (有梗、加表情符號)</option>
-                  <option value="professional">💼 專業開箱風 (功能詳細、邏輯清晰)</option>
-                  <option value="luxury">✨ 質感奢華風 (語氣沉穩、生活格調)</option>
-                  <option value="humorous">🤪 幽默小編風 (調侃自黑、緊跟時事)</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="gen-promo">促銷方案 (選填)</label>
-                <input type="text" id="gen-promo" class="form-control" placeholder="例如：領券折 $100、下單送好禮...">
-              </div>
-
-              <div class="form-group">
-                <label for="gen-prompt-extra">補充說明 / 關鍵字 (選填)</label>
-                <textarea id="gen-prompt-extra" class="form-control" rows="3" placeholder="例如：強調防震緩震科技、或融入週末休閒話題..."></textarea>
-              </div>
-
-              <button class="btn btn-primary btn-block" id="btn-generate" onclick="triggerAIGeneration()">
-                ✨ 啟動 AI 創作文案
-              </button>
-            </div>
-
-            <!-- Right panel: Live Preview Mockup -->
-            <div class="preview-mockup-wrapper">
-              <div class="phone-mockup">
-                <div class="phone-speaker"></div>
-                <div class="phone-screen">
-                  <div class="phone-header">
-                    <span class="phone-time">13:46</span>
-                    <div class="phone-icons">📶 🔋</div>
-                  </div>
-                  
-                  <div class="mockup-app-bar">
-                    <span class="mockup-back">◀</span>
-                    <span class="mockup-title" id="mockup-header-title">聰明工具箱 Feed</span>
-                    <span class="mockup-more">•••</span>
-                  </div>
-
-                  <div class="mockup-body">
-                    <!-- Post Header -->
-                    <div class="post-header">
-                      <div class="post-avatar" id="mockup-avatar">🍊</div>
-                      <div class="post-meta">
-                        <span class="post-author" id="mockup-author">AI 聰明工具箱</span>
-                        <span class="post-time">剛剛 · AI Agent 推薦發布</span>
-                      </div>
-                    </div>
-
-                    <!-- Post Visual Placeholders -->
-                    <div class="post-visual" id="mockup-visual">
-                      <div class="visual-img-placeholder">
-                        <span class="visual-icon">🖼️</span>
-                        <p id="mockup-visual-desc">關聯商品視覺圖</p>
-                      </div>
-                    </div>
-
-                    <!-- Post Actions -->
-                    <div class="post-actions">
-                      <span>❤️ 1.2k</span>
-                      <span>💬 84</span>
-                      <span>📤 分享</span>
-                    </div>
-
-                    <!-- Post Text Area (Typing animation target) -->
-                    <div class="post-content-area">
-                      <p id="mockup-text-content" class="post-text-p">
-                        設定完成後，點擊左側「啟動 AI 創作文案」，即可在此即時預覽 AI 生成的排程內容文案...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="mockup-actions-row">
-                <button class="btn btn-secondary" onclick="copyMockupText()">📋 複製文案</button>
-                <button class="btn btn-primary" onclick="scheduleMockupText()">📅 儲存並加入排程</button>
+              <div class="crm-ai-output-box" id="crm-ai-output-body">
+                等待分析指令...
               </div>
             </div>
           </div>
         </section>
 
-        <!-- =================== 4. BRANDS TAB =================== -->
-        <section class="tab-content" id="tab-brands">
-          <div class="brands-layout">
-            <div class="brands-summary">
-              <p class="section-intro">品牌資料庫可儲存每個品牌的專屬定位、調性與視覺資產，確保 AI Agent 生成的文案高度符合品牌 Tone & Voice。</p>
+        <!-- =================== 7. AUTOMATION CENTER =================== -->
+        <section class="tab-content" id="tab-automation">
+          <div class="automation-layout">
+            <!-- Workspace Summary -->
+            <div class="glass-card automation-header">
+              <h3 class="card-title">⚡ 智能流程自動化中心 (Automation Workflows)</h3>
+              <p class="section-intro">串接 n8n, Make, Zapier, Webhook 等第三方服務，當觸發外部社群事件時，由 AI 聰明處理並自動同步通知。</p>
             </div>
-            
-            <div class="brands-grid" id="brands-container">
-              <!-- Dynamically populated by JS -->
-            </div>
-          </div>
-        </section>
 
-        <!-- =================== 5. TRENDS TAB =================== -->
-        <section class="tab-content" id="tab-trends">
-          <div class="trends-layout">
+            <!-- Flow Designer grid representation -->
             <div class="grid-2col">
-              <!-- Keyword and Category Trend analysis -->
+              <!-- Active Flow Lists -->
               <div class="glass-card">
-                <h3 class="card-title">📈 本週爆發關鍵字趨勢</h3>
+                <h4 class="preview-title">我的自動化工作流</h4>
+                <div class="flow-list" id="automation-flows-container">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Flow Node Visualizer Visual -->
+              <div class="glass-card flow-visualizer-card">
+                <h4 class="preview-title">工作流節點預覽 (Flow Node)</h4>
+                <div class="visualizer-nodes-flow" id="workflow-visualizer-nodes">
+                  <!-- Populated by JS -->
+                </div>
+                <div class="visualizer-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="triggerTestWorkflowRun()">⚡ 模擬測試此流程</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================== 8. KNOWLEDGE BASE =================== -->
+        <section class="tab-content" id="tab-knowledge">
+          <div class="knowledge-layout">
+            <div class="glass-card knowledge-header">
+              <h3 class="card-title">📚 AI 記憶庫與知識管理 (RAG)</h3>
+              <p class="section-intro">上傳您的舞蹈教案、品牌 Tone & Voice PDF、上課須知 FAQ 等，讓您的專屬 AI Agents 學習並以符合您個人風格的知識進行回覆。</p>
+            </div>
+
+            <div class="grid-2col">
+              <!-- Upload Area -->
+              <div class="glass-card upload-container-card">
+                <h4 class="preview-title">📤 上傳本機檔案 (.pdf, .docx, .txt)</h4>
+                <div class="dropzone" id="knowledge-dropzone" onclick="triggerFileInputClick()">
+                  <span class="dropzone-icon">📁</span>
+                  <p>拖放檔案至此，或點擊以選擇檔案上傳</p>
+                  <span class="text-xs text-muted">限制單一檔案最大 20MB</span>
+                  <input type="file" id="knowledge-file-input" style="display:none" onchange="handleMockFileUpload(event)">
+                </div>
+
+                <!-- Active file index -->
+                <h4 class="preview-title" style="margin-top:20px;">📚 已學習知識清單</h4>
+                <ul class="file-list" id="knowledge-files-list">
+                  <!-- Populated by JS -->
+                </ul>
+              </div>
+
+              <!-- Live Q&A preview box based on uploaded knowledge -->
+              <div class="glass-card">
+                <h4 class="preview-title">💬 知識庫問答測試 (Mock RAG Search)</h4>
+                <div class="qa-form">
+                  <div class="form-group">
+                    <label for="rag-query">輸入您的問題（將結合已上傳的知識庫回答）</label>
+                    <input type="text" id="rag-query" class="form-control" placeholder="例如：請問初學者請假規定是什麼？">
+                  </div>
+                  <button class="btn btn-primary" onclick="queryRagDatabase()">🔍 檢索與問答</button>
+                </div>
+
+                <div class="qa-results-box" id="rag-output-body">
+                  輸入檢索問題並點擊搜尋...
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================== 9. ANALYTICS =================== -->
+        <section class="tab-content" id="tab-analytics">
+          <div class="analytics-layout">
+            <!-- Grid Charts -->
+            <div class="grid-2col">
+              <!-- Follower growth -->
+              <div class="glass-card">
+                <h3 class="card-title">📈 跨平台粉絲成長趨勢 (本月)</h3>
                 <div class="trends-chart-wrapper">
-                  <div class="bar-chart-y" id="trend-bar-chart">
+                  <div class="bar-chart-y" id="analytics-growth-chart">
                     <!-- Inserted by JS -->
                   </div>
                 </div>
               </div>
 
-              <!-- Competitor Analysis Overview -->
+              <!-- Revenue breakdown -->
               <div class="glass-card">
-                <h3 class="card-title">⚔️ 競品監控與分析比較</h3>
-                <div class="competitor-comparison">
-                  <table class="data-table">
-                    <thead>
-                      <tr>
-                        <th>對手店鋪</th>
-                        <th>主打品類</th>
-                        <th>平均價格</th>
-                        <th>折扣策略</th>
-                        <th>社群互動率</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td class="font-bold text-orange">優雅運動館 (對手 A)</td>
-                        <td>機能跑鞋</td>
-                        <td>$2,450</td>
-                        <td>全館滿 $1200 折 100</td>
-                        <td>🔥 4.2%</td>
-                      </tr>
-                      <tr>
-                        <td class="font-bold text-orange">極客潮流 (對手 B)</td>
-                        <td>潮流服飾</td>
-                        <td>$1,880</td>
-                        <td>滿二件 85 折</td>
-                        <td>🔥 3.8%</td>
-                      </tr>
-                      <tr>
-                        <td class="font-bold text-orange">智能生活旗艦店 (對手 C)</td>
-                        <td>手持吸塵器</td>
-                        <td>$12,800</td>
-                        <td>買主機送濾網</td>
-                        <td>🔥 5.1%</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <h3 class="card-title">💰 課程與活動營業收入比例</h3>
+                <div class="trends-chart-wrapper">
+                  <div class="bar-chart-y" id="analytics-revenue-chart">
+                    <!-- Inserted by JS -->
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- AI Operations Advisor Report -->
+            <div class="glass-card analytics-report-card">
+              <div class="card-header">
+                <h3 class="card-title">📑 AI 週營運改善建議報告</h3>
+                <button class="btn btn-primary btn-sm" onclick="generateWeeklyAnalyticsReport()">⚡ 產生最新分析報告</button>
+              </div>
+              <div class="analytics-report-body" id="analytics-report-body">
+                點擊上方按鈕，讓 AI 自動分析您本週的社群轉換率、學員流失率與營收狀況，並產出下週營運方針與排程建議...
               </div>
             </div>
           </div>
         </section>
 
-        <!-- =================== 6. REPORTS TAB =================== -->
-        <section class="tab-content" id="tab-reports">
-          <div class="reports-layout">
-            <div class="glass-card reports-container">
-              <h3 class="card-title">📑 每日 AI 行銷分析報告</h3>
-              <p class="reports-desc">系統每日 08:00 自動彙整前一日的市場動態、本會活動及社群輿情，產出符合 AIDA/AISAS 模型架構的營運報告。</p>
+        <!-- =================== 10. SETTINGS / PERSONAL AI BRAIN =================== -->
+        <section class="tab-content" id="tab-settings">
+          <div class="settings-layout">
+            <!-- Settings panel config -->
+            <div class="glass-card settings-panel-card">
+              <h3 class="card-title">⚙️ 個人 AI 大腦與系統配置 (Personal AI Brain)</h3>
+              <p class="section-intro">調整此處設定，AI 就會完全模仿您的舞蹈哲學、書寫語氣與客戶服務態度。</p>
               
-              <div class="report-list">
-                <div class="report-item">
-                  <div class="report-meta">
-                    <span class="report-date">2026-07-13</span>
-                    <span class="badge badge-success">最新</span>
-                  </div>
-                  <h4 class="report-name">每日市場與社群輿情 analysis 報告 - 2026/07/13</h4>
-                  <div class="report-actions">
-                    <button class="btn btn-secondary" onclick="viewReport('report-0713')">📄 線上預覽</button>
-                    <button class="btn btn-secondary">💾 下載 Markdown</button>
-                    <button class="btn btn-primary">🔗 匯出至 Notion</button>
-                  </div>
-                </div>
-
-                <div class="report-item">
-                  <div class="report-meta">
-                    <span class="report-date">2026-07-12</span>
-                  </div>
-                  <h4 class="report-name">每日市場與社群輿情 analysis 報告 - 2026/07/12</h4>
-                  <div class="report-actions">
-                    <button class="btn btn-secondary" onclick="viewReport('report-0712')">📄 線上預覽</button>
-                    <button class="btn btn-secondary">💾 下載 Markdown</button>
-                    <button class="btn btn-primary">🔗 匯出至 Notion</button>
-                  </div>
-                </div>
+              <div class="form-group">
+                <label for="set-style">我的舞蹈教學風格與特色</label>
+                <textarea id="set-style" class="form-control" rows="3">融合 Dancehall 牙買加傳統街頭律動，著重身體核心爆發力、流暢感，以及音樂性感受。課堂氣氛極具熱情與互動性。</textarea>
               </div>
 
-              <!-- Inline Report Reader -->
-              <div class="report-reader glass-card hidden" id="report-reader-box">
-                <div class="reader-header">
-                  <h4 id="reader-title">報告預覽</h4>
-                  <button class="btn btn-icon" onclick="closeReportReader()">✕</button>
-                </div>
-                <div class="reader-content" id="reader-content-body">
-                  <!-- MD HTML content inserted by JS -->
-                </div>
+              <div class="form-group">
+                <label for="set-tone">我的書寫與社群語氣偏好</label>
+                <input type="text" id="set-tone" class="form-control" value="熱情、激勵人心、注重動作力量的爆發感、大量搭配跳舞與火焰表情符號 🔥💃">
               </div>
+
+              <div class="form-group">
+                <label for="set-service">客戶服務與回覆原則</label>
+                <textarea id="set-service" class="form-control" rows="3">親切溫暖、耐心解答學員問題。對缺席學員給予主動關心；對於預約工作坊的學員，提供詳細的報名與繳費須知指引。</textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="set-api-key">OpenAI / Supabase API 密鑰 (模擬串接)</label>
+                <input type="password" id="set-api-key" class="form-control" value="sk-proj-••••••••••••••••••••••••">
+              </div>
+
+              <button class="btn btn-primary" onclick="saveSystemSettings()">💾 儲存 AI 設定並寫入大腦</button>
             </div>
           </div>
         </section>
@@ -477,7 +688,7 @@
     </div>
   </div>
 
-  <!-- Event Modal (for Calendar Click) -->
+  <!-- Event Modal (for Calendar Click / Post detail) -->
   <div class="modal-overlay hidden" id="event-modal">
     <div class="modal-card glass-card">
       <div class="modal-header">
@@ -487,31 +698,84 @@
       <div class="modal-body">
         <input type="hidden" id="modal-day-num">
         <div class="form-group">
-          <label for="modal-post-title">貼文主題</label>
+          <label for="modal-post-title">貼文主題 / 課堂標題</label>
           <input type="text" id="modal-post-title" class="form-control">
         </div>
         <div class="form-group">
-          <label for="modal-post-time">發布時間</label>
+          <label for="modal-post-time">時間</label>
           <input type="time" id="modal-post-time" class="form-control">
         </div>
         <div class="form-group">
-          <label for="modal-post-platform">發布渠道</label>
+          <label for="modal-post-platform">發布渠道 / 類別</label>
           <select id="modal-post-platform" class="form-control">
-            <option value="聰明工具箱 Feed">🍊 聰明工具箱 Feed</option>
             <option value="Instagram">📸 Instagram</option>
+            <option value="TikTok">🎵 TikTok</option>
             <option value="Facebook">📘 Facebook</option>
             <option value="Threads">🧵 Threads</option>
+            <option value="YouTube Shorts">🎥 YouTube Shorts</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="modal-post-desc">貼文文案內容</label>
+          <label for="modal-post-desc">貼文文案內容 / 課程備忘</label>
           <textarea id="modal-post-desc" class="form-control" rows="6"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-        <button class="btn btn-danger" onclick="deleteModalEvent()">🗑️ 刪除貼文</button>
+        <button class="btn btn-danger" onclick="deleteModalEvent()">🗑️ 刪除排程</button>
         <button class="btn btn-primary" onclick="saveModalEvent()">💾 儲存變更</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Student Modal (CRM) -->
+  <div class="modal-overlay hidden" id="new-student-modal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>新增學員資料</h3>
+        <button class="btn btn-icon" onclick="closeNewStudentModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="ns-name">學員姓名</label>
+          <input type="text" id="ns-name" class="form-control" placeholder="輸入姓名...">
+        </div>
+        <div class="form-group">
+          <label for="ns-level">舞蹈能力等級</label>
+          <select id="ns-level" class="form-control">
+            <option value="初學入門">初學入門</option>
+            <option value="中階進步">中階進步</option>
+            <option value="高階進階">高階進階</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ns-style">偏好風格</label>
+          <input type="text" id="ns-style" class="form-control" value="Dancehall">
+        </div>
+        <div class="form-group">
+          <label for="ns-attendance">出席率</label>
+          <input type="text" id="ns-attendance" class="form-control" value="100%">
+        </div>
+        <div class="form-group">
+          <label for="ns-payment">繳費狀態</label>
+          <select id="ns-payment" class="form-control">
+            <option value="已繳費">已繳費</option>
+            <option value="未繳費">未繳費</option>
+            <option value="體驗票">體驗票</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ns-birthday">生日</label>
+          <input type="text" id="ns-birthday" class="form-control" value="09-12">
+        </div>
+        <div class="form-group">
+          <label for="ns-tags">標籤備註 (逗號分隔)</label>
+          <input type="text" id="ns-tags" class="form-control" placeholder="例如：缺席兩次, 核心待加強...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeNewStudentModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveNewStudent()">💾 儲存學員</button>
       </div>
     </div>
   </div>
