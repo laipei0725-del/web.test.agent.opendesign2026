@@ -10,6 +10,7 @@ let activeAgentId = 'coach';
 let activeStudioPlatform = 'instagram';
 let activeChatThreadId = 'thread-1';
 let activeFlowId = 'flow-1';
+let activeSocialView = 'calendar';
 
 // ==========================================
 // Mock Databases
@@ -42,6 +43,10 @@ const mockAgents = {
       { name: '📚 產生舞蹈基礎教案', raw: '規劃一堂適合初學者的 90 分鐘 Dancehall 律動教案，主題是「Wining (臀部律動)」技巧。' },
       { name: '🔥 規劃 15 分鐘高效暖身流程', raw: '規劃一堂高強度的熱身流程，包含關節活動、心肺提升，特別著重在髖關節與腰部肌群的啟動。' },
       { name: '📝 寫下一期學員的練習反饋', raw: '針對完成一個月體驗班的初級班同學，提供一段鼓勵性強、包含三個具體練習重點（重心轉換、核心收縮、音樂踩點）的課後作業。' }
+    ],
+    history: [
+      { timestamp: '14:23', title: '基礎教案: Wining 臀部旋律律動', result: '已成功產出 Wining 基礎教案，包含 15 分鐘拉伸、40 分鐘動作分解與 35 分鐘音樂踩點實練。' },
+      { timestamp: '昨日', title: '暖身流程: 髖關節啟動', result: '已生成高效暖身設計：包含 8 個拍子的跨步扭轉、髖關節外旋與腹部核心收縮點火。' }
     ]
   },
   cs: {
@@ -55,6 +60,9 @@ const mockAgents = {
       { name: '💬 回覆初學者體驗課諮詢', raw: '有一位初學者在 IG 詢問：「我沒有任何跳舞經驗，可以報名你們的 Dancehall 體驗課嗎？會不會跟不上？」請生成適合的回覆。' },
       { name: '💵 回覆私人課包堂與報價問題', raw: '學員詢問私人一對一特訓的價格與排課方式，請回覆包堂優惠並導向約課流程。' },
       { name: '⚠️ 回覆學員因故缺席或請假', raw: '學員臨時私訊告知晚上肚子痛不能來上課，希望能請假。請給予關懷並說明請假與補課規定。' }
+    ],
+    history: [
+      { timestamp: '15:10', title: '答覆: Sandy Wang 私教報價', result: '已回覆私教單堂及包堂方案，並附帶婚禮編舞成功案例說明。' }
     ]
   },
   content: {
@@ -68,6 +76,9 @@ const mockAgents = {
       { name: '📸 規劃 IG Reels 爆款劇本', raw: '為「一分鐘學會牙買加經典律動 One Drop」設計 Reels 短片腳本，包含分鏡、視覺指令、口播文字以及 Hook 鉤子。' },
       { name: '📘 撰寫 Facebook 走心社群貼文', raw: '寫一篇講述自己從完全不會跳舞，到成為舞蹈老師的「心路歷程」故事貼文，著重情感共鳴。' },
       { name: '🧵 生成 Threads 短文字話題', raw: '設計一個能引發舞蹈圈同好討論與互動的 Thread 短文，例如關於「舞蹈教學最怕遇到哪種情況」。' }
+    ],
+    history: [
+      { timestamp: '11:05', title: 'IG Reels: 骨盆律動大公開', result: '已產生 Reels 腳本：前 3 秒展示對比，中間步驟拆解，末尾引導私訊。' }
     ]
   },
   marketing: {
@@ -80,6 +91,9 @@ const mockAgents = {
     templates: [
       { name: '🎯 規劃暑期雙人同行工作坊促銷方案', raw: '為八月的「Dancehall 燃脂工作坊」規劃全套行銷策略，包含早鳥優惠、社群裂變機制。' },
       { name: '📢 撰寫 FB 高點擊率廣告文案', raw: '撰寫一則針對「想要塑形、又覺得傳統健身枯燥」的上班族為受眾的舞蹈工作坊招生廣告文案。' }
+    ],
+    history: [
+      { timestamp: '09:40', title: '宣傳方案: 雙人同行85折', result: '規劃完成行銷漏斗：以短影音為誘餌，吸引下載免費基礎包，再以 Email 觸發限時折扣。' }
     ]
   },
   community: {
@@ -90,8 +104,11 @@ const mockAgents = {
     prompt: '你是一位極具向心力的舞蹈社群經理。你的語氣充滿愛與歸屬感，善於在 LINE 群組發布活動通知、上課須知與行前關懷，讓學員感受到滿滿的安全感與凝聚力。',
     memory: '工作坊細節：本週日 14:00 Studio A 進行，需攜帶水壺與乾淨室內鞋，提前 15 分鐘報到。',
     templates: [
-      { name: '📢 撰寫週日工作坊行前通知 LINE 公告', raw: '為即將到來的工作坊撰寫一份親切、溫馨的行前準備通知。' },
+      { name: '📢 撰寫週日工作坊行行前通知 LINE 公告', raw: '為即將到來的工作坊撰寫一份親切、溫馨的行前準備通知。' },
       { name: '🎂 撰寫學員生日專屬祝賀關懷信', raw: '為本月生日的學員設計一段專屬祝賀訊息，附帶一張免費團體課單堂券作為生日禮。' }
+    ],
+    history: [
+      { timestamp: '週一', title: 'LINE群發: 暑期班開課叮嚀', result: '已生成溫暖的行前文案，點閱率達 94%。' }
     ]
   },
   business: {
@@ -104,6 +121,9 @@ const mockAgents = {
     templates: [
       { name: '📋 起草舞蹈工作室與運動品牌聯名企劃案', raw: '撰寫一份 500 字的品牌合作企劃大綱，提議由我們的舞蹈老師穿著該品牌服飾拍攝教學短影片，並在其門市舉辦快閃體驗課。' },
       { name: '🛠️ 設計「舞蹈教室值班小幫手」SOP', raw: '規劃一份兼職員工或值班小幫手的開門、接待學員、下課收尾流程 SOP 清單。' }
+    ],
+    history: [
+      { timestamp: '上週', title: '教室清潔收尾 SOP 制定', result: '已產出 12 條實用值班核對清單，成功減少了開門備忘失誤。' }
     ]
   }
 };
@@ -116,7 +136,11 @@ const mockInbox = {
     platform: 'Instagram DM',
     avatar: '👩‍🦰',
     snippet: '請問下週三的 Dancehall 入門課還有名額嗎？',
-    studentInfo: { level: '初學入門', attendance: '92%', payment: '已繳費 (本月季卡)', birthday: '08-15', notes: '對雷鬼舞步有極大興趣，臀部控制律動待加強。' },
+    studentInfo: { level: '初學入門', attendance: '92%', payment: '已繳費 (本月季卡)', birthday: '08-15', tags: '愛好者, 基礎加強, 積極度高' },
+    previousConversations: [
+      { date: '2026-06-15', snippet: '詢問雷鬼基礎體驗班費用' },
+      { date: '2026-07-02', snippet: '報名完成並預約季卡課程' }
+    ],
     messages: [
       { sender: 'student', text: '哈囉老師！我有看到你最新發布的 Dancehall 影片，真的超級好看！' },
       { sender: 'teacher', text: '哈囉 Emma！謝謝妳的喜歡 🔥 牙買加的雷鬼律動真的非常有魅力喔！' },
@@ -129,7 +153,11 @@ const mockInbox = {
     platform: 'LINE Chat',
     avatar: '👨',
     snippet: '老師，不好意思我今天晚上突然要加班，可能要請假...',
-    studentInfo: { level: '中階進步', attendance: '60% (連續缺席2次)', payment: '已繳費 (一對一包堂剩3堂)', birthday: '11-02', notes: '上班族加班多，節奏感佳，但最近出席率不穩定。' },
+    studentInfo: { level: '中階進步', attendance: '60% (連續缺席2次)', payment: '已繳費 (一對一包堂剩3堂)', birthday: '11-02', tags: '上班族, 缺席兩次, 時間不穩定' },
+    previousConversations: [
+      { date: '2026-06-20', snippet: '預約一對一私人私教課' },
+      { date: '2026-07-08', snippet: '加班請假一次，已補課完成' }
+    ],
     messages: [
       { sender: 'student', text: '老師，不好意思我今天晚上公司突然要緊急加班，可能要請假一次 😭' }
     ]
@@ -140,7 +168,10 @@ const mockInbox = {
     platform: 'Facebook Messenger',
     avatar: '👧',
     snippet: '想諮詢一下一對一私教課怎麼收費？',
-    studentInfo: { level: '全新諮詢', attendance: '0%', payment: '未繳費 (未報名過)', birthday: '04-20', notes: '希望在年底婚禮上表演一段 Dancehall 排舞，詢問私教專案。' },
+    studentInfo: { level: '全新諮詢', attendance: '0%', payment: '未繳費 (尚未報名)', birthday: '04-20', tags: '潛在客戶, 婚禮排舞需求' },
+    previousConversations: [
+      { date: '2026-07-10', snippet: '首次加好友，瀏覽自動歡迎訊息' }
+    ],
     messages: [
       { sender: 'student', text: '哈囉！我想詢問一下老師的一對一私教課是怎麼收費的？因為年底要結婚，希望有一段雙人排舞的表演。' }
     ]
@@ -216,8 +247,42 @@ const mockSocialPosts = {
   ]
 };
 
+const mockStudioOutputs = {
+  instagram: {
+    title: 'Instagram Reels',
+    text: `【🎬 IG Reels 短影音劇本】\n\n📌 影片主題：初學者必學 Dancehall 臀部律動技巧\n🔥 3秒黃金Hook: 「跳舞扭屁股總是看起來像肚子痛？因為你用錯發力點了！」\n\n🎥 畫面分鏡：\n1. [0-3s] 老師示範高爆發力的 Wining 動作，搭配節奏雷鬼音樂。\n2. [3-20s] 側面鏡頭拆解：膝蓋彎曲 -> 骨盆向上提拉 -> 後推畫圓。\n3. [20-45s] 正面踩點雷鬼節奏 (One Drop) 慢速到快速。\n\n✍️ 貼文 Caption:\n跳 Dancehall 的性感靈魂來自於臀部律動！Wining 畫圓其實是用核心跟大腿發力喔！這篇快點收藏起來練，這週三晚上課堂我帶你實際踩點節奏！🔥💃\n\n🏷️ Hashtags:\n#dancehall #wining #dancelife #街舞教學 #雷鬼舞蹈 #ReelsChoreo`
+  },
+  tiktok: {
+    title: 'TikTok Video',
+    text: `【🎵 TikTok 影音腳本】\n\n📌 影片主題：3步學會牙買加經典 Wining 律動\n🔥 爆點Hook: 「別再瞎扭了！牙買加雷鬼舞老師教你3步學會最正宗的 Wining 臀部律動！」\n\n🎥 畫面分鏡：\n1. 快速切入：直接把錯誤動作與正確動作放在一起比對 (錯誤: 腰部過度用力 vs 正確: 核心帶動)。\n2. 節奏拆解：拍子1屈膝、拍子2骨盆提起、拍子3順滑畫圓。\n3. 快嘴口播，搭配流行雷鬼背景音。\n\n🏷️ Hashtags:\n#dancehallstyle #winingtutorial #dancer #學跳舞 #街舞教學 #TikTok舞蹈`
+  },
+  facebook: {
+    title: 'Facebook Post',
+    text: `【📘 Facebook 品牌貼文】\n\n📌 影片主題：Dancehall 基礎律動拆解\n\n很多人問我，為什麼雷鬼舞的律動那麼有力量卻又那麼放鬆？\n\n其實，牙買加人的舞蹈靈魂，藏在「重心的下沉」和「核心收縮的變速」裡。今天影片為大家完整分解 Wining 動作中的骨盆發力，不管你是街舞愛好者，還是想雕塑核心的上班族，都非常推薦收藏練習！\n\n🔥 課程報名中：下週三團體課現正招生，雙人同行享85折早鳥特惠！👇\n[點擊報名連結]\n\n🏷️ #dancehall #dancelife #編舞教學 #街舞課 #核心塑形`
+  },
+  threads: {
+    title: 'Threads Topic',
+    text: `【🧵 Threads 熱門討論】\n\n有沒有人也覺得，跳 Dancehall 臀部畫圓（Wining）的時候，最難的不是腰部用不用力，而是你能不能在滿堂的鏡子前面放開自我、不要覺得尷尬？😂\n\n很多學員一開始都卡在心魔，其實大家都在看老師，根本沒人在看你啦！放膽扭下去就對了！\n\n今天晚上課堂見，今晚誰要來？在下面留個 🔥 讓我知道！👇`
+  },
+  youtube: {
+    title: 'YouTube Shorts',
+    text: `【🎥 YouTube Shorts 腳本】\n\n📌 主題：牙買加 Dancehall 基礎律動\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！Dancehall 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」\n\n✍️ 說明欄文案:\n如果你想提升舞蹈的流暢感與律動性，Dancehall 是最好的練習風格。歡迎加入這週工作坊特訓！\n\n🏷️ Hashtags:\n#shorts #dancehall #dancetutorial #雷鬼舞步 #核心訓練`
+  }
+};
+
+// Integration status memory
+const mockIntegrations = {
+  make: true,
+  n8n: true,
+  zapier: false,
+  webhook: true,
+  gcal: true,
+  notion: false,
+  gsheet: true
+};
+
 // ==========================================
-// Initialization & Core Tab Switcher
+// Core Tab Switcher
 // ==========================================
 
 function switchTab(tabId) {
@@ -260,11 +325,12 @@ function switchTab(tabId) {
   } else if (tabId === 'chat') {
     initChatInbox();
   } else if (tabId === 'social') {
-    renderSocialCalendar();
+    switchSocialView('calendar');
   } else if (tabId === 'crm') {
     renderCrmTable();
   } else if (tabId === 'automation') {
     initAutomations();
+    renderIntegrationButtons();
   } else if (tabId === 'knowledge') {
     renderKnowledgeFiles();
   } else if (tabId === 'analytics') {
@@ -335,14 +401,23 @@ function switchAgent(agentId) {
   
   // Highlight active selector
   document.querySelectorAll('.agent-select-btn').forEach(btn => btn.classList.remove('active'));
-  // Trigger rendering in workspace
-  const agent = mockAgents[agentId];
   
+  const agent = mockAgents[agentId];
+  if (!agent) return;
+
   document.getElementById('active-agent-icon').textContent = agent.icon;
   document.getElementById('active-agent-name').textContent = agent.name;
   document.getElementById('active-agent-desc').textContent = agent.desc;
   document.getElementById('active-agent-prompt').value = agent.prompt;
   document.getElementById('active-agent-memory').value = agent.memory;
+
+  // Show/Hide Customer Service specific modifier panel
+  const csModifiers = document.getElementById('cs-agent-modifiers');
+  if (agentId === 'cs') {
+    csModifiers.classList.remove('hidden');
+  } else {
+    csModifiers.classList.add('hidden');
+  }
 
   // Load templates dropdown
   const templateSelect = document.getElementById('agent-input-template');
@@ -351,6 +426,7 @@ function switchAgent(agentId) {
   `).join('');
 
   onAgentTemplateChange();
+  renderAgentHistory();
 }
 
 function onAgentTemplateChange() {
@@ -359,6 +435,26 @@ function onAgentTemplateChange() {
   if (agent && agent.templates[selectIdx]) {
     document.getElementById('agent-input-raw').value = agent.templates[selectIdx].raw;
   }
+}
+
+function renderAgentHistory() {
+  const historyList = document.getElementById('agent-history-list');
+  const agent = mockAgents[activeAgentId];
+  if (!agent || !agent.history) {
+    historyList.innerHTML = '<li class="file-item text-muted">無歷史生成記錄</li>';
+    return;
+  }
+
+  historyList.innerHTML = agent.history.map(h => `
+    <li class="file-item" style="cursor:pointer" onclick="loadHistoryItem('${h.title}', '${h.result.replace(/'/g, "\\'")}')">
+      <span class="file-item-name">⏱️ ${h.timestamp} - ${h.title}</span>
+      <span class="file-item-size" style="font-size:10px; color:var(--color-accent);">載入預覽 ➔</span>
+    </li>
+  `).join('');
+}
+
+function loadHistoryItem(title, result) {
+  document.getElementById('agent-output-text').textContent = `【歷史記錄預覽：${title}】\n\n${result}`;
 }
 
 function generateAgentOutput() {
@@ -383,38 +479,53 @@ function generateAgentOutput() {
       }
       
       outputBox.innerHTML = finalOutputText;
+
+      // Add to history list
+      agent.history.unshift({
+        timestamp: '剛剛',
+        title: rawInput.length > 18 ? rawInput.substring(0, 15) + '...' : rawInput,
+        result: finalOutputText
+      });
+      renderAgentHistory();
     }, 800);
   }, 600);
+}
+
+// Modify output text for Customer Service Agent specifically
+function modifyAgentOutputText(mode) {
+  const outputBox = document.getElementById('agent-output-text');
+  const currentText = outputBox.textContent;
+  if (currentText.startsWith('等待') || currentText.startsWith('🤖')) return;
+
+  outputBox.textContent = '🤖 AI 正在套用格式並修飾語氣...';
+  setTimeout(() => {
+    let modified = '';
+    if (mode === 'generate') {
+      modified = `【AI 客服重新回覆】\n哈囉！這堂雷鬼排舞課名額快滿了，今天報名可以幫您保留位置喔！歡迎您跟朋友一起来跳舞，非常舒壓好玩！✨`;
+    } else if (mode === 'rewrite') {
+      modified = `【AI 客服重寫】\n哈囉！想了解 Dancehall 基礎體驗課的朋友們注意囉！這堂課是特別為了零經驗的學員設計的，動作簡單易懂。下週三名額有限，立即報名吧！🔥`;
+    } else if (mode === 'warmer') {
+      modified = `【AI 客服 - 更溫暖】\n親愛的寶貝～❤️ 沒問題喔！身體健康最重要，今天肚子痛就在家多休息、喝熱水喔！晚上好好睡一覺，老師會幫你登記請假的，下週看你健健康康地回來扭臀喔！加油喔！🥰✨`;
+    } else if (mode === 'professional') {
+      modified = `【AI 客服 - 更專業】\n您好，感謝您的諮詢。本教室的一對一私人指導課程收費標準為：單堂體驗費 NT$2,000，一次性報名 10 堂享有包堂優惠價 NT$18,000（限期三個月內使用完畢）。我們將根據您的需求客製編舞與上課時段。如有意向，我們將為您排定30分鐘的商務諮詢，謝謝。`;
+    } else if (mode === 'short') {
+      modified = `【AI 客服 - 精簡】\n哈囉！體驗課單堂 $450，初學者完全可以跟得上喔！下週三還有空位，要幫您跟朋友登記嗎？✨`;
+    } else if (mode === 'long') {
+      modified = `【AI 客服 - 詳細說明】\n哈囉！非常感謝您的來信諮詢！有關一對一私教班的收費方式：我們提供客製化的私教特訓，單堂費用為 2000 元，若您選擇包堂方案（10堂課），我們會提供最優特惠價 18,000 元，平均一堂可節省 200 元喔！上課時，我們會為您的婚禮雙人舞曲目進行一對一的動作修改、姿勢調整與進度追蹤。您可以點選下方連結預訂首堂時間。`;
+    }
+    outputBox.textContent = modified;
+  }, 500);
 }
 
 function copyAgentOutputText() {
   const text = document.getElementById('agent-output-text').textContent;
   navigator.clipboard.writeText(text);
-  alert('已複製 Agent 生成結果！');
+  alert('已複製結果！');
 }
 
 // ==========================================
 // Content Studio Logic
 // ==========================================
-
-const mockStudioOutputs = {
-  instagram: {
-    title: 'Instagram Reels',
-    text: `【🎬 IG Reels 短影音劇本】\n\n📌 影片主題：初學者必學 Dancehall 臀部律動技巧\n🔥 3秒黃金Hook: 「跳舞扭屁股總是看起來像肚子痛？因為你用錯發力點了！」\n\n🎥 畫面分鏡：\n1. [0-3s] 老師示範高爆發力的 Wining 動作，搭配節奏雷鬼音樂。\n2. [3-20s] 側面鏡頭拆解：膝蓋彎曲 -> 骨盆向上提拉 -> 後推畫圓。\n3. [20-45s] 正面踩點雷鬼節奏 (One Drop) 慢速到快速。\n\n✍️ 貼文 Caption:\n跳 Dancehall 的性感靈魂來自於臀部律動！Wining 畫圓其實是用核心跟大腿發力喔！這篇快點收藏起來練，這週三晚上課堂我帶你實際踩點節奏！🔥💃\n\n🏷️ Hashtags:\n#dancehall #wining #dancelife #街舞教學 #雷鬼舞蹈 #ReelsChoreo`
-  },
-  tiktok: {
-    title: 'TikTok Video',
-    text: `【🎵 TikTok 影音腳本】\n\n📌 影片主題：3步學會牙買加經典 Wining 律動\n🔥 爆點Hook: 「別再瞎扭了！牙買加雷鬼舞老師教你3步學會最正宗的 Wining 臀部律動！」\n\n🎥 畫面分鏡：\n1. 快速切入：直接把錯誤動作與正確動作放在一起比對 (錯誤: 腰部過度用力 vs 正確: 核心帶動)。\n2. 節奏拆解：拍子1屈膝、拍子2骨盆提起、拍子3順滑畫圓。\n3. 快嘴口播，搭配流行雷鬼背景音。\n\n🏷️ Hashtags:\n#dancehallstyle #winingtutorial #dancer #學跳舞 #街舞教學 #TikTok舞蹈`
-  },
-  youtube: {
-    title: 'YouTube Shorts',
-    text: `【🎥 YouTube Shorts 腳本】\n\n📌 主題：牙買加 Dancehall 基礎律動\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！Dancehall 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」\n\n✍️ 說明欄文案:\n如果你想提升舞蹈的流暢感與律動性，Dancehall 是最好的練習風格。歡迎加入這週工作坊特訓！\n\n🏷️ Hashtags:\n#shorts #dancehall #dancetutorial #雷鬼舞步 #核心訓練`
-  },
-  threads: {
-    title: 'Threads Topic',
-    text: `【🧵 Threads 熱門討論】\n\n有沒有人也覺得，跳 Dancehall 臀部畫圓（Wining）的時候，最難的不是腰部用不用力，而是你能不能在滿堂的鏡子前面放開自我、不要覺得尷尬？😂\n\n很多學員一開始都卡在心魔，其實大家都在看老師，根本沒人在看你啦！放膽扭下去就對了！\n\n今天晚上課堂見，今晚誰要來？在下面留個 🔥 讓我知道！👇`
-  }
-};
 
 function generateStudioScripts() {
   const style = document.getElementById('studio-style').value;
@@ -422,12 +533,20 @@ function generateStudioScripts() {
   const idea = document.getElementById('studio-idea').value;
 
   const textContent = document.getElementById('studio-mockup-text-content');
-  textContent.textContent = '🎬 AI 正在為您串接跨平台發布格式，產生中...';
+  textContent.textContent = '🎬 AI 正在為您串接跨平台發布格式，進行一鍵生成中...';
 
   setTimeout(() => {
-    // Dynamically enrich mock texts based on input
+    // Enrich mock texts dynamically
     mockStudioOutputs.instagram.text = `【🎬 IG Reels 短影音劇本】\n\n📌 影片主題：${topic}\n🕺 風格：${style}\n🔥 3秒黃金Hook: 「大家都想跳好${style}，但90%的人動作都做錯了！」\n\n🎥 畫面分鏡：\n1. [0-3s] 配合極富張力的動作點展現 ${topic} 的震撼力。\n2. [3-25s] ${idea || '分步驟細緻拆解動作發力，強調肢體控制'}\n3. [25-50s] 老師帶領學員配合節奏進行實練展示。\n\n✍️ 貼文 Caption:\n今天跟著影片做一次，保證讓你突破舞蹈瓶頸！想要更系統化進步，歡迎點個人檔案連結報名最新的一對一私教班！🔥\n\n🏷️ Hashtags:\n#dancehall #${style.toLowerCase().replace(/\s+/g, '')} #choreo #學跳舞 #影音劇本`;
     
+    mockStudioOutputs.tiktok.text = `【🎵 TikTok 短影音腳本】\n\n📌 影片主題：${topic}\n🕺 風格：${style}\n🔥 爆點Hook: 「別再瞎跳了！用這3步做正宗的 ${style} 臀部律動！」\n\n🎥 畫面分鏡：\n1. [0-5s] 錯誤示範對比正確示範，引出痛點。\n2. [5-20s] 重心沉降，發力點特寫 (搭配綠幕箭頭指示)。\n3. [20-40s] 配合當前最火雷鬼樂慢速踩點實操。\n\n🏷️ Hashtags:\n#dancehallstyle #${style.toLowerCase().replace(/\s+/g, '')} #dancer #學跳舞 #TikTok舞蹈`;
+
+    mockStudioOutputs.facebook.text = `【📘 Facebook 品牌貼文】\n\n📌 主題：【${style} 行動教學短片】${topic}\n\n各位熱愛跳舞的朋友！\n今天我們為大家帶來正宗的 ${style} 技巧教學。跳舞的性感與力量，往往取決於對重心下沉的掌控度。\n\n很多同學在做 Wining 畫圓時，常因為腰部用錯力而感到卡卡的，甚至容易拉傷。在影片中我們詳細拆解了核心發力的三大核心要訣：\n1. 膝蓋微蹲\n2. 腹部微收\n3. 骨盆向上帶起圓弧\n\n想學習更多？趕快分享這篇文，這週三晚上我們在線下教室帶你伴隨音樂律動！💃🔥\n\n👉 報名連結：[點擊前往約課系統]`;
+
+    mockStudioOutputs.threads.text = `【🧵 Threads 熱門話題】\n\n跳 ${style} 時，臀部律動 ${topic} 最難的不是肌肉發力，而是你能不能在滿堂同學的鏡子前面放開自我、擺脫尷尬？😂\n\n大家一開始都卡在心魔，其實放膽扭下去就對了！\n今晚課堂見，今晚誰會到？在下面留個 🔥 讓我知道！👇`;
+
+    mockStudioOutputs.youtube.text = `【🎥 YouTube Shorts 腳本】\n\n📌 主題：${topic}\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！${style} 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」`;
+
     switchStudioPreviewPlatform(activeStudioPlatform);
   }, 1000);
 }
@@ -501,6 +620,21 @@ function selectChatThread(threadId) {
   document.getElementById('c-level').textContent = thread.studentInfo.level;
   document.getElementById('c-attendance').textContent = thread.studentInfo.attendance;
   document.getElementById('c-payment').textContent = thread.studentInfo.payment;
+  document.getElementById('c-birthday').textContent = thread.studentInfo.birthday;
+  document.getElementById('c-tags').textContent = thread.studentInfo.tags;
+
+  // Render Previous conversations
+  const prevConversationsList = document.getElementById('chat-previous-conversations');
+  if (thread.previousConversations) {
+    prevConversationsList.innerHTML = thread.previousConversations.map(c => `
+      <li>
+        <span class="badge badge-success" style="font-size:10px;">${c.date}</span>
+        <span class="text-muted" style="font-size:11px;">${c.snippet}</span>
+      </li>
+    `).join('');
+  } else {
+    prevConversationsList.innerHTML = '<li>無先前對話記錄</li>';
+  }
 
   // Generate initial recommended reply
   regenerateAICopilotReply();
@@ -562,10 +696,71 @@ function modifyCopilotTone(tone) {
   setTimeout(() => {
     if (tone === 'warmer') {
       replyBody.textContent = `親愛的 ❤️！${currentText.replace('哈囉', '哈囉寶貝').replace('！', '！🥰✨')}`;
-    } else if (tone === 'shorter') {
+    } else if (tone === 'professional') {
+      replyBody.textContent = `您好，關於您諮詢的課程事項：${currentText.replace('哈囉', '').replace('❤️', '').replace('！', '。')}`;
+    } else if (tone === 'short') {
       replyBody.textContent = currentText.substring(0, 45) + '... 直接幫您登記好嗎？✨';
+    } else if (tone === 'long') {
+      replyBody.textContent = `【詳細建議】\n${currentText} 另外，如果有任何時間上的變動，均可於課前2小時在線請假。我們也提供各類型的街舞與基礎教學，歡迎隨時預約。`;
     }
   }, 600);
+}
+
+// ==========================================
+// Social Media Manager Views
+// ==========================================
+
+function switchSocialView(viewName) {
+  activeSocialView = viewName;
+  
+  // Update view switcher active buttons
+  const buttons = ['calendar', 'draft', 'scheduled', 'published', 'analytics'];
+  buttons.forEach(btn => {
+    const el = document.getElementById(`sbtn-${btn}`);
+    if (el) {
+      if (btn === viewName) el.classList.add('active');
+      else el.classList.remove('active');
+    }
+  });
+
+  const calendarContainer = document.getElementById('social-calendar-view-container');
+  const listContainer = document.getElementById('social-list-view-container');
+  const listTitle = document.getElementById('social-list-view-title');
+  const listBody = document.getElementById('social-list-view-body');
+
+  if (viewName === 'calendar') {
+    calendarContainer.classList.remove('hidden');
+    listContainer.classList.add('hidden');
+    renderSocialCalendar();
+  } else {
+    calendarContainer.classList.add('hidden');
+    listContainer.classList.remove('hidden');
+    
+    if (viewName === 'draft') {
+      listTitle.textContent = '📝 Drafts (草稿備忘箱)';
+      listBody.innerHTML = `
+        <li>🎬 <strong>[IG Reels]</strong> 基礎 Wining 錯誤動作比對 (AI 建議採用) <button class="btn btn-secondary btn-xs" style="margin-left:auto;">編輯發布</button></li>
+        <li>📘 <strong>[Facebook]</strong> 上課側錄 NG 鏡頭大合輯 <button class="btn btn-secondary btn-xs" style="margin-left:auto;">編輯發布</button></li>
+      `;
+    } else if (viewName === 'scheduled') {
+      listTitle.textContent = '⏳ Scheduled (排程等待中)';
+      listBody.innerHTML = `
+        <li>🎬 <strong>[TikTok]</strong> Wining臀部基礎教學 - 週五 19:00 排定發布 <button class="btn btn-danger btn-xs" style="margin-left:auto;">取消排程</button></li>
+        <li>🧵 <strong>[Threads]</strong> 關於肢體爆發力的探討 - 週五 21:00 排定發布 <button class="btn btn-danger btn-xs" style="margin-left:auto;">取消排程</button></li>
+      `;
+    } else if (viewName === 'published') {
+      listTitle.textContent = '✅ Published (已發布歷史紀錄)';
+      listBody.innerHTML = `
+        <li>🎬 <strong>[Instagram]</strong> 週六工作坊精彩排舞回顧 - 2026-07-13 發布 <span class="tag-badge badge-success" style="margin-left:auto;">已發布</span></li>
+      `;
+    } else if (viewName === 'analytics') {
+      listTitle.textContent = '📊 Social Analytics (內容成效表現)';
+      listBody.innerHTML = `
+        <li>🎬 <strong>IG Reels: 基礎 Wining 教學</strong> - 互動率 8.4% (高於平均 35%)</li>
+        <li>🎵 <strong>TikTok: 1分鐘基礎 One Drop</strong> - 點閱數 14.5k</li>
+      `;
+    }
+  }
 }
 
 // ==========================================
@@ -604,29 +799,39 @@ function renderCrmTable() {
 
 function selectCrmStudent(idx) {
   document.getElementById('crm-ai-student-select').value = idx;
-  generateStudentCrmStrategy();
+  triggerCrmAction('summarize');
 }
 
-function generateStudentCrmStrategy() {
+function triggerCrmAction(actionType) {
   const idx = document.getElementById('crm-ai-student-select').value;
   const student = mockStudents[idx];
   const outputBox = document.getElementById('crm-ai-output-body');
 
-  outputBox.textContent = `🤖 AI 正在比對 ${student.name} 的出席率與教學備忘錄，擬定關懷計畫...`;
+  outputBox.textContent = `🤖 AI CRM 大腦正在比對資料並執行運算...`;
 
   setTimeout(() => {
-    let strategy = `【${student.name} 的 AI 專屬關懷策略建議】\n`;
-    strategy += `1. 情況分析：出席率 ${student.attendance}，目前狀態為 [${student.payment}]。\n`;
-    strategy += `2. 痛點診斷：${student.tags.join(', ')}。應針對學員的個人特徵給予具體回饋。\n\n`;
-    strategy += `3. 推薦 LINE 行動訊息模板（一鍵複製）：\n`;
-    
-    if (student.attendance.replace('%', '') < 80) {
-      strategy += `「嗨 ${student.name}，最近工作還順利嗎？🥰 老師有注意到你最近兩堂課缺席了，是不是上班太累了呀？跳舞是釋放壓力的好方法，這週日有一堂超好玩的基礎律動，要不要幫你預留一個位置來動一動、放鬆一下呢？❤️💃」`;
-    } else {
-      strategy += `「嗨 ${student.name}！最近看你上課的臀部律動控制力越來越穩定了耶，真的進步超多！🔥 老師建議你這週可以在家多做 5 分鐘的大腿核心肌肉啟動，下堂課編舞小品我們來挑戰變速跳法，加油！✨💪」`;
+    let text = '';
+    if (actionType === 'summarize') {
+      text = `【學員歷史總結 (CRM History Summary) - ${student.name}】\n`;
+      text += `- 舞蹈能力: ${student.level} | 核心風格: ${student.style}\n`;
+      text += `- 出席紀錄: 目前出席率為 ${student.attendance}，最近一個月內請假次數已紀錄。\n`;
+      text += `- 付費歷史: 當前狀態為 [${student.payment}]。\n`;
+      text += `- 教師備註: 該生對於 ${student.style} 風格相當有熱情，動作力量控制優秀，但需注意工作繁忙時容易連續缺席。`;
+    } else if (actionType === 'followup') {
+      text = `【AI 跟進建議 (Suggested Follow-up) - ${student.name}】\n`;
+      text += `- 建議跟進行動: 由於出席率或付費狀態，建議今天利用 LINE 發送關懷訊息。\n`;
+      text += `- 回訪主題: ${student.attendance.replace('%', '') < 80 ? '連續缺席關懷與課堂預約' : '課後進度肯定與動作微調鼓勵'}\n`;
+      text += `- 推薦時程: 今天下午 16:00 點前發送效果最佳。`;
+    } else if (actionType === 'message') {
+      text = `【AI 自動生成訊息 (Generated Message) - ${student.name}】\n`;
+      if (student.attendance.replace('%', '') < 80) {
+        text += `「嗨 ${student.name}，最近工作還順利嗎？🥰 老師有注意到你最近兩堂課缺席了，是不是上班太累了呀？跳舞是釋放壓力的好方法，這週日有一堂超好玩的基礎律動，要不要幫你預留一個位置來動一動、放鬆一下呢？❤️💃」`;
+      } else {
+        text += `「嗨 ${student.name}！最近看你上課的臀部律動控制力越來越穩定了耶，真的進步超多！🔥 老師建議你這週可以在家多做 5 分鐘的大腿核心肌肉啟動，下堂課編舞小品我們來挑戰變速跳法，加油！✨💪」`;
+      }
     }
-    outputBox.textContent = strategy;
-  }, 800);
+    outputBox.textContent = text;
+  }, 700);
 }
 
 function openNewStudentModal() {
@@ -697,8 +902,30 @@ function selectAutomationFlow(flowId) {
   }).join('');
 }
 
+function renderIntegrationButtons() {
+  const ids = ['make', 'n8n', 'zapier', 'webhook', 'gcal', 'notion', 'gsheet'];
+  ids.forEach(id => {
+    const el = document.getElementById(`int-${id}`);
+    if (el) {
+      if (mockIntegrations[id]) {
+        el.textContent = 'Connected';
+        el.className = 'btn btn-primary btn-xs';
+      } else {
+        el.textContent = 'Disconnected';
+        el.className = 'btn btn-secondary btn-xs';
+      }
+    }
+  });
+}
+
+function toggleIntegration(id) {
+  mockIntegrations[id] = !mockIntegrations[id];
+  renderIntegrationButtons();
+  alert(`${id.toUpperCase()} 串接連線狀態已變更為：${mockIntegrations[id] ? '啟用' : '停用'}`);
+}
+
 function triggerTestWorkflowRun() {
-  alert('💡 已成功觸發工作流測試運行！\n系統成功調用 Webhook，自動向您的測試 LINE 帳號發送了推薦回覆與學員 CRM 變更卡片。');
+  alert('💡 已成功觸發自動化測試流程！\nWebhook 成功對外派送，模擬將學員 IG DM 私訊轉換，並同步更新至 CRM 系統。');
 }
 
 // ==========================================
@@ -754,11 +981,11 @@ function queryRagDatabase() {
 }
 
 // ==========================================
-// Analytics Charts Rendering (Pure CSS Bar animations)
+// Analytics Charts Rendering
 // ==========================================
 
 function renderAnalyticsCharts() {
-  // Mock growth chart
+  // Social growth
   const growthContainer = document.getElementById('analytics-growth-chart');
   const growthData = [
     { label: 'Instagram', val: '80%', display: '+2,450 粉絲' },
@@ -777,7 +1004,7 @@ function renderAnalyticsCharts() {
     </div>
   `).join('');
 
-  // Mock revenue chart
+  // Business revenue
   const revContainer = document.getElementById('analytics-revenue-chart');
   const revData = [
     { label: '團體團課', val: '75%', display: '$117,000' },
@@ -808,7 +1035,7 @@ function generateWeeklyAnalyticsReport() {
 <h4>💡 本週改善方針：</h4>
 <ul>
   <li><b>私教靈活排課制</b>：針對常加班的上班族學員，主動推送「週末清晨/深夜彈性預約時段」，降低請假流失率。</li>
-  <li><b>內容裂變行銷</b>：TikTok 粉絲增長迅速（本月+95%），應善加利用「TikTok 基礎律動教學影音」向本地舞蹈教室進行導流，提供專屬的「線下首堂體驗票 $450」折扣碼。</li>
+  <li><b>內容裂變行銷</b>：TikTok 粉絲增長迅速（本月+95%），應善加利用「TikTok 基礎律動教學影音」向線下團體課進行導流，提供專屬的「線下首堂體驗票 $450」折扣碼。</li>
   <li><b>主打風格聚焦</b>：數據顯示，包含 <b>Dancehall Wining</b> 的影片互動率比一般編舞排舞影片高出 42%，建議下週多產出該風格短影音。</li>
 </ul>`;
   }, 1200);
@@ -822,12 +1049,15 @@ function saveSystemSettings() {
   const style = document.getElementById('set-style').value;
   const tone = document.getElementById('set-tone').value;
   const service = document.getElementById('set-service').value;
+  const philosophy = document.getElementById('set-philosophy').value;
+  const sop = document.getElementById('set-sop').value;
+  const brand = document.getElementById('set-brand').value;
 
-  // Update in-memory models
-  mockAgents.coach.memory = `舞蹈風格偏好：${style}。寫作語氣：${tone}。`;
-  mockAgents.cs.memory = `客戶回覆原則：${service}`;
+  // Update in-memory configurations
+  mockAgents.coach.memory = `舞蹈風格特色：${style}。書寫語氣：${tone}。舞蹈哲學：${philosophy}。`;
+  mockAgents.cs.memory = `客戶回覆原則：${service}。教室規則 SOP：${sop}。品牌基本資訊：${brand}`;
 
-  alert('💾 成功將個人大腦設定儲存至 Dance Creator OS！\n所有專屬 AI Agents 的 System Prompt 與背景記憶體皆已完成無縫熱更新。');
+  alert('💾 成功將個人大腦設定儲存至 Dance Creator OS！\n所有專屬 AI Agents 的 System Prompt 與背景知識已完成即時熱更新。');
 }
 
 // ==========================================
@@ -837,6 +1067,8 @@ function saveSystemSettings() {
 function renderSocialCalendar() {
   const gridBody = document.getElementById('social-calendar-grid-body');
   const monthYearLabel = document.getElementById('social-calendar-month-year');
+  if (!gridBody || !monthYearLabel) return;
+  
   gridBody.innerHTML = '';
 
   const months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
@@ -875,7 +1107,7 @@ function renderSocialCalendar() {
         if (ev.plat === 'ig') platClass = 'ig';
         else if (ev.plat === 'fb') platClass = 'fb';
         else if (ev.plat === 'threads') platClass = 'threads';
-        else if (ev.plat === 'tiktok') platClass = 'threads'; // Styled similarly or customized
+        else if (ev.plat === 'tiktok') platClass = 'threads'; 
         else if (ev.plat === 'youtube') platClass = 'smart'; 
         
         evDiv.className = `calendar-event ${platClass}`;
@@ -936,7 +1168,11 @@ function saveModalEvent() {
 
   mockSocialPosts[dateStr] = [{ title, time, platform, desc, plat }];
   closeModal();
-  renderSocialCalendar();
+  if (activeSocialView === 'calendar') {
+    renderSocialCalendar();
+  } else {
+    switchSocialView(activeSocialView);
+  }
 }
 
 function deleteModalEvent() {
@@ -945,7 +1181,11 @@ function deleteModalEvent() {
     delete mockSocialPosts[dateStr];
   }
   closeModal();
-  renderSocialCalendar();
+  if (activeSocialView === 'calendar') {
+    renderSocialCalendar();
+  } else {
+    switchSocialView(activeSocialView);
+  }
 }
 
 function prevMonth() {
@@ -959,6 +1199,7 @@ function prevMonth() {
   }
 }
 
+// Next Month
 function nextMonth() {
   currentMonth++;
   if (currentMonth > 11) {
@@ -972,31 +1213,31 @@ function nextMonth() {
 
 // Quick Actions Mapper from Dashboard
 function quickAction(actionId) {
-  if (actionId === 'dancehall-reels') {
+  if (actionId === 'gen-ig-post') {
     switchTab('studio');
     document.getElementById('studio-style').value = 'Dancehall (牙買加雷鬼舞)';
     document.getElementById('studio-topic').value = '初學者必練 3 個性感的 Wining 擺臀動作';
     document.getElementById('studio-idea').value = '強調核心發力，不單純是用腰，避免扭傷。前3秒是老師排舞示範。';
     generateStudioScripts();
-  } else if (actionId === 'tiktok-script') {
+  } else if (actionId === 'gen-tiktok-script') {
     switchTab('studio');
     document.getElementById('studio-style').value = 'Dancehall Choreo';
     document.getElementById('studio-topic').value = '快速學會雷鬼街頭步 Log On';
     document.getElementById('studio-idea').value = '節奏踩點、側向踏步、手部動作同步搭配。適合 TikTok 快速合拍。';
     generateStudioScripts();
-  } else if (actionId === 'lesson-plan') {
+  } else if (actionId === 'reply-student') {
+    switchTab('chat');
+    selectChatThread('thread-1');
+  } else if (actionId === 'create-lesson-plan') {
     switchTab('agents');
     switchAgent('coach');
     document.getElementById('agent-input-template').value = 0;
     onAgentTemplateChange();
-  } else if (actionId === 'workshop-promo') {
+  } else if (actionId === 'create-event-promo') {
     switchTab('agents');
     switchAgent('marketing');
     document.getElementById('agent-input-template').value = 0;
     onAgentTemplateChange();
-  } else if (actionId === 'reply-student-leo') {
-    switchTab('chat');
-    selectChatThread('thread-2');
   }
 }
 
@@ -1013,6 +1254,7 @@ window.quickAction = quickAction;
 window.switchAgent = switchAgent;
 window.onAgentTemplateChange = onAgentTemplateChange;
 window.generateAgentOutput = generateAgentOutput;
+window.modifyAgentOutputText = modifyAgentOutputText;
 window.copyAgentOutputText = copyAgentOutputText;
 window.generateStudioScripts = generateStudioScripts;
 window.switchStudioPreviewPlatform = switchStudioPreviewPlatform;
@@ -1024,11 +1266,12 @@ window.regenerateAICopilotReply = regenerateAICopilotReply;
 window.applyCopilotReply = applyCopilotReply;
 window.modifyCopilotTone = modifyCopilotTone;
 window.selectCrmStudent = selectCrmStudent;
-window.generateStudentCrmStrategy = generateStudentCrmStrategy;
+window.triggerCrmAction = triggerCrmAction;
 window.openNewStudentModal = openNewStudentModal;
 window.closeNewStudentModal = closeNewStudentModal;
 window.saveNewStudent = saveNewStudent;
 window.selectAutomationFlow = selectAutomationFlow;
+window.toggleIntegration = toggleIntegration;
 window.triggerTestWorkflowRun = triggerTestWorkflowRun;
 window.triggerFileInputClick = triggerFileInputClick;
 window.handleMockFileUpload = handleMockFileUpload;
@@ -1040,3 +1283,5 @@ window.nextMonth = nextMonth;
 window.closeModal = closeModal;
 window.saveModalEvent = saveModalEvent;
 window.deleteModalEvent = deleteModalEvent;
+window.switchSocialView = switchSocialView;
+window.loadHistoryItem = loadHistoryItem;
