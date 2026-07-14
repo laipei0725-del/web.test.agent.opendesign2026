@@ -710,10 +710,23 @@ function closeReportReader() {
   document.getElementById('report-reader-box').classList.add('hidden');
 }
 
-// ==========================================
-// Page Load Initializer
-// ==========================================
 window.addEventListener('DOMContentLoaded', () => {
   initDashboard();
   renderBrands();
 });
+
+// Expose functions globally to fix inline HTML onclick/onchange handlers in ES module scope
+window.switchTab = switchTab;
+window.prevMonth = prevMonth;
+window.nextMonth = nextMonth;
+window.openCalendarDayModal = openCalendarDayModal;
+window.closeModal = closeModal;
+window.saveModalEvent = saveModalEvent;
+window.deleteModalEvent = deleteModalEvent;
+window.onGeneratorBrandChange = onGeneratorBrandChange;
+window.triggerAIGeneration = triggerAIGeneration;
+window.copyMockupText = copyMockupText;
+window.scheduleMockupText = scheduleMockupText;
+window.quickAction = quickAction;
+window.viewReport = viewReport;
+window.closeReportReader = closeReportReader;
