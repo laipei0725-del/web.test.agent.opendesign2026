@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中華民國全國建築師公會 - 首頁改版</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <img src="file:///Users/peipei/.gemini/antigravity/brain/27962213-518f-47e6-89cd-fabbfdae6a1b/logo_placeholder_1783576976881.jpg" alt="NAA Logo" class="logo" />
+      <nav class="nav">
+        <ul>
+          <li><a href="#home">首頁</a></li>
+          <li><a href="#news">最新消息</a></li>
+          <li><a href="blog.html">部落格</a></li>
+          <li><a href="#contact">聯絡我們</a></li>
+          <li id="auth-nav-item"><button class="btn-login" id="btn-login-trigger">會員快捷登入</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <div class="hero-overlay"></div>
+    <img src="file:///Users/peipei/.gemini/antigravity/brain/27962213-518f-47e6-89cd-fabbfdae6a1b/hero_placeholder_1783576988779.jpg" alt="Hero" class="hero-bg" />
+    <div class="hero-content">
+      <h1>打造更美好的建築未來</h1>
+      <p>全國建築師公會全新形象，專業服務，知識分享。</p>
+      <a href="#services" class="cta-button">立即了解</a>
+      <button class="cta-button" id="btn-apply-trigger" style="margin-left: 10px; border: none; cursor: pointer;">立即線上報名與申辦</button>
+    </div>
+  </section>
+
+  <!-- Filter -->
+  <section class="filter-section">
+    <label for="category-select" class="visually-hidden">分類過濾</label>
+    <select id="category-select">
+      <option value="all">全部</option>
+      <option value="news">最新消息</option>
+      <option value="services">服務項目</option>
+      <option value="regulations">法規資訊</option>
+    </select>
+  </section>
+
+  <!-- Card Grid -->
+  <main class="main-content" id="cards-container">
+    <!-- 會由 JavaScript 從 Supabase 動態載入並渲染 -->
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer" id="contact">
+    <div class="container">
+      <p>© 2026 中華民國全國建築師公會</p>
+      <ul class="social-links">
+        <li><a href="#" aria-label="Facebook"><svg width="24" height="24" fill="currentColor"><!-- icon placeholder --></svg></a></li>
+        <li><a href="#" aria-label="Instagram"><svg width="24" height="24" fill="currentColor"><!-- icon placeholder --></svg></a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Login/Signup Modal -->
+  <div class="modal-backdrop" id="modal-login">
+    <div class="modal-container">
+      <button class="modal-close" id="modal-login-close">&times;</button>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tab-login-btn">會員登入</button>
+        <button class="modal-tab" id="tab-signup-btn">註冊新帳號</button>
+      </div>
+      
+      <!-- Login Form -->
+      <form id="form-login">
+        <div class="form-group">
+          <label for="login-email">電子信箱</label>
+          <input type="email" id="login-email" class="form-control" placeholder="name@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">密碼</label>
+          <input type="password" id="login-password" class="form-control" placeholder="請輸入密碼" required />
+        </div>
+        <button type="submit" class="btn-submit" id="btn-login-submit">登入</button>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="form-signup" style="display: none;">
+        <div class="form-group">
+          <label for="signup-email">電子信箱</label>
+          <input type="email" id="signup-email" class="form-control" placeholder="name@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="signup-password">密碼 (至少 6 位數)</label>
+          <input type="password" id="signup-password" class="form-control" placeholder="請設定密碼" required />
+        </div>
+        <button type="submit" class="btn-submit" id="btn-signup-submit">註冊</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Application Modal -->
+  <div class="modal-backdrop" id="modal-apply">
+    <div class="modal-container">
+      <button class="modal-close" id="modal-apply-close">&times;</button>
+      <h3 style="margin-bottom: 1.5rem; color: var(--color-primary);">線上報名與申辦</h3>
+      <form id="form-apply">
+        <div class="form-group">
+          <label for="apply-type">申辦類別</label>
+          <select id="apply-type" class="form-control" required>
+            <option value="">請選擇...</option>
+            <option value="seminar">耐震評估講習會報名</option>
+            <option value="structural_review">結構外審委託服務</option>
+            <option value="reconstruction">都更危老重建申辦</option>
+            <option value="bim_tech">BIM 技術服務與諮詢</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="apply-name">申請人姓名</label>
+          <input type="text" id="apply-name" class="form-control" placeholder="請輸入姓名" required />
+        </div>
+        <div class="form-group">
+          <label for="apply-phone">聯絡電話</label>
+          <input type="tel" id="apply-phone" class="form-control" placeholder="請輸入電話號碼" required />
+        </div>
+        <div class="form-group">
+          <label for="apply-project">專案名稱</label>
+          <input type="text" id="apply-project" class="form-control" placeholder="例：XX市大樓新建案" required />
+        </div>
+        <div class="form-group">
+          <label for="apply-details">備註與詳細說明</label>
+          <textarea id="apply-details" class="form-control" rows="3" placeholder="請填寫任何其他說明..."></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="btn-apply-submit">送出申請</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/script.js"></script>
+</body>
+</html>

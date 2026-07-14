@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中華民國全國建築師公會 - 部落格</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <img src="file:///Users/peipei/.gemini/antigravity/brain/27962213-518f-47e6-89cd-fabbfdae6a1b/logo_placeholder_1783576976881.jpg" alt="NAA Logo" class="logo" />
+      <nav class="nav">
+        <ul>
+          <li><a href="index.html#home">首頁</a></li>
+          <li><a href="index.html#news">最新消息</a></li>
+          <li><a href="blog.html">部落格</a></li>
+          <li><a href="index.html#contact">聯絡我們</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="blog-hero">
+    <div class="hero-overlay"></div>
+    <img src="file:///Users/peipei/.gemini/antigravity/brain/27962213-518f-47e6-89cd-fabbfdae6a1b/hero_placeholder_1783576988779.jpg" alt="Hero" class="hero-bg" />
+    <div class="hero-content">
+      <h1>建築師的視界·部落格</h1>
+      <p>分享最新建築趨勢、案例分析與專業見解。</p>
+    </div>
+  </section>
+
+  <!-- Blog List -->
+  <main class="main-content" id="blog-posts-container" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+    <!-- 會由 JavaScript 從 Supabase 動態載入並渲染 -->
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer" id="contact">
+    <div class="container">
+      <p>© 2026 中華民國全國建築師公會</p>
+      <ul class="social-links">
+        <li><a href="#" aria-label="Facebook"><svg width="24" height="24" fill="currentColor"><!-- icon placeholder --></svg></a></li>
+        <li><a href="#" aria-label="Instagram"><svg width="24" height="24" fill="currentColor"><!-- icon placeholder --></svg></a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module" src="/blog.js"></script>
+</body>
+</html>
