@@ -2,6 +2,13 @@
 // Dance Creator OS - Core Application Logic
 // ==========================================
 
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase Client
+const supabaseUrl = 'https://kremauxwtwobmbjwbzzs.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZW1hdXh3dHdvYm1iandienpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0ODYxMTAsImV4cCI6MjA5OTA2MjExMH0.smMJiEQ4n7qr5tpmR54EXPPMNakt1rM1ZM-pw4s5ABw';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 // Global States
 let activeTab = 'dashboard';
 let currentYear = 2026;
@@ -13,7 +20,7 @@ let activeFlowId = 'flow-1';
 let activeSocialView = 'calendar';
 
 // ==========================================
-// Mock Databases
+// Local Cache / Mock Databases
 // ==========================================
 
 // Today's Dashboard Schedules
@@ -54,7 +61,7 @@ const mockAgents = {
     icon: '💬',
     role: '智能客服與銷售助理',
     desc: '自動化回覆體驗課諮詢、請假延期、學員跟進與費用問題，並維持溫馨鼓勵語氣。',
-    prompt: '你是一位溫暖、體貼、充滿活力的舞蹈教室客服專員。你代表我們的品牌給予學員最高規格的關懷，會主動用積極溫暖的詞語（如「哈囉！」「太棒了！🔥」）拉近距離，並條理清晰地回覆學員關於課程費用、請假手續等問題。',
+    prompt: '你是一位溫慢、體貼、充滿活力的舞蹈教室客服專員。你代表我們的品牌給予學員最高規格的關懷，會主動用積極溫慢的詞語（如「哈囉！」「太棒了！🔥」）拉近距離，並條理清晰地回覆學員關於課程費用、請假手續等問題。',
     memory: '教室規則：1. 體驗票限本人使用一次，價格 $450。2. 私人一對一課程單堂 $2,000 / 包堂優惠 10 堂 $18,000。3. 請假需在開課前 2 小時完成線上登記。',
     templates: [
       { name: '💬 回覆初學者體驗課諮詢', raw: '有一位初學者在 IG 詢問：「我沒有任何跳舞經驗，可以報名你們的 Dancehall 體驗課嗎？會不會跟不上？」請生成適合的回覆。' },
@@ -108,7 +115,7 @@ const mockAgents = {
       { name: '🎂 撰寫學員生日專屬祝賀關懷信', raw: '為本月生日的學員設計一段專屬祝賀訊息，附帶一張免費團體課單堂券作為生日禮。' }
     ],
     history: [
-      { timestamp: '週一', title: 'LINE群發: 暑期班開課叮嚀', result: '已生成溫暖的行前文案，點閱率達 94%。' }
+      { timestamp: '週一', title: 'LINE群發: 暑期班開課叮嚀', result: '已生成溫馨的行前文案，點閱率達 94%。' }
     ]
   },
   business: {
@@ -128,7 +135,10 @@ const mockAgents = {
   }
 };
 
-// Customer Service Chat Inbox
+// Local cache for Student CRM (overwritten by Supabase)
+let mockStudents = [];
+
+// Local cache for Chat Inbox
 const mockInbox = {
   'thread-1': {
     id: 'thread-1',
@@ -141,11 +151,7 @@ const mockInbox = {
       { date: '2026-06-15', snippet: '詢問雷鬼基礎體驗班費用' },
       { date: '2026-07-02', snippet: '報名完成並預約季卡課程' }
     ],
-    messages: [
-      { sender: 'student', text: '哈囉老師！我有看到你最新發布的 Dancehall 影片，真的超級好看！' },
-      { sender: 'teacher', text: '哈囉 Emma！謝謝妳的喜歡 🔥 牙買加的雷鬼律動真的非常有魅力喔！' },
-      { sender: 'student', text: '想請問一下，下週三晚上的 Dancehall 入門課還有名額可以報名嗎？我朋友也想一起來。' }
-    ]
+    messages: []
   },
   'thread-2': {
     id: 'thread-2',
@@ -158,9 +164,7 @@ const mockInbox = {
       { date: '2026-06-20', snippet: '預約一對一私人私教課' },
       { date: '2026-07-08', snippet: '加班請假一次，已補課完成' }
     ],
-    messages: [
-      { sender: 'student', text: '老師，不好意思我今天晚上公司突然要緊急加班，可能要請假一次 😭' }
-    ]
+    messages: []
   },
   'thread-3': {
     id: 'thread-3',
@@ -172,20 +176,9 @@ const mockInbox = {
     previousConversations: [
       { date: '2026-07-10', snippet: '首次加好友，瀏覽自動歡迎訊息' }
     ],
-    messages: [
-      { sender: 'student', text: '哈囉！我想詢問一下老師的一對一私教課是怎麼收費的？因為年底要結婚，希望有一段雙人排舞的表演。' }
-    ]
+    messages: []
   }
 };
-
-// Student CRM Records
-const mockStudents = [
-  { name: 'Emma Lin', level: '初學入門', style: 'Dancehall', attendance: '92%', payment: '已繳費', birthday: '08-15', tags: ['愛好者', '基礎加強'] },
-  { name: 'Leo Chen', level: '中階進步', style: 'Dancehall / Reggae', attendance: '60%', payment: '已繳費', birthday: '11-02', tags: ['上班族', '缺席兩次'] },
-  { name: 'Sandy Wang', level: '全新諮詢', style: 'Dancehall 婚禮排舞', attendance: '0%', payment: '體驗票', birthday: '04-20', tags: ['潛在客', '婚禮需求'] },
-  { name: 'Tiffany Chang', level: '高階進階', style: 'Dancehall Choreo', attendance: '96%', payment: '已繳費', birthday: '01-25', tags: ['助教儲備', '音樂性佳'] },
-  { name: 'Howard Liu', level: '初學入門', style: 'Dancehall Foundation', attendance: '80%', payment: '未繳費', birthday: '06-12', tags: ['待催繳', '體能需提升'] }
-];
 
 // Automation Center Workflows
 const mockAutomationFlows = {
@@ -266,11 +259,10 @@ const mockStudioOutputs = {
   },
   youtube: {
     title: 'YouTube Shorts',
-    text: `【🎥 YouTube Shorts 腳本】\n\n📌 主題：牙買加 Dancehall 基礎律動\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！Dancehall 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」\n\n✍️ 說明欄文案:\n如果你想提升舞蹈的流暢感與律動性，Dancehall 是最好的練習風格。歡迎加入這週工作坊特訓！\n\n🏷️ Hashtags:\n#shorts #dancehall #dancetutorial #雷鬼舞步 #核心訓練`
+    text: `【🎥 YouTube Shorts 腳本】\n\n📌 主題：牙買加 Dancehall 基礎律動\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！Dancehall 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」`
   }
 };
 
-// Integration status memory
 const mockIntegrations = {
   make: true,
   n8n: true,
@@ -280,6 +272,79 @@ const mockIntegrations = {
   notion: false,
   gsheet: true
 };
+
+// ==========================================
+// Supabase Sync Operations
+// ==========================================
+
+async function fetchStudentsFromSupabase() {
+  const { data, error } = await supabase.from('students').select('*').order('name');
+  if (error) {
+    console.error('Error fetching students:', error);
+    return;
+  }
+  if (data) {
+    mockStudents = data;
+    renderCrmTable();
+  }
+}
+
+async function fetchMessagesFromSupabase() {
+  const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
+  if (error) {
+    console.error('Error fetching messages:', error);
+    return;
+  }
+  if (data) {
+     // Clear messages cache first
+     Object.keys(mockInbox).forEach(key => {
+        mockInbox[key].messages = [];
+     });
+     
+     data.forEach(msg => {
+        let threadId = 'thread-1';
+        if (msg.student_name === 'Emma Lin') threadId = 'thread-1';
+        else if (msg.student_name === 'Leo Chen') threadId = 'thread-2';
+        else if (msg.student_name === 'Sandy Wang') threadId = 'thread-3';
+        
+        if (mockInbox[threadId]) {
+           mockInbox[threadId].messages.push({
+              sender: msg.sender,
+              text: msg.text
+           });
+        }
+     });
+     
+     // Rerender active thread
+     selectChatThread(activeChatThreadId);
+  }
+}
+
+function subscribeToSupabaseRealtime() {
+  // Realtime subscription for messages
+  supabase
+    .channel('messages-live')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'messages' },
+      (payload) => {
+        fetchMessagesFromSupabase();
+      }
+    )
+    .subscribe();
+
+  // Realtime subscription for students
+  supabase
+    .channel('students-live')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'students' },
+      (payload) => {
+        fetchStudentsFromSupabase();
+      }
+    )
+    .subscribe();
+}
 
 // ==========================================
 // Core Tab Switcher
@@ -543,7 +608,7 @@ function generateStudioScripts() {
 
     mockStudioOutputs.facebook.text = `【📘 Facebook 品牌貼文】\n\n📌 主題：【${style} 行動教學短片】${topic}\n\n各位熱愛跳舞的朋友！\n今天我們為大家帶來正宗的 ${style} 技巧教學。跳舞的性感與力量，往往取決於對重心下沉的掌控度。\n\n很多同學在做 Wining 畫圓時，常因為腰部用錯力而感到卡卡的，甚至容易拉傷。在影片中我們詳細拆解了核心發力的三大核心要訣：\n1. 膝蓋微蹲\n2. 腹部微收\n3. 骨盆向上帶起圓弧\n\n想學習更多？趕快分享這篇文，這週三晚上我們在線下教室帶你伴隨音樂律動！💃🔥\n\n👉 報名連結：[點擊前往約課系統]`;
 
-    mockStudioOutputs.threads.text = `【🧵 Threads 熱門話題】\n\n跳 ${style} 時，臀部律動 ${topic} 最難的不是肌肉發力，而是你能不能在滿堂同學的鏡子前面放開自我、擺脫尷尬？😂\n\n大家一開始都卡在心魔，其實放膽扭下去就對了！\n今晚課堂見，今晚誰會到？在下面留個 🔥 讓我知道！👇`;
+    mockStudioOutputs.threads.text = `【🧵 Threads 熱門話題】\n\n跳 ${style} 時，臀部律動 ${topic} 最難的不是肌肉發力，而是你能不能在滿堂同學的鏡子前面放開自我、擺脫尷尬？😂\n\n許多學員一開始都卡在心魔，其實放膽扭下去就對了！\n今晚課堂見，今晚誰會到？在下面留個 🔥 讓我知道！👇`;
 
     mockStudioOutputs.youtube.text = `【🎥 YouTube Shorts 腳本】\n\n📌 主題：${topic}\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！${style} 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」`;
 
@@ -640,7 +705,7 @@ function selectChatThread(threadId) {
   regenerateAICopilotReply();
 }
 
-function sendUserChatMessage() {
+async function sendUserChatMessage() {
   const inputBox = document.getElementById('chat-input-box');
   const text = inputBox.value.trim();
   if (!text) return;
@@ -648,17 +713,30 @@ function sendUserChatMessage() {
   const thread = mockInbox[activeChatThreadId];
   if (!thread) return;
 
-  // Push user message
-  thread.messages.push({ sender: 'teacher', text });
+  // Insert teacher message into Supabase
+  const { error } = await supabase.from('messages').insert([{
+    student_name: thread.studentName,
+    sender: 'teacher',
+    text: text,
+    platform: thread.platform
+  }]);
+
+  if (error) {
+    console.error('Error sending message:', error);
+  }
+
   inputBox.value = '';
+  await fetchMessagesFromSupabase();
 
-  // Render
-  selectChatThread(activeChatThreadId);
-
-  // Automatically trigger a mock customer response after 1.5 seconds
-  setTimeout(() => {
-    thread.messages.push({ sender: 'student', text: '好的，謝謝老師！那我把我的聯絡電話跟本名私訊留給您。' });
-    selectChatThread(activeChatThreadId);
+  // Mock student response after 1.5 seconds and update Supabase
+  setTimeout(async () => {
+    await supabase.from('messages').insert([{
+      student_name: thread.studentName,
+      sender: 'student',
+      text: '好的，謝謝老師！那我把我的聯絡電話跟本名私訊留給您。',
+      platform: thread.platform
+    }]);
+    await fetchMessagesFromSupabase();
   }, 1500);
 }
 
@@ -842,7 +920,7 @@ function closeNewStudentModal() {
   document.getElementById('new-student-modal').classList.add('hidden');
 }
 
-function saveNewStudent() {
+async function saveNewStudent() {
   const name = document.getElementById('ns-name').value;
   const level = document.getElementById('ns-level').value;
   const style = document.getElementById('ns-style').value;
@@ -858,9 +936,18 @@ function saveNewStudent() {
 
   const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [];
 
-  mockStudents.push({ name, level, style, attendance, payment, birthday, tags });
-  closeNewStudentModal();
-  renderCrmTable();
+  // Write new student to Supabase
+  const { error } = await supabase.from('students').insert([{
+    name, level, style, attendance, payment, birthday, tags
+  }]);
+
+  if (error) {
+    console.error('Error saving student to Supabase:', error);
+    alert('上報 Supabase 錯誤：' + error.message);
+  } else {
+    closeNewStudentModal();
+    await fetchStudentsFromSupabase();
+  }
 }
 
 // ==========================================
@@ -1244,8 +1331,15 @@ function quickAction(actionId) {
 // ==========================================
 // Page Load Initializer
 // ==========================================
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   switchTab('dashboard');
+  
+  // Realtime subscriptions
+  subscribeToSupabaseRealtime();
+  
+  // Fetch initial data from live Supabase instance
+  await fetchStudentsFromSupabase();
+  await fetchMessagesFromSupabase();
 });
 
 // Expose all functions to global window scope to prevent Vite tree-shaking
