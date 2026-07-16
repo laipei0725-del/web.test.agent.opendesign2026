@@ -14,21 +14,64 @@ const studentNameInput = document.getElementById('pay-student-name');
 const studentEmailInput = document.getElementById('pay-student-email');
 const studentPhoneInput = document.getElementById('pay-student-phone');
 
-const mpgForm = document.getElementById('newebpay-mpg-form');
-const mpgMerchantID = document.getElementById('mpg-MerchantID');
-const mpgTradeInfo = document.getElementById('mpg-TradeInfo');
-const mpgTradeSha = document.getElementById('mpg-TradeSha');
-const mpgVersion = document.getElementById('mpg-Version');
-
+const ecpayForm = document.getElementById('ecpay-checkout-form');
 const checkoutFields = document.getElementById('checkout-fields');
 const checkoutLoading = document.getElementById('checkout-loading-state');
 
 let selectedCourse = null;
 
-// NewebPay Test Sandbox Credentials
-const MERCHANT_ID = 'MS32917965';
-const HASH_KEY = '12345678901234567890123456789012';
-const HASH_IV = '1234567890123456';
+// ECPay Official Test Credentials (Sandbox)
+const MERCHANT_ID = '3002607';
+const HASH_KEY = 'pwFHCqoQZGmho4w6';
+const HASH_IV = 'EkRm7iFT261dpevs';
+
+// Helper to format Date as yyyy/MM/dd HH:mm:ss
+function formatECPayDate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const MM = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const HH = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
+}
+
+// Generate CheckMacValue according to ECPay specification
+function calculateCheckMacValue(params, hashKey, hashIV) {
+  // 1. Sort by key alphabetically A-Z
+  const sortedKeys = Object.keys(params).sort();
+  
+  // 2. Join as key=value string
+  let rawStr = sortedKeys
+    .map(key => `${key}=${params[key]}`)
+    .join('&');
+    
+  // 3. Add HashKey at front and HashIV at end
+  rawStr = `HashKey=${hashKey}&${rawStr}&HashIV=${hashIV}`;
+  
+  // 4. URL Encode
+  let encodedStr = encodeURIComponent(rawStr);
+  
+  // 5. Replace standard URL encode characters with ECPay specific ones (.NET encoding style)
+  encodedStr = encodedStr
+    .replace(/%2D/g, '-')
+    .replace(/%5F/g, '_')
+    .replace(/%2E/g, '.')
+    .replace(/%21/g, '!')
+    .replace(/%2A/g, '*')
+    .replace(/%28/g, '(')
+    .replace(/%29/g, ')')
+    .replace(/%20/g, '+');
+    
+  // 6. Convert to lowercase
+  const lowerStr = encodedStr.toLowerCase();
+  
+  // 7. Calculate SHA256 and convert to UPPERCASE
+  const sha256 = CryptoJS.SHA256(lowerStr).toString(CryptoJS.enc.Hex).toUpperCase();
+  
+  return sha256;
+}
 
 // Initialize and Fetch Classes
 async function initBookingPage() {
@@ -109,7 +152,7 @@ function closeCheckoutModal() {
   checkoutModal.classList.remove('active');
 }
 
-function submitNewebPayPayment() {
+function submitECPayPayment() {
   if (!selectedCourse) return;
   
   const name = studentNameInput.value.trim();
@@ -124,61 +167,51 @@ function submitNewebPayPayment() {
   checkoutFields.style.display = 'none';
   checkoutLoading.style.display = 'flex';
   
-  // Create NewebPay transaction details
-  const timestamp = Math.round(new Date().getTime() / 1000);
-  const orderNo = 'DANCE_' + timestamp;
+  // ECPay specific trade parameters
+  const tradeDate = formatECPayDate();
+  const tradeNo = 'D' + new Date().getTime().toString().substring(3); // Unique and max 20 chars
   
   const params = {
     MerchantID: MERCHANT_ID,
-    RespondType: 'JSON',
-    TimeStamp: timestamp,
-    Version: '2.0',
-    MerchantOrderNo: orderNo,
-    Amt: selectedCourse.price,
-    ItemDesc: `${selectedCourse.title} - 單堂約課`,
-    Email: email,
-    LoginType: 0,
-    CREDIT: 1,
+    MerchantTradeNo: tradeNo,
+    MerchantTradeDate: tradeDate,
+    PaymentType: 'aio',
+    TotalAmount: selectedCourse.price,
+    TradeDesc: `Dance Creator OS - ${selectedCourse.title}`,
+    ItemName: `${selectedCourse.title} 單堂約課`,
     ReturnURL: window.location.origin + window.location.pathname,
+    ChoosePayment: 'Credit',
+    EncryptType: '1',
     ClientBackURL: window.location.origin + window.location.pathname
   };
   
-  // Format parameters to URL Query String
-  const paramString = Object.entries(params)
-    .map(([key, val]) => `${key}=${val}`)
-    .join('&');
-    
-  // AES-256-CBC encryption using CryptoJS
-  const key = CryptoJS.enc.Utf8.parse(HASH_KEY);
-  const iv = CryptoJS.enc.Utf8.parse(HASH_IV);
-  const encrypted = CryptoJS.AES.encrypt(paramString, key, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7
-  });
+  // Calculate signature
+  const checkMacValue = calculateCheckMacValue(params, HASH_KEY, HASH_IV);
   
-  const tradeInfo = encrypted.ciphertext.toString(CryptoJS.enc.Hex);
+  // Insert values into the hidden form
+  document.getElementById('ecpay-MerchantID').value = params.MerchantID;
+  document.getElementById('ecpay-MerchantTradeNo').value = params.MerchantTradeNo;
+  document.getElementById('ecpay-MerchantTradeDate').value = params.MerchantTradeDate;
+  document.getElementById('ecpay-PaymentType').value = params.PaymentType;
+  document.getElementById('ecpay-TotalAmount').value = params.TotalAmount;
+  document.getElementById('ecpay-TradeDesc').value = params.TradeDesc;
+  document.getElementById('ecpay-ItemName').value = params.ItemName;
+  document.getElementById('ecpay-ReturnURL').value = params.ReturnURL;
+  document.getElementById('ecpay-ChoosePayment').value = params.ChoosePayment;
+  document.getElementById('ecpay-EncryptType').value = params.EncryptType;
+  document.getElementById('ecpay-ClientBackURL').value = params.ClientBackURL;
+  document.getElementById('ecpay-CheckMacValue').value = checkMacValue;
   
-  // Calculate SHA-256 TradeSha
-  const shaString = `HashKey=${HASH_KEY}&${tradeInfo}&HashIV=${HASH_IV}`;
-  const tradeSha = CryptoJS.SHA256(shaString).toString(CryptoJS.enc.Hex).toUpperCase();
-  
-  // Set hidden form parameters
-  mpgMerchantID.value = MERCHANT_ID;
-  mpgTradeInfo.value = tradeInfo;
-  mpgTradeSha.value = tradeSha;
-  mpgVersion.value = '2.0';
-  
-  // Submit the form to NewebPay MPG Gateway
+  // Submit the form to ECPay AioCheckOut Gateway
   setTimeout(() => {
-    mpgForm.submit();
+    ecpayForm.submit();
   }, 1000);
 }
 
 // Expose functions globally for HTML triggers
 window.openCheckoutModal = openCheckoutModal;
 window.closeCheckoutModal = closeCheckoutModal;
-window.submitNewebPayPayment = submitNewebPayPayment;
+window.submitECPayPayment = submitECPayPayment;
 
 // Run on load
 document.addEventListener('DOMContentLoaded', initBookingPage);

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- CryptoJS Library for NewebPay MPG AES-256-CBC Encryption -->
+  <!-- CryptoJS Library for ECPay Signature Calculation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <!-- Stylesheets -->
   <link rel="stylesheet" href="dashboard.css">
@@ -182,7 +182,7 @@
     <header class="booking-header">
       <span class="booking-logo">💃</span>
       <h1 class="booking-title">Dance Creator OS</h1>
-      <p class="booking-subtitle">線上預約約課與藍新金流測試支付系統</p>
+      <p class="booking-subtitle">線上預約約課與綠界金流 (ECPay) 測試支付系統</p>
     </header>
 
     <!-- Classes Grid -->
@@ -203,7 +203,7 @@
     </main>
   </div>
 
-  <!-- Checkout / NewebPay Form Modal -->
+  <!-- Checkout / ECPay Form Modal -->
   <div class="checkout-overlay" id="checkout-modal">
     <div class="glass-card checkout-card" id="checkout-form-container">
       <div class="checkout-header">
@@ -213,10 +213,11 @@
 
       <!-- Test Mode Guidelines -->
       <div class="test-box">
-        <strong>⚙️ 藍新金流測試沙盒 (Sandbox Test Mode)</strong><br>
-        測試商店代號：<code>MS32917965</code><br>
-        測試信用卡卡號：<strong><code>4000-2211-1111-1111</code></strong><br>
-        有效年月 / 安全碼：任意填寫（例如 12/29, 123）
+        <strong>⚙️ 綠界金流測試特店 (ECPay Stage Test Mode)</strong><br>
+        測試特店編號：<code>3002607</code><br>
+        測試信用卡卡號：<strong><code>4311-9522-2222-2222</code></strong><br>
+        有效年月：需大於當下（例如 12/2029）<br>
+        安全碼：輸入任意三碼（例如 222）
       </div>
 
       <!-- Form Inputs -->
@@ -242,25 +243,33 @@
           <input type="text" id="pay-student-phone" class="form-control" placeholder="請輸入手機號碼" value="0912345678">
         </div>
         
-        <button class="btn btn-primary btn-book" onclick="submitNewebPayPayment()" style="margin-top: 24px;">
-          💳 前往藍新金流進行信用卡支付
+        <button class="btn btn-primary btn-book" onclick="submitECPayPayment()" style="margin-top: 24px;">
+          💳 前往綠界金流進行信用卡支付
         </button>
       </div>
 
       <!-- Loading State -->
       <div class="checkout-loading" id="checkout-loading-state">
         <div class="spinner"></div>
-        <p style="font-weight: 600; color: var(--text-main);">正在進行 AES 金鑰加密，前往安全支付頁面...</p>
+        <p style="font-weight: 600; color: var(--text-main);">正在進行綠界 SHA256 簽章加密，前往安全收銀台...</p>
       </div>
     </div>
   </div>
 
-  <!-- Real Hidden NewebPay Form -->
-  <form id="newebpay-mpg-form" method="POST" action="https://ccore.newebpay.com/MPG/mpg_gateway" style="display: none;">
-    <input type="hidden" name="MerchantID" id="mpg-MerchantID">
-    <input type="hidden" name="TradeInfo" id="mpg-TradeInfo">
-    <input type="hidden" name="TradeSha" id="mpg-TradeSha">
-    <input type="hidden" name="Version" id="mpg-Version">
+  <!-- Real Hidden ECPay Form -->
+  <form id="ecpay-checkout-form" method="POST" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" style="display: none;">
+    <input type="hidden" name="MerchantID" id="ecpay-MerchantID">
+    <input type="hidden" name="MerchantTradeNo" id="ecpay-MerchantTradeNo">
+    <input type="hidden" name="MerchantTradeDate" id="ecpay-MerchantTradeDate">
+    <input type="hidden" name="PaymentType" id="ecpay-PaymentType">
+    <input type="hidden" name="TotalAmount" id="ecpay-TotalAmount">
+    <input type="hidden" name="TradeDesc" id="ecpay-TradeDesc">
+    <input type="hidden" name="ItemName" id="ecpay-ItemName">
+    <input type="hidden" name="ReturnURL" id="ecpay-ReturnURL">
+    <input type="hidden" name="ChoosePayment" id="ecpay-ChoosePayment">
+    <input type="hidden" name="EncryptType" id="ecpay-EncryptType">
+    <input type="hidden" name="ClientBackURL" id="ecpay-ClientBackURL">
+    <input type="hidden" name="CheckMacValue" id="ecpay-CheckMacValue">
   </form>
 
   <script type="module" src="booking.js"></script>
