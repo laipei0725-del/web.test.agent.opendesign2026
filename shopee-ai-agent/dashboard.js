@@ -54,6 +54,228 @@ let activeFlowId = 'flow-1';
 let activeSocialView = 'calendar';
 
 // ==========================================
+// Mock Database & Local Caches
+// ==========================================
+let mockStudents = [];
+
+const mockAgents = {
+  coach: {
+    name: 'Dance Coach Agent',
+    icon: '💃',
+    role: '專屬編舞與教學大腦',
+    desc: '協助您規劃舞蹈教案、熱身流程、動作結構分解，並生成學員練習作業與回饋。',
+    prompt: '你是一位擁有 10 年教學經驗的資深 Dancehall 舞蹈老師。你的風格親切熱情，擅長拆解動作結構，能以極具系統性的邏輯產出結構完整的舞蹈教案、課堂暖身步驟與課後練習指引。',
+    memory: '我的主要受眾為 18-35 歲的潮流與街舞愛好者，主要專攻牙買加雷鬼（Dancehall）街頭律動。我的教學哲學是「每個人都能找到自己身體的律動節奏」。',
+    templates: [
+      { name: '📚 產生舞蹈基礎教案', raw: '規劃一堂適合初學者的 90 分鐘 Dancehall 律動教案，主題是「Wining (臀部律動)」技巧。' },
+      { name: '🔥 規劃 15 分鐘高效暖身流程', raw: '規劃一堂高強度的熱身流程，包含關節活動、心肺提升，特別著重在髖關節與腰部肌群的啟動。' },
+      { name: '📝 寫下一期學員的練習反饋', raw: '針對完成一個月體驗班的初級班同學，提供一段鼓勵性強、包含三個具體練習重點（重心轉換、核心收縮、音樂踩點）的課後作業。' }
+    ],
+    history: [
+      { timestamp: '14:23', title: '基礎教案: Wining 臀部旋律律動', result: '已成功產出 Wining 基礎教案，包含 15 分鐘拉伸、40 分鐘動作分解與 35 分鐘音樂踩點實練。' },
+      { timestamp: '昨日', title: '暖身流程: 髖關節啟動', result: '已生成高效暖身設計：包含 8 個拍子的跨步扭轉、髖關節外旋與腹部核心收縮點火。' }
+    ]
+  },
+  cs: {
+    name: 'Customer Service Agent',
+    icon: '💬',
+    role: '智能客服與銷售助理',
+    desc: '自動化回覆體驗課諮詢、請假延期、學員跟進與費用問題，並維持溫馨鼓勵語氣。',
+    prompt: '你是一位溫慢、體貼、充滿活力的舞蹈教室客服專員。你代表我們的品牌給予學員最高規格的關懷，會主動用積極溫慢的詞語（如「哈囉！」「太棒了！🔥」）拉近距離，並條理清晰地回覆學員關於課程費用、請假手續等問題。',
+    memory: '教室規則：1. 體驗票限本人使用一次，價格 $450。2. 私人一對一課程單堂 $2,000 / 包堂優惠 10 堂 $18,000。3. 請假需在開課前 2 小時完成線上登記。',
+    templates: [
+      { name: '💬 回覆初學者體驗課諮詢', raw: '有一位初學者在 IG 詢問：「我沒有任何跳舞經驗，可以報名你們的 Dancehall 體驗課嗎？會不會跟不上？」請生成適合的回覆。' },
+      { name: '💵 回覆私人課包堂與報價問題', raw: '學員詢問私人一對一特訓的價格與排課方式，請回覆包堂優惠並導向約課流程。' },
+      { name: '⚠️ 回覆學員因故缺席或請假', raw: '學員臨時私訊告知晚上肚子痛不能來上課，希望能請假。請給予關懷並說明請假與補課規定。' }
+    ],
+    history: [
+      { timestamp: '15:10', title: '答覆: Sandy Wang 私教報價', result: '已回覆私教單堂及包堂方案，並附帶婚禮編舞成功案例說明。' }
+    ]
+  },
+  content: {
+    name: 'Content Creator Agent',
+    icon: '🎬',
+    role: '社群內容行銷推手',
+    desc: '為 Instagram、TikTok、Threads、YouTube 等社群自動生成爆款 Hook、分鏡腳本與標籤。',
+    prompt: '你是一位爆款社群短影音企劃與文案大師。你深諳 Reels / TikTok 演算法，擅長在影片前 3 秒安排強力吸引眼球的 Hook（鉤子），並能把舞蹈技巧轉化為極具觀看價值教學短片腳本。',
+    memory: '熱門標籤：#dancehall #dancehallteacher #dancelife #dancer #choreo #學跳舞 #街舞教學 #短影音劇本',
+    templates: [
+      { name: '📸 規劃 IG Reels 爆款劇本', raw: '為「一分鐘學會牙買加經典律動 One Drop」設計 Reels 短片腳本，包含分鏡、視覺指令、口播文字以及 Hook 鉤子。' },
+      { name: '📘 撰寫 Facebook 走心社群貼文', raw: '寫一篇講述自己從完全不會跳舞，到成為舞蹈老師的「心路歷程」故事貼文，著重情感共鳴。' },
+      { name: '🧵 生成 Threads 短文字話題', raw: '設計一個能引發舞蹈圈同好討論與互動的 Thread 短文，例如關於「舞蹈教學最怕遇到哪種情況」。' }
+    ],
+    history: [
+      { timestamp: '11:05', title: 'IG Reels: 骨盆律動大公開', result: '已產生 Reels 腳本：前 3 秒展示對比，中間步驟拆解，末尾引導私訊。' }
+    ]
+  },
+  marketing: {
+    name: 'Marketing Agent',
+    icon: '🔥',
+    role: '活動行銷策略顧問',
+    desc: '規劃暑期工作坊、品牌促銷、廣告文案與漏斗導流策略，提高課程滿班率。',
+    prompt: '你是一位舞蹈教室的資深行銷總監。你擅長運用促銷心理學設計吸引人的報名方案，並能撰寫出高轉換率的 Landing Page 文案與 FB 廣告文案。',
+    memory: '即將推廣活動：暑期雙人同行限時 85 折「Dancehall 燃脂特訓工作坊」。',
+    templates: [
+      { name: '🎯 規劃暑期雙人同行工作坊促銷方案', raw: '為八月的「Dancehall 燃脂工作坊」規劃全套行銷策略，包含早鳥優惠、社群裂變機制。' },
+      { name: '📢 撰寫 FB 高點擊率廣告文案', raw: '撰寫一則針對「想要塑形、又覺得傳統健身枯燥」的上班族為受眾的舞蹈工作坊招生廣告文案。' }
+    ],
+    history: [
+      { timestamp: '09:40', title: '宣傳方案: 雙人同行85折', result: '規劃完成行銷漏斗：以短影音為誘餌，吸引下載免費基礎包，再以 Email 觸發限時折扣。' }
+    ]
+  },
+  community: {
+    name: 'Community Manager Agent',
+    icon: '👥',
+    role: '班級與社群經理人',
+    desc: '生成學生群組公告、學員溫馨提醒、工作坊行前通知，維繫學員向心力。',
+    prompt: '你是一位極具向心力的舞蹈社群經理。你的語氣充滿愛與歸屬感，善於在 LINE 群組發布活動通知、上課須知與行前關懷，讓學員感受到滿滿的安全感與凝聚力。',
+    memory: '工作坊細節：本週日 14:00 Studio A 進行，需攜帶水壺與乾淨室內鞋，提前 15 分鐘報到。',
+    templates: [
+      { name: '📢 撰寫週日工作坊行行前通知 LINE 公告', raw: '為即將到來的工作坊撰寫一份親切、溫馨的行前準備通知。' },
+      { name: '🎂 撰寫學員生日專屬祝賀關懷信', raw: '為本月生日的學員設計一段專屬祝賀訊息，附帶一張免費團體課單堂券作為生日禮。' }
+    ],
+    history: [
+      { timestamp: '週一', title: 'LINE群發: 暑期班開課叮嚀', result: '已生成溫馨的行前文案，點閱率達 94%。' }
+    ]
+  },
+  business: {
+    name: 'Business Assistant',
+    icon: '⚙️',
+    role: '個人工作室營運秘書',
+    desc: '協助起草品牌合作企劃書、教室管理 SOP、會議記錄與活動執行計劃。',
+    prompt: '你是一位幹練、專業的商務秘書與營運顧問。你的格式嚴謹，擅長用 Bullet Points 與表格呈現商務企劃書、品牌聯名提案與工作標準作業流程（SOP）。',
+    memory: '主要聯名對象：潮流服飾品牌、時尚運動服飾，目標是達成跨界品牌合作。',
+    templates: [
+      { name: '📋 起草舞蹈工作室與運動品牌聯名企劃案', raw: '撰寫一份 500 字的品牌合作企劃大綱，提議由我們的舞蹈老師穿著該品牌服飾拍攝教學短影片，並在其門市舉辦快閃體驗課。' },
+      { name: '🛠️ 設計「舞蹈教室值班小幫手」SOP', raw: '規劃一份兼職員工或值班小幫手的開門、接待學員、下課收尾流程 SOP 清單。' }
+    ],
+    history: [
+      { timestamp: '上週', title: '教室清潔收尾 SOP 制定', result: '已產出 12 條實用值班核對清單，成功減少了開門備忘失誤。' }
+    ]
+  }
+};
+
+const mockInbox = {
+  'thread-1': {
+    id: 'thread-1',
+    studentName: 'Emma Lin',
+    platform: 'Instagram DM',
+    avatar: '👩‍🦰',
+    snippet: '請問下週三的 Dancehall 入門課還有名額嗎？',
+    studentInfo: { level: '初學入門', attendance: '92%', payment: '已繳費 (本月季卡)', birthday: '08-15', tags: '愛好者, 基礎加強, 積極度高' },
+    previousConversations: [
+      { date: '2026-06-15', snippet: '詢問雷鬼基礎體驗班費用' },
+      { date: '2026-07-02', snippet: '報名完成並預約季卡課程' }
+    ],
+    messages: []
+  },
+  'thread-2': {
+    id: 'thread-2',
+    studentName: 'Leo Chen',
+    platform: 'LINE Chat',
+    avatar: '👨',
+    snippet: '老師，不好意思我今天晚上突然要加班，可能要請假...',
+    studentInfo: { level: '中階進步', attendance: '60% (連續缺席2次)', payment: '已繳費 (一對一包堂剩3堂)', birthday: '11-02', tags: '上班族, 缺席兩次, 時間不穩定' },
+    previousConversations: [
+      { date: '2026-06-20', snippet: '預約一對一私人私教課' },
+      { date: '2026-07-08', snippet: '加班請假一次，已補課完成' }
+    ],
+    messages: []
+  },
+  'thread-3': {
+    id: 'thread-3',
+    studentName: 'Sandy Wang',
+    platform: 'Facebook Messenger',
+    avatar: '👧',
+    snippet: '想諮詢一下一對一私教課怎麼收費？',
+    studentInfo: { level: '全新諮詢', attendance: '0%', payment: '未繳費 (尚未報名)', birthday: '04-20', tags: '潛在客戶, 婚禮排舞需求' },
+    previousConversations: [
+      { date: '2026-07-10', snippet: '首次加好友，瀏覽自動歡迎訊息' }
+    ],
+    messages: []
+  }
+};
+
+const mockAutomationFlows = {
+  'flow-1': {
+    id: 'flow-1',
+    name: 'IG DM 智能自動回覆與 CRM 同步',
+    trigger: 'Instagram 新小盒子私訊',
+    nodes: [
+      { type: 'trigger', text: '📢 當有新 Instagram DM 諮詢' },
+      { type: 'action', text: '🤖 AI 分析對話意圖與學員情緒' },
+      { type: 'action', text: '✍️ 自動調用「Customer Service Agent」擬定草稿' },
+      { type: 'action', text: '👥 自動同步對話摘要至 Student CRM 備忘錄' },
+      { type: 'action', text: '🟢 透過 LINE 向老師發送高優先通知與建議回覆' }
+    ]
+  },
+  'flow-2': {
+    id: 'flow-2',
+    name: '學員缺席關懷與補課提醒流程',
+    trigger: 'CRM 標記學員缺席',
+    nodes: [
+      { type: 'trigger', text: '📅 當 CRM 出席狀態更新為「缺席」' },
+      { type: 'action', text: '🤖 AI 計算該學員連續缺席次數' },
+      { type: 'action', text: '✍️ 調用「Community Manager Agent」產生個人化溫暖關懷語' },
+      { type: 'action', text: '📱 自動於 LINE 發送請假確認與預約補課連結' }
+    ]
+  },
+  'flow-3': {
+    id: 'flow-3',
+    name: '新工作坊報名與金流對帳通知',
+    trigger: '收到工作坊 Webhook 報名',
+    nodes: [
+      { type: 'trigger', text: '💳 當收到報名表單 Webhook 提交' },
+      { type: 'action', text: '🤖 AI 自動比對匯款後五碼與金額' },
+      { type: 'action', text: '👥 CRM 自動將繳費狀態更新為「已繳費」' },
+      { type: 'action', text: '📅 Google 日曆自動同步加入該學員報名格' },
+      { type: 'action', text: '📧 自動發送行前準備 Email 公告' }
+    ]
+  }
+};
+
+const mockFiles = [
+  { name: 'Dancehall_Foundation_SOP.pdf', size: '2.4 MB', type: 'PDF' },
+  { name: '2026_暑期工作坊學員須知_FAQ.docx', size: '1.2 MB', type: 'DOCX' },
+  { name: '品牌調性_Tone_And_Voice_指南.txt', size: '45 KB', type: 'TXT' }
+];
+
+const mockSocialPosts = {};
+
+const mockStudioOutputs = {
+  instagram: {
+    title: 'Instagram Reels',
+    text: `【🎬 IG Reels 短影音劇本】\n\n📌 影片主題：初學者必學 Dancehall 臀部律動技巧\n🔥 3秒黃金Hook: 「跳舞扭屁股總是看起來像肚子痛？因為你用錯發力點了！」\n\n🎥 畫面分鏡：\n1. [0-3s] 老師示範高爆發力的 Wining 動作，搭配節奏雷鬼音樂。\n2. [3-20s] 側面鏡頭拆解：膝蓋彎曲 -> 骨盆向上提拉 -> 後推畫圓。\n3. [20-45s] 正面踩點雷鬼節奏 (One Drop) 慢速到快速。\n\n✍️ 貼文 Caption:\n跳 Dancehall 的性感靈魂來自於臀部律動！Wining 畫圓其實是用核心跟大腿發力喔！這篇快點收藏起來練，這週三晚上課堂我帶你實際踩點節奏！🔥💃\n\n🏷️ Hashtags:\n#dancehall #wining #dancelife #街舞教學 #雷鬼舞蹈 #ReelsChoreo`
+  },
+  tiktok: {
+    title: 'TikTok Video',
+    text: `【🎵 TikTok 影音腳本】\n\n📌 影片主題：3步學會牙買加經典 Wining 律動\n🔥 爆點Hook: 「別再瞎扭了！牙買加雷鬼舞老師教你3步學會最正宗的 Wining 臀部律動！」\n\n🎥 畫面分鏡：\n1. 快速切入：直接把錯誤動作與正確動作放在一起比對 (錯誤: 腰部過度用力 vs 正確: 核心帶動)。\n2. 節奏拆解：拍子1屈膝、拍子2骨盆提起、拍子3順滑畫圓。\n3. 慢速到快速，搭配流行雷鬼背景音。\n\n🏷️ Hashtags:\n#dancehallstyle #winingtutorial #dancer #學跳舞 #街舞教學 #TikTok舞蹈`
+  },
+  facebook: {
+    title: 'Facebook Post',
+    text: `【📘 Facebook 品牌貼文】\n\n📌 影片主題：Dancehall 基礎律動拆解\n\n很多人問我，為什麼雷鬼舞的律動那麼有力量卻又那麼放鬆？\n\n其實，牙買加人的舞蹈靈魂，藏在「重心的下沉」和「核心收縮的變速」裡。今天影片為大家完整分解 Wining 動作中的骨盆發力，不管你是街舞愛好者，還是想雕塑核心的上班族，都非常推薦收藏練習！\n\n🔥 課程報名中：下週三團體課現正招生，雙人同行享85折早鳥特惠！👇\n[點擊報名連結]\n\n🏷️ #dancehall #dancelife #編舞教學 #街舞課 #核心塑形`
+  },
+  threads: {
+    title: 'Threads Topic',
+    text: `【🧵 Threads 熱門討論】\n\n有沒有人也覺得，跳 Dancehall 臀部畫圓（Wining）的時候，最難的不是腰部用不用力，而是你能不能在滿堂的鏡子前面放開自我、不要覺得尷尬？😂\n\n許多學員一開始都卡在心魔，其實大家都在看老師，根本沒人在看你啦！放膽扭下去就對了！\n\n今天晚上課堂見，今晚誰要來？在下面留個 🔥 讓我知道！👇`
+  },
+  youtube: {
+    title: 'YouTube Shorts',
+    text: `【🎥 YouTube Shorts 腳本】\n\n📌 主題：牙買加 Dancehall 基礎律動\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！Dancehall 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」`
+  }
+};
+
+const mockIntegrations = {
+  make: true,
+  n8n: true,
+  zapier: false,
+  webhook: true,
+  gcal: true,
+  notion: false,
+  gsheet: true
+};
+
+// ==========================================
 // Global Event Bus
 // ==========================================
 const EventBus = {
