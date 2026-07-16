@@ -20,22 +20,101 @@ let activeFlowId = 'flow-1';
 let activeSocialView = 'calendar';
 
 // ==========================================
+// Global Dashboard State
+// ==========================================
+const DashboardState = {
+  students: [],
+  courses: [],
+  events: [],
+  sales: [],
+  content: [],
+  messages: [],
+  agentsTasksCount: 0
+};
+
+// ==========================================
+// Dashboard Service (Data Aggregation)
+// ==========================================
+const DashboardService = {
+  calculateStudents() {
+    return DashboardState.students.length;
+  },
+
+  calculateRevenue() {
+    // Sum of all paid orders (status is 'paid' or '已繳費')
+    const paidSales = DashboardState.sales.filter(s => s.status === 'paid' || s.status === '已繳費');
+    return paidSales.reduce((sum, s) => sum + Number(s.amount), 0);
+  },
+
+  calculateEvents() {
+    return DashboardState.events.length;
+  },
+
+  calculateGrowth() {
+    // Compare total revenue of current month (July 2026) vs previous month (June 2026)
+    const thisMonthSales = DashboardState.sales.filter(s => {
+      const date = new Date(s.created_at);
+      return date.getFullYear() === 2026 && date.getMonth() === 6 && (s.status === 'paid' || s.status === '已繳費');
+    });
+    const lastMonthSales = DashboardState.sales.filter(s => {
+      const date = new Date(s.created_at);
+      return date.getFullYear() === 2026 && date.getMonth() === 5 && (s.status === 'paid' || s.status === '已繳費');
+    });
+
+    const thisMonthRev = thisMonthSales.reduce((sum, s) => sum + Number(s.amount), 0);
+    const lastMonthRev = lastMonthSales.reduce((sum, s) => sum + Number(s.amount), 0);
+
+    if (lastMonthRev === 0) {
+      return '--';
+    }
+    const diff = ((thisMonthRev - lastMonthRev) / lastMonthRev) * 100;
+    return (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+  },
+
+  calculateTasks() {
+    return DashboardState.agentsTasksCount;
+  },
+
+  calculateContent() {
+    return DashboardState.content.length;
+  }
+};
+
+// Helper to determine if the user has created anything yet
+function hasNoData() {
+  return DashboardState.students.length === 0 &&
+         DashboardState.courses.length === 0 &&
+         DashboardState.events.length === 0 &&
+         DashboardState.agentsTasksCount === 0;
+}
+
+// Update the Creator Dashboard overlay states
+function updateDashboardUIState() {
+  const loadingEl = document.getElementById('dashboard-loading');
+  const emptyEl = document.getElementById('dashboard-empty');
+  const gridEl = document.getElementById('dashboard-data-grid');
+
+  if (!loadingEl || !emptyEl || !gridEl) return;
+
+  // Always hide loading once data is ready
+  loadingEl.classList.add('hidden');
+
+  if (hasNoData()) {
+    emptyEl.classList.remove('hidden');
+    gridEl.classList.add('hidden');
+  } else {
+    emptyEl.classList.add('hidden');
+    gridEl.classList.remove('hidden');
+
+    // Populate data
+    renderDashboardMetrics();
+    renderDashboardLists();
+  }
+}
+
+// ==========================================
 // Local Cache / Mock Databases
 // ==========================================
-
-// Today's Dashboard Schedules
-const mockSchedules = [
-  { time: '14:00 - 15:30', title: 'Dancehall Foundation', loc: 'Studio A', count: '18 名學員' },
-  { time: '16:00 - 17:30', title: 'Choreography Special', loc: 'Studio B', count: '24 名學員' },
-  { time: '19:00 - 20:30', title: 'Leo Private Lesson', loc: 'VIP Room', count: '1 名學員' }
-];
-
-// Content Creator Tasks
-const mockContentTasks = [
-  { status: 'editing', title: '剪輯上週六 Dancehall Workshop 精彩影片', due: '今日 18:00 前' },
-  { status: 'pending', title: '撰寫今晚排舞教學 Reels 貼文文案', due: '今日 21:00 前' },
-  { status: 'draft', title: 'AI 靈感草稿：初學者如何克服扭臀動作障礙', due: '待審核' }
-];
 
 // AI Agents Catalog
 const mockAgents = {
@@ -93,7 +172,7 @@ const mockAgents = {
     icon: '🔥',
     role: '活動行銷策略顧問',
     desc: '規劃暑期工作坊、品牌促銷、廣告文案與漏斗導流策略，提高課程滿班率。',
-    prompt: '你是一位舞蹈教室的資深行銷總監。你擅長運用促銷心理學設計吸引人的報名方案，並能撰寫出高轉換率的 Landing Page 文案與 FB 廣告文案。',
+    prompt: '你是一位舞蹈教室的資深行銷總監。你擅長運用促銷心理學設計吸引人的報名方案，並能撰寫出高轉換率 of Landing Page 文案與 FB 廣告文案。',
     memory: '即將推廣活動：暑期雙人同行限時 85 折「Dancehall 燃脂特訓工作坊」。',
     templates: [
       { name: '🎯 規劃暑期雙人同行工作坊促銷方案', raw: '為八月的「Dancehall 燃脂工作坊」規劃全套行銷策略，包含早鳥優惠、社群裂變機制。' },
@@ -135,7 +214,7 @@ const mockAgents = {
   }
 };
 
-// Local cache for Student CRM (overwritten by Supabase)
+// Local cache for Student CRM (synced with Supabase)
 let mockStudents = [];
 
 // Local cache for Chat Inbox
@@ -226,19 +305,8 @@ const mockFiles = [
   { name: '品牌調性_Tone_And_Voice_指南.txt', size: '45 KB', type: 'TXT' }
 ];
 
-// Mock Calendar social media posts
-const mockSocialPosts = {
-  '2026-07-13': [
-    { platform: 'Instagram', time: '18:00', title: 'Dancehall排舞精選影片', desc: '週六工作坊高燃排舞片段，搭配 Hook 吸引互動。', plat: 'ig' }
-  ],
-  '2026-07-15': [
-    { platform: 'TikTok', time: '19:00', title: 'Wining臀部基礎教學', desc: '一分鐘內拆解初學者最容易做錯的三個扭臀動作。', plat: 'tiktok' },
-    { platform: 'Threads', time: '21:00', title: '關於排舞的肢體力量討論', desc: '提出「動作爆發力到底來自於核心還是放鬆」話題互動。', plat: 'threads' }
-  ],
-  '2026-07-18': [
-    { platform: 'YouTube Shorts', time: '12:00', title: '老師上課日常趣味側拍', desc: '上課時的NG搞笑互動，拉近與粉絲的距離。', plat: 'youtube' }
-  ]
-};
+// Mock Calendar social media posts (overwritten dynamically from Supabase `content_calendar`)
+const mockSocialPosts = {};
 
 const mockStudioOutputs = {
   instagram: {
@@ -277,6 +345,79 @@ const mockIntegrations = {
 // Supabase Sync Operations
 // ==========================================
 
+async function loadDashboardData() {
+  const loadingEl = document.getElementById('dashboard-loading');
+  const emptyEl = document.getElementById('dashboard-empty');
+  const gridEl = document.getElementById('dashboard-data-grid');
+
+  // Trigger UI loading state
+  if (loadingEl) loadingEl.classList.remove('hidden');
+  if (emptyEl) emptyEl.classList.add('hidden');
+  if (gridEl) gridEl.classList.add('hidden');
+
+  try {
+    const [studentsRes, coursesRes, eventsRes, salesRes, contentRes, messagesRes] = await Promise.all([
+      supabase.from('students').select('*'),
+      supabase.from('courses').select('*'),
+      supabase.from('events').select('*'),
+      supabase.from('sales').select('*'),
+      supabase.from('content_calendar').select('*'),
+      supabase.from('messages').select('*')
+    ]);
+
+    DashboardState.students = studentsRes.data || [];
+    DashboardState.courses = coursesRes.data || [];
+    DashboardState.events = eventsRes.data || [];
+    DashboardState.sales = salesRes.data || [];
+    DashboardState.content = contentRes.data || [];
+    DashboardState.messages = messagesRes.data || [];
+
+    // Recompute total agent tasks count
+    let tasksCount = 0;
+    Object.values(mockAgents).forEach(agent => {
+      if (agent.history) {
+        tasksCount += agent.history.length;
+      }
+    });
+    DashboardState.agentsTasksCount = tasksCount;
+
+    // Keep legacy array updated
+    mockStudents = DashboardState.students;
+
+    // Refresh calendar layout cache from the database contents
+    syncCalendarCacheFromContentState();
+
+    // Rerender depending on tab state
+    updateDashboardUIState();
+  } catch (err) {
+    console.error('Failed to aggregate dashboard state:', err);
+  }
+}
+
+function syncCalendarCacheFromContentState() {
+  Object.keys(mockSocialPosts).forEach(key => delete mockSocialPosts[key]);
+  DashboardState.content.forEach(item => {
+    const dateStr = item.scheduled_time.split(' ')[0] || item.scheduled_time.split('T')[0];
+    let plat = 'ig';
+    if (item.platform === 'TikTok') plat = 'tiktok';
+    else if (item.platform === 'Facebook') plat = 'fb';
+    else if (item.platform === 'Threads') plat = 'threads';
+    else if (item.platform === 'YouTube Shorts') plat = 'youtube';
+
+    if (!mockSocialPosts[dateStr]) {
+      mockSocialPosts[dateStr] = [];
+    }
+
+    mockSocialPosts[dateStr].push({
+      title: item.title,
+      time: item.scheduled_time.split(' ')[1] ? item.scheduled_time.split(' ')[1].substring(0, 5) : '18:00',
+      platform: item.platform,
+      desc: item.description,
+      plat: plat
+    });
+  });
+}
+
 async function fetchStudentsFromSupabase() {
   const { data, error } = await supabase.from('students').select('*').order('name');
   if (error) {
@@ -296,17 +437,16 @@ async function fetchMessagesFromSupabase() {
     return;
   }
   if (data) {
-     // Clear messages cache first
      Object.keys(mockInbox).forEach(key => {
         mockInbox[key].messages = [];
      });
-     
+
      data.forEach(msg => {
         let threadId = 'thread-1';
         if (msg.student_name === 'Emma Lin') threadId = 'thread-1';
         else if (msg.student_name === 'Leo Chen') threadId = 'thread-2';
         else if (msg.student_name === 'Sandy Wang') threadId = 'thread-3';
-        
+
         if (mockInbox[threadId]) {
            mockInbox[threadId].messages.push({
               sender: msg.sender,
@@ -314,35 +454,34 @@ async function fetchMessagesFromSupabase() {
            });
         }
      });
-     
-     // Rerender active thread
+
      selectChatThread(activeChatThreadId);
   }
 }
 
 function subscribeToSupabaseRealtime() {
-  // Realtime subscription for messages
   supabase
-    .channel('messages-live')
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'messages' },
-      (payload) => {
-        fetchMessagesFromSupabase();
-      }
-    )
-    .subscribe();
-
-  // Realtime subscription for students
-  supabase
-    .channel('students-live')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'students' },
-      (payload) => {
-        fetchStudentsFromSupabase();
-      }
-    )
+    .channel('db-changes-global')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+      loadDashboardData();
+      fetchStudentsFromSupabase();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+      loadDashboardData();
+      fetchMessagesFromSupabase();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, () => {
+      loadDashboardData();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
+      loadDashboardData();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => {
+      loadDashboardData();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'content_calendar' }, () => {
+      loadDashboardData();
+    })
     .subscribe();
 }
 
@@ -384,7 +523,7 @@ function switchTab(tabId) {
 
   // Specific tab initializations
   if (tabId === 'dashboard') {
-    renderDashboardLists();
+    loadDashboardData();
   } else if (tabId === 'agents') {
     initAgentsWorkspace();
   } else if (tabId === 'chat') {
@@ -404,45 +543,75 @@ function switchTab(tabId) {
 }
 
 // ==========================================
-// Creator Dashboard Rendering
+// Creator Dashboard Metrics & Lists Rendering
 // ==========================================
 
-function renderDashboardLists() {
-  // Today's Schedules
-  const schedList = document.getElementById('today-schedules');
-  schedList.innerHTML = mockSchedules.map(s => `
-    <li>
-      <span class="badge badge-success" style="font-size:10px; margin-right:4px;">${s.time}</span>
-      <strong>${s.title}</strong>
-      <span class="text-muted" style="margin-left:auto; font-size:11px;">📍 ${s.loc} (${s.count})</span>
-    </li>
-  `).join('');
+function renderDashboardMetrics() {
+  document.getElementById('kpi-students').textContent = `${DashboardService.calculateStudents()} 名`;
 
-  // Content Tasks
+  const rev = DashboardService.calculateRevenue();
+  document.getElementById('kpi-revenue').textContent = `NT$${rev.toLocaleString()}`;
+
+  document.getElementById('kpi-events').textContent = `${DashboardService.calculateEvents()} 場`;
+
+  document.getElementById('kpi-growth').textContent = DashboardService.calculateGrowth();
+}
+
+function renderDashboardLists() {
+  // Real schedules (Courses + Events)
+  const schedList = document.getElementById('today-schedules');
+  if (schedList) {
+    if (DashboardState.courses.length === 0 && DashboardState.events.length === 0) {
+      schedList.innerHTML = '<li class="text-muted text-xs">無排定課程與活動。請點擊下方新增。</li>';
+    } else {
+      const courseHtml = DashboardState.courses.map(c => `
+        <li>
+          <span class="badge badge-success" style="font-size:10px; margin-right:4px;">${c.time_slot}</span>
+          <strong>${c.title}</strong>
+          <span class="text-muted" style="margin-left:auto; font-size:11px;">📍 ${c.location} (${c.student_count} 名學員)</span>
+        </li>
+      `).join('');
+
+      const eventHtml = DashboardState.events.map(e => `
+        <li>
+          <span class="badge badge-primary" style="font-size:10px; margin-right:4px;">${e.date}</span>
+          <strong>${e.title}</strong>
+          <span class="text-muted" style="margin-left:auto; font-size:11px;">📍 ${e.location}</span>
+        </li>
+      `).join('');
+
+      schedList.innerHTML = courseHtml + eventHtml;
+    }
+  }
+
+  // Real scheduled content posts
   const taskList = document.getElementById('today-content-tasks');
-  taskList.innerHTML = mockContentTasks.map(t => {
-    let statEmoji = '📝';
-    if (t.status === 'editing') statEmoji = '🎬';
-    if (t.status === 'draft') statEmoji = '💡';
-    return `
-      <li>
-        <span>${statEmoji}</span>
-        <span>${t.title}</span>
-        <span class="tag-badge" style="margin-left:auto;">${t.due}</span>
-      </li>
-    `;
-  }).join('');
+  if (taskList) {
+    if (DashboardState.content.length === 0) {
+      taskList.innerHTML = '<li class="text-muted text-xs">無排定的社群發布。</li>';
+    } else {
+      taskList.innerHTML = DashboardState.content.map(t => `
+        <li>
+          <span>🎬</span>
+          <strong>[${t.platform}]</strong> ${t.title}
+          <span class="tag-badge" style="margin-left:auto;">${t.scheduled_time.split(' ')[1] ? t.scheduled_time.split(' ')[1].substring(0, 5) : '18:00'}</span>
+        </li>
+      `).join('');
+    }
+  }
 
   // Customer Inbox summary
   const inboxList = document.getElementById('today-inbox-preview');
-  inboxList.innerHTML = Object.values(mockInbox).map(thread => `
-    <li style="cursor:pointer" onclick="switchTab('chat'); selectChatThread('${thread.id}')">
-      <span>${thread.avatar}</span>
-      <strong>${thread.studentName}</strong>
-      <span class="text-muted text-xs" style="margin-left:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">${thread.snippet}</span>
-      <span class="tag-badge badge-primary" style="margin-left:auto; font-size:9px;">${thread.platform}</span>
-    </li>
-  `).join('');
+  if (inboxList) {
+    inboxList.innerHTML = Object.values(mockInbox).map(thread => `
+      <li style="cursor:pointer" onclick="switchTab('chat'); selectChatThread('${thread.id}')">
+        <span>${thread.avatar}</span>
+        <strong>${thread.studentName}</strong>
+        <span class="text-muted text-xs" style="margin-left:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">${thread.snippet}</span>
+        <span class="tag-badge badge-primary" style="margin-left:auto; font-size:9px;">${thread.platform}</span>
+      </li>
+    `).join('');
+  }
 }
 
 // ==========================================
@@ -463,10 +632,9 @@ function initAgentsWorkspace() {
 
 function switchAgent(agentId) {
   activeAgentId = agentId;
-  
-  // Highlight active selector
+
   document.querySelectorAll('.agent-select-btn').forEach(btn => btn.classList.remove('active'));
-  
+
   const agent = mockAgents[agentId];
   if (!agent) return;
 
@@ -476,7 +644,6 @@ function switchAgent(agentId) {
   document.getElementById('active-agent-prompt').value = agent.prompt;
   document.getElementById('active-agent-memory').value = agent.memory;
 
-  // Show/Hide Customer Service specific modifier panel
   const csModifiers = document.getElementById('cs-agent-modifiers');
   if (agentId === 'cs') {
     csModifiers.classList.remove('hidden');
@@ -484,7 +651,6 @@ function switchAgent(agentId) {
     csModifiers.classList.add('hidden');
   }
 
-  // Load templates dropdown
   const templateSelect = document.getElementById('agent-input-template');
   templateSelect.innerHTML = agent.templates.map((t, idx) => `
     <option value="${idx}">${t.name}</option>
@@ -525,24 +691,24 @@ function loadHistoryItem(title, result) {
 function generateAgentOutput() {
   const outputBox = document.getElementById('agent-output-text');
   outputBox.innerHTML = '🤖 AI Agent 正在調用知識庫與 System Prompt 運算中...\n████▒▒▒▒▒▒ 40%';
-  
+
   setTimeout(() => {
     outputBox.innerHTML = '🤖 AI Agent 正在套用個人大腦 Tone & Voice 潤飾中...\n████████▒▒ 80%';
     setTimeout(() => {
       const rawInput = document.getElementById('agent-input-raw').value;
       const agent = mockAgents[activeAgentId];
-      
+
       let finalOutputText = '';
       if (activeAgentId === 'coach') {
         finalOutputText = `【${agent.name} 產出方案】\n\n📌 主題: ${rawInput}\n\n1. 課堂暖身設計 (15 mins):\n   - 呼吸調節與重心沉降配合 (Dancehall 經典 One Drop 踩點準備)。\n   - 髖關節與臀部 Wining 慢速環繞熱身，強化大腿內側肌群與核心穩定性。\n\n2. 基礎動作拆解 (30 mins):\n   - Wining (牙買加臀部畫圓律動) 的三大核心口訣：膝蓋微彎、腹部微收、利用骨盆向上帶起圓弧。\n   - 配合雷鬼樂的 One Drop 和 Steppa 節奏做變速訓練 (60BPM -> 85BPM)。\n\n3. 編舞小品排練 (35 mins):\n   - 結合經典動作的 4 個 Eight Counts 排舞練習。配合 🔥 激情滿點的 Dancehall 音樂，鼓勵同學眼神與面部表情的主動釋放！\n\n4. 課後練習重點與關懷:\n   - 提醒大家對鏡子練習時手部動作配合核心放鬆。\n   - 「跳舞是享受，不要把表情鎖死，給自己一點自信！🔥💃」`;
       } else if (activeAgentId === 'cs') {
         finalOutputText = `【${agent.name} 智能回覆建議】\n\n哈囉！太棒了！🔥 很高興妳對 Dancehall 有興趣！\n\n別擔心！我們的體驗課是專門為完全零基礎的同學設計的喔！課堂上老師會非常詳細地將每一個臀部律動與踏步動作拆解，同學也都是初學者，氣氛非常好、超好玩！大家都可以跟得上喔～💃✨\n\n下週三晚上的課程目前僅剩 3 個名額，體驗課費用單堂是 $450 元。妳跟朋友要不要直接幫妳們保留下週的位置呢？我可以直接幫妳們登記預約喔！❤️`;
       } else if (activeAgentId === 'content') {
-        finalOutputText = `【${agent.name} 社群影音腳本】\n\n🔥 Reels / TikTok 標題: 舞蹈小白必看！3 步學會 Dancehall 最性感臀部律動 Wining！\n\n🎬 [0:00 - 0:05] Hook (吸睛畫面)\n- 視覺: 老師穿著潮流服飾，做一段 5 秒超有爆發力的 Wining 展示，眼神對著鏡頭放電。\n- 口播: 「跳 Dancehall 臀部老是扭得很卡？那是因為你少做了這一步！」\n\n🎬 [0:05 - 0:35] Body (教學步驟拆解)\n- 步驟 1: 膝蓋先微彎，把重心沉下去 (建立地基)。\n- 步驟 2: 想像骨盆在畫圓，而不是腰在扭 (避免腰部受傷)。\n- 步驟 3: 音樂踩點時，每一次畫圓都要對準雷鬼重拍！\n\n🎬 [0:35 - 0:50] Call to Action (互動與轉化)\n- 口播: 「學會了嗎？這週三來教室，我帶你直接用音樂感受！趕快點下方連結報名啦！🔥」\n\n🏷️ 推薦標籤: #dancehall #dancehallteacher #dancelife #街舞教學 #雷鬼舞蹈 #短影音劇本`;
+        finalOutputText = `【${agent.name} 社群影音腳本】\n\n🔥 Reels / TikTok 標題: 舞蹈小白必看！3 步學會 Dancehall 最性感臀部律動 Wining！\n\n🎬 [0:00 - 0:05] Hook (吸睛畫面)\n- 視覺: 老師穿著潮流服飾，做一段 5 秒超有爆發力的 Wining 展示，眼神對著鏡頭放電。\n- 口播: 「跳 Dancehall 臀部老是扭得很卡？那是原因你少做了這一步！」\n\n🎬 [0:05 - 0:35] Body (教學步驟拆解)\n- 步驟 1: 膝蓋先微彎，把重心沉下去 (建立地基)。\n- 步驟 2: 想像骨盆在畫圓，而不是腰在扭 (避免腰部受傷)。\n- 步驟 3: 音樂踩點時，每一次畫圓都要對準雷鬼重拍！\n\n🎬 [0:35 - 0:50] Call to Action (互動與轉化)\n- 口播: 「學會了嗎？這週三來教室，我帶你直接用音樂感受！趕快點下方連結報名啦！🔥」\n\n🏷️ 推薦標籤: #dancehall #dancehallteacher #dancelife #街舞教學 #雷鬼舞蹈 #短影音劇本`;
       } else {
         finalOutputText = `【${agent.name} 輸出結果】\n\n已成功根據：\n「${rawInput}」\n為您生成適配 Dance Creator OS 品牌語氣風格的完整行銷文案及執行 SOP 文案，並包含預設的 #dancehall 標籤。已準備就緒，您可以直接複製使用！`;
       }
-      
+
       outputBox.innerHTML = finalOutputText;
 
       // Add to history list
@@ -552,11 +718,14 @@ function generateAgentOutput() {
         result: finalOutputText
       });
       renderAgentHistory();
+
+      // Trigger automatic refresh of Dashboard metrics on AI task completion
+      DashboardState.agentsTasksCount++;
+      updateDashboardUIState();
     }, 800);
   }, 600);
 }
 
-// Modify output text for Customer Service Agent specifically
 function modifyAgentOutputText(mode) {
   const outputBox = document.getElementById('agent-output-text');
   const currentText = outputBox.textContent;
@@ -601,9 +770,8 @@ function generateStudioScripts() {
   textContent.textContent = '🎬 AI 正在為您串接跨平台發布格式，進行一鍵生成中...';
 
   setTimeout(() => {
-    // Enrich mock texts dynamically
     mockStudioOutputs.instagram.text = `【🎬 IG Reels 短影音劇本】\n\n📌 影片主題：${topic}\n🕺 風格：${style}\n🔥 3秒黃金Hook: 「大家都想跳好${style}，但90%的人動作都做錯了！」\n\n🎥 畫面分鏡：\n1. [0-3s] 配合極富張力的動作點展現 ${topic} 的震撼力。\n2. [3-25s] ${idea || '分步驟細緻拆解動作發力，強調肢體控制'}\n3. [25-50s] 老師帶領學員配合節奏進行實練展示。\n\n✍️ 貼文 Caption:\n今天跟著影片做一次，保證讓你突破舞蹈瓶頸！想要更系統化進步，歡迎點個人檔案連結報名最新的一對一私教班！🔥\n\n🏷️ Hashtags:\n#dancehall #${style.toLowerCase().replace(/\s+/g, '')} #choreo #學跳舞 #影音劇本`;
-    
+
     mockStudioOutputs.tiktok.text = `【🎵 TikTok 短影音腳本】\n\n📌 影片主題：${topic}\n🕺 風格：${style}\n🔥 爆點Hook: 「別再瞎跳了！用這3步做正宗的 ${style} 臀部律動！」\n\n🎥 畫面分鏡：\n1. [0-5s] 錯誤示範對比正確示範，引出痛點。\n2. [5-20s] 重心沉降，發力點特寫 (搭配綠幕箭頭指示)。\n3. [20-40s] 配合當前最火雷鬼樂慢速踩點實操。\n\n🏷️ Hashtags:\n#dancehallstyle #${style.toLowerCase().replace(/\s+/g, '')} #dancer #學跳舞 #TikTok舞蹈`;
 
     mockStudioOutputs.facebook.text = `【📘 Facebook 品牌貼文】\n\n📌 主題：【${style} 行動教學短片】${topic}\n\n各位熱愛跳舞的朋友！\n今天我們為大家帶來正宗的 ${style} 技巧教學。跳舞的性感與力量，往往取決於對重心下沉的掌控度。\n\n很多同學在做 Wining 畫圓時，常因為腰部用錯力而感到卡卡的，甚至容易拉傷。在影片中我們詳細拆解了核心發力的三大核心要訣：\n1. 膝蓋微蹲\n2. 腹部微收\n3. 骨盆向上帶起圓弧\n\n想學習更多？趕快分享這篇文，這週三晚上我們在線下教室帶你伴隨音樂律動！💃🔥\n\n👉 報名連結：[點擊前往約課系統]`;
@@ -618,13 +786,11 @@ function generateStudioScripts() {
 
 function switchStudioPreviewPlatform(platform) {
   activeStudioPlatform = platform;
-  
-  // Update active tab buttons
+
   document.querySelectorAll('.platform-tab').forEach(tab => tab.classList.remove('active'));
   const currentTab = document.getElementById(`stab-${platform}`);
   if (currentTab) currentTab.classList.add('active');
 
-  // Load preview copy
   const data = mockStudioOutputs[platform];
   document.getElementById('studio-mockup-title').textContent = data.title;
   document.getElementById('studio-mockup-text-content').textContent = data.text;
@@ -636,9 +802,35 @@ function copyStudioScriptText() {
   alert('已複製當前平台的影音腳本文案！');
 }
 
-function scheduleStudioScript() {
-  alert('已將此影音腳本儲存為草稿，並同步發送至 Social Media Manager 發布行事曆！');
-  switchTab('social');
+async function scheduleStudioScript() {
+  const title = document.getElementById('studio-topic').value || 'AI 推薦短影音發布';
+  const desc = document.getElementById('studio-mockup-text-content').textContent;
+  const platform = activeStudioPlatform === 'ig' ? 'Instagram' :
+                   activeStudioPlatform === 'tiktok' ? 'TikTok' :
+                   activeStudioPlatform === 'fb' ? 'Facebook' :
+                   activeStudioPlatform === 'threads' ? 'Threads' : 'YouTube Shorts';
+
+  const dateStr = '2026-07-16';
+  const time = '18:00';
+  const scheduled_time = `${dateStr} ${time}:00`;
+
+  // Write new content plan directly to Supabase content_calendar table
+  const { error } = await supabase.from('content_calendar').insert([{
+    title: title,
+    description: desc,
+    platform: platform,
+    scheduled_time: scheduled_time,
+    status: 'scheduled',
+    brand_id: '6cf18857-352f-474e-aaba-1d67f570f23b'
+  }]);
+
+  if (error) {
+    console.error('Error scheduling content post:', error);
+    alert('排程失敗：' + error.message);
+  } else {
+    alert('已將此影音腳本寫入資料庫排程，並同步更新至社群發布行事曆！');
+    switchTab('social');
+  }
 }
 
 // ==========================================
@@ -662,14 +854,12 @@ function initChatInbox() {
 
 function selectChatThread(threadId) {
   activeChatThreadId = threadId;
-  
-  // Highlight active selector
+
   document.querySelectorAll('.chat-thread-item').forEach(item => item.classList.remove('active'));
-  
+
   const thread = mockInbox[threadId];
   if (!thread) return;
 
-  // Render chat messages
   const msgBody = document.getElementById('chat-messages-body');
   msgBody.innerHTML = thread.messages.map(m => `
     <div class="chat-message ${m.sender}">
@@ -677,10 +867,8 @@ function selectChatThread(threadId) {
     </div>
   `).join('');
 
-  // Scroll to bottom
   msgBody.scrollTop = msgBody.scrollHeight;
 
-  // Render CRM mini-card
   document.getElementById('c-name').textContent = thread.studentName;
   document.getElementById('c-level').textContent = thread.studentInfo.level;
   document.getElementById('c-attendance').textContent = thread.studentInfo.attendance;
@@ -688,7 +876,6 @@ function selectChatThread(threadId) {
   document.getElementById('c-birthday').textContent = thread.studentInfo.birthday;
   document.getElementById('c-tags').textContent = thread.studentInfo.tags;
 
-  // Render Previous conversations
   const prevConversationsList = document.getElementById('chat-previous-conversations');
   if (thread.previousConversations) {
     prevConversationsList.innerHTML = thread.previousConversations.map(c => `
@@ -701,7 +888,6 @@ function selectChatThread(threadId) {
     prevConversationsList.innerHTML = '<li>無先前對話記錄</li>';
   }
 
-  // Generate initial recommended reply
   regenerateAICopilotReply();
 }
 
@@ -713,7 +899,6 @@ async function sendUserChatMessage() {
   const thread = mockInbox[activeChatThreadId];
   if (!thread) return;
 
-  // Insert teacher message into Supabase
   const { error } = await supabase.from('messages').insert([{
     student_name: thread.studentName,
     sender: 'teacher',
@@ -728,7 +913,6 @@ async function sendUserChatMessage() {
   inputBox.value = '';
   await fetchMessagesFromSupabase();
 
-  // Mock student response after 1.5 seconds and update Supabase
   setTimeout(async () => {
     await supabase.from('messages').insert([{
       student_name: thread.studentName,
@@ -770,7 +954,7 @@ function modifyCopilotTone(tone) {
   if (currentText.startsWith('🤖')) return;
 
   replyBody.textContent = '🤖 AI 正在調整語氣與字數...';
-  
+
   setTimeout(() => {
     if (tone === 'warmer') {
       replyBody.textContent = `親愛的 ❤️！${currentText.replace('哈囉', '哈囉寶貝').replace('！', '！🥰✨')}`;
@@ -790,8 +974,7 @@ function modifyCopilotTone(tone) {
 
 function switchSocialView(viewName) {
   activeSocialView = viewName;
-  
-  // Update view switcher active buttons
+
   const buttons = ['calendar', 'draft', 'scheduled', 'published', 'analytics'];
   buttons.forEach(btn => {
     const el = document.getElementById(`sbtn-${btn}`);
@@ -813,7 +996,7 @@ function switchSocialView(viewName) {
   } else {
     calendarContainer.classList.add('hidden');
     listContainer.classList.remove('hidden');
-    
+
     if (viewName === 'draft') {
       listTitle.textContent = '📝 Drafts (草稿備忘箱)';
       listBody.innerHTML = `
@@ -822,10 +1005,13 @@ function switchSocialView(viewName) {
       `;
     } else if (viewName === 'scheduled') {
       listTitle.textContent = '⏳ Scheduled (排程等待中)';
-      listBody.innerHTML = `
-        <li>🎬 <strong>[TikTok]</strong> Wining臀部基礎教學 - 週五 19:00 排定發布 <button class="btn btn-danger btn-xs" style="margin-left:auto;">取消排程</button></li>
-        <li>🧵 <strong>[Threads]</strong> 關於肢體爆發力的探討 - 週五 21:00 排定發布 <button class="btn btn-danger btn-xs" style="margin-left:auto;">取消排程</button></li>
-      `;
+      if (DashboardState.content.length === 0) {
+        listBody.innerHTML = '<li>無排定發布內容</li>';
+      } else {
+        listBody.innerHTML = DashboardState.content.map(item => `
+          <li>🎬 <strong>[${item.platform}]</strong> ${item.title} - ${item.scheduled_time} 發布 <button class="btn btn-danger btn-xs" style="margin-left:auto;" onclick="deleteContentPost('${item.id}')">取消排程</button></li>
+        `).join('');
+      }
     } else if (viewName === 'published') {
       listTitle.textContent = '✅ Published (已發布歷史紀錄)';
       listBody.innerHTML = `
@@ -841,12 +1027,25 @@ function switchSocialView(viewName) {
   }
 }
 
+async function deleteContentPost(id) {
+  const { error } = await supabase.from('content_calendar').delete().eq('id', id);
+  if (error) {
+    console.error('Failed to delete content post:', error);
+    alert('取消排程失敗');
+  } else {
+    // loadDashboardData() called automatically via realtime subscription
+    alert('已成功取消排程。');
+  }
+}
+
 // ==========================================
 // Student CRM Database Logic
 // ==========================================
 
 function renderCrmTable() {
   const tbody = document.getElementById('crm-table-body');
+  if (!tbody) return;
+
   tbody.innerHTML = mockStudents.map((s, idx) => {
     let payClass = 'badge-success';
     if (s.payment === '未繳費') payClass = 'badge-warning';
@@ -868,16 +1067,20 @@ function renderCrmTable() {
     `;
   }).join('');
 
-  // Update AI Strategy selector
   const selector = document.getElementById('crm-ai-student-select');
-  selector.innerHTML = mockStudents.map((s, idx) => `
-    <option value="${idx}">${s.name} (${s.level})</option>
-  `).join('');
+  if (selector) {
+    selector.innerHTML = mockStudents.map((s, idx) => `
+      <option value="${idx}">${s.name} (${s.level})</option>
+    `).join('');
+  }
 }
 
 function selectCrmStudent(idx) {
-  document.getElementById('crm-ai-student-select').value = idx;
-  triggerCrmAction('summarize');
+  const selector = document.getElementById('crm-ai-student-select');
+  if (selector) {
+    selector.value = idx;
+    triggerCrmAction('summarize');
+  }
 }
 
 function triggerCrmAction(actionType) {
@@ -944,9 +1147,89 @@ async function saveNewStudent() {
   if (error) {
     console.error('Error saving student to Supabase:', error);
     alert('上報 Supabase 錯誤：' + error.message);
+    return;
+  }
+
+  // Create corresponding transaction invoice in the sales table to dynamically compute Revenue
+  let amount = 0;
+  if (payment === '已繳費') amount = 18000;
+  else if (payment === '體驗票') amount = 450;
+
+  if (amount > 0) {
+    const { error: salesErr } = await supabase.from('sales').insert([{
+      student_name: name,
+      amount: amount,
+      status: 'paid'
+    }]);
+    if (salesErr) console.error('Error saving sales ledger:', salesErr);
+  }
+
+  closeNewStudentModal();
+}
+
+// ==========================================
+// New Course / New Event Modals Handlers
+// ==========================================
+
+function openNewCourseModal() {
+  document.getElementById('new-course-modal').classList.remove('hidden');
+}
+
+function closeNewCourseModal() {
+  document.getElementById('new-course-modal').classList.add('hidden');
+}
+
+async function saveNewCourse() {
+  const title = document.getElementById('nc-title').value;
+  const style = document.getElementById('nc-style').value;
+  const time_slot = document.getElementById('nc-time').value;
+  const location = document.getElementById('nc-location').value;
+  const student_count = Number(document.getElementById('nc-students').value);
+
+  if (!title) {
+    alert('請輸入課程名稱！');
+    return;
+  }
+
+  const { error } = await supabase.from('courses').insert([{
+    title, style, time_slot, location, student_count
+  }]);
+
+  if (error) {
+    console.error('Error saving course to Supabase:', error);
+    alert('儲存失敗：' + error.message);
   } else {
-    closeNewStudentModal();
-    await fetchStudentsFromSupabase();
+    closeNewCourseModal();
+  }
+}
+
+function openNewEventModal() {
+  document.getElementById('new-event-modal').classList.remove('hidden');
+}
+
+function closeNewEventModal() {
+  document.getElementById('new-event-modal').classList.add('hidden');
+}
+
+async function saveNewEvent() {
+  const title = document.getElementById('ne-title').value;
+  const date = document.getElementById('ne-date').value;
+  const location = document.getElementById('ne-location').value;
+
+  if (!title) {
+    alert('請輸入活動名稱！');
+    return;
+  }
+
+  const { error } = await supabase.from('events').insert([{
+    title, date, location
+  }]);
+
+  if (error) {
+    console.error('Error saving event to Supabase:', error);
+    alert('儲存失敗：' + error.message);
+  } else {
+    closeNewEventModal();
   }
 }
 
@@ -972,7 +1255,7 @@ function initAutomations() {
 function selectAutomationFlow(flowId) {
   activeFlowId = flowId;
   document.querySelectorAll('.flow-item').forEach(item => item.classList.remove('active'));
-  
+
   const flow = mockAutomationFlows[flowId];
   if (!flow) return;
 
@@ -1072,7 +1355,6 @@ function queryRagDatabase() {
 // ==========================================
 
 function renderAnalyticsCharts() {
-  // Social growth
   const growthContainer = document.getElementById('analytics-growth-chart');
   const growthData = [
     { label: 'Instagram', val: '80%', display: '+2,450 粉絲' },
@@ -1080,7 +1362,7 @@ function renderAnalyticsCharts() {
     { label: 'Threads', val: '60%', display: '+1,120 粉絲' },
     { label: 'YouTube', val: '45%', display: '+450 訂閱' }
   ];
-  
+
   growthContainer.innerHTML = growthData.map(d => `
     <div class="chart-bar-item">
       <span class="chart-bar-label">${d.label}</span>
@@ -1091,7 +1373,6 @@ function renderAnalyticsCharts() {
     </div>
   `).join('');
 
-  // Business revenue
   const revContainer = document.getElementById('analytics-revenue-chart');
   const revData = [
     { label: '團體團課', val: '75%', display: '$117,000' },
@@ -1116,7 +1397,7 @@ function generateWeeklyAnalyticsReport() {
   reportBody.textContent = '🤖 AI 正在彙整本週社群轉換數據、私教回購率與營業額，產生分析中...';
 
   setTimeout(() => {
-    reportBody.innerHTML = `<h3>📊 Dance Creator OS 週度營運改善建議 (2026/07/14)</h3>
+    reportBody.innerHTML = `<h3>📊 Dance Creator OS 週度營運改善建議 (2026/07/16)</h3>
 <p><b>本週核心觀察：</b>本月團體課報名率已達 85% 歷史新高，但一對一私教課程回購率較上月下滑了 8%。主要原因在於部分學員（如 Leo Chen 等）由於加班頻繁缺席，進而延長了包堂消耗週期。</p>
 
 <h4>💡 本週改善方針：</h4>
@@ -1140,7 +1421,6 @@ function saveSystemSettings() {
   const sop = document.getElementById('set-sop').value;
   const brand = document.getElementById('set-brand').value;
 
-  // Update in-memory configurations
   mockAgents.coach.memory = `舞蹈風格特色：${style}。書寫語氣：${tone}。舞蹈哲學：${philosophy}。`;
   mockAgents.cs.memory = `客戶回覆原則：${service}。教室規則 SOP：${sop}。品牌基本資訊：${brand}`;
 
@@ -1155,30 +1435,28 @@ function renderSocialCalendar() {
   const gridBody = document.getElementById('social-calendar-grid-body');
   const monthYearLabel = document.getElementById('social-calendar-month-year');
   if (!gridBody || !monthYearLabel) return;
-  
+
   gridBody.innerHTML = '';
 
   const months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
   monthYearLabel.textContent = `${currentYear} 年 ${months[currentMonth]}`;
 
-  const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); // 0 is Sunday
+  const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
   let adjustedFirstDay = firstDayIndex - 1;
-  if (adjustedFirstDay < 0) adjustedFirstDay = 6; // Sunday becomes index 6
+  if (adjustedFirstDay < 0) adjustedFirstDay = 6;
 
-  // Empty padding cells
   for (let i = 0; i < adjustedFirstDay; i++) {
     const emptyCell = document.createElement('div');
     emptyCell.className = 'calendar-day empty';
     gridBody.appendChild(emptyCell);
   }
 
-  // Active day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dayCell = document.createElement('div');
     dayCell.className = 'calendar-day';
-    
+
     const dayStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     dayCell.onclick = () => openSocialCalendarDayModal(dayStr, day);
 
@@ -1194,9 +1472,9 @@ function renderSocialCalendar() {
         if (ev.plat === 'ig') platClass = 'ig';
         else if (ev.plat === 'fb') platClass = 'fb';
         else if (ev.plat === 'threads') platClass = 'threads';
-        else if (ev.plat === 'tiktok') platClass = 'threads'; 
-        else if (ev.plat === 'youtube') platClass = 'smart'; 
-        
+        else if (ev.plat === 'tiktok') platClass = 'threads';
+        else if (ev.plat === 'youtube') platClass = 'smart';
+
         evDiv.className = `calendar-event ${platClass}`;
         evDiv.textContent = `[${ev.time}] ${ev.title}`;
         evDiv.title = ev.desc;
@@ -1212,7 +1490,7 @@ function renderSocialCalendar() {
 function openSocialCalendarDayModal(dateStr, dayNum) {
   const modal = document.getElementById('event-modal');
   document.getElementById('modal-day-num').value = dateStr;
-  
+
   const titleInput = document.getElementById('modal-post-title');
   const timeInput = document.getElementById('modal-post-time');
   const platformSelect = document.getElementById('modal-post-platform');
@@ -1240,38 +1518,47 @@ function closeModal() {
   document.getElementById('event-modal').classList.add('hidden');
 }
 
-function saveModalEvent() {
+async function saveModalEvent() {
   const dateStr = document.getElementById('modal-day-num').value;
   const title = document.getElementById('modal-post-title').value;
   const time = document.getElementById('modal-post-time').value;
   const platform = document.getElementById('modal-post-platform').value;
   const desc = document.getElementById('modal-post-desc').value;
 
-  let plat = 'ig';
-  if (platform === 'TikTok') plat = 'tiktok';
-  if (platform === 'Facebook') plat = 'fb';
-  if (platform === 'Threads') plat = 'threads';
-  if (platform === 'YouTube Shorts') plat = 'youtube';
+  const scheduled_time = `${dateStr} ${time}:00`;
 
-  mockSocialPosts[dateStr] = [{ title, time, platform, desc, plat }];
-  closeModal();
-  if (activeSocialView === 'calendar') {
-    renderSocialCalendar();
+  // Write new content plan directly to Supabase content_calendar table
+  const { error } = await supabase.from('content_calendar').insert([{
+    title: title,
+    description: desc,
+    platform: platform,
+    scheduled_time: scheduled_time,
+    status: 'scheduled',
+    brand_id: '6cf18857-352f-474e-aaba-1d67f570f23b'
+  }]);
+
+  if (error) {
+    console.error('Error saving post:', error);
+    alert('排程失敗：' + error.message);
   } else {
-    switchSocialView(activeSocialView);
+    closeModal();
   }
 }
 
-function deleteModalEvent() {
+async function deleteModalEvent() {
   const dateStr = document.getElementById('modal-day-num').value;
-  if (mockSocialPosts[dateStr]) {
-    delete mockSocialPosts[dateStr];
-  }
-  closeModal();
-  if (activeSocialView === 'calendar') {
-    renderSocialCalendar();
+  // Find the event item in DashboardState.content on this day
+  const item = DashboardState.content.find(c => c.scheduled_time.startsWith(dateStr));
+  if (item) {
+    const { error } = await supabase.from('content_calendar').delete().eq('id', item.id);
+    if (error) {
+      console.error('Failed to delete post:', error);
+      alert('刪除排程失敗');
+    } else {
+      closeModal();
+    }
   } else {
-    switchSocialView(activeSocialView);
+    closeModal();
   }
 }
 
@@ -1286,7 +1573,6 @@ function prevMonth() {
   }
 }
 
-// Next Month
 function nextMonth() {
   currentMonth++;
   if (currentMonth > 11) {
@@ -1332,11 +1618,12 @@ function quickAction(actionId) {
 // Page Load Initializer
 // ==========================================
 window.addEventListener('DOMContentLoaded', async () => {
+  // Trigger initial Dashboard load
   switchTab('dashboard');
-  
+
   // Realtime subscriptions
   subscribeToSupabaseRealtime();
-  
+
   // Fetch initial data from live Supabase instance
   await fetchStudentsFromSupabase();
   await fetchMessagesFromSupabase();
@@ -1364,6 +1651,12 @@ window.triggerCrmAction = triggerCrmAction;
 window.openNewStudentModal = openNewStudentModal;
 window.closeNewStudentModal = closeNewStudentModal;
 window.saveNewStudent = saveNewStudent;
+window.openNewCourseModal = openNewCourseModal;
+window.closeNewCourseModal = closeNewCourseModal;
+window.saveNewCourse = saveNewCourse;
+window.openNewEventModal = openNewEventModal;
+window.closeNewEventModal = closeNewEventModal;
+window.saveNewEvent = saveNewEvent;
 window.selectAutomationFlow = selectAutomationFlow;
 window.toggleIntegration = toggleIntegration;
 window.triggerTestWorkflowRun = triggerTestWorkflowRun;

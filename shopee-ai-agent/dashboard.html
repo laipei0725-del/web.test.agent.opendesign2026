@@ -123,34 +123,56 @@
         
         <!-- =================== 1. CREATOR DASHBOARD =================== -->
         <section class="tab-content active" id="tab-dashboard">
-          <div class="dashboard-grid">
+          <!-- Loading State Overlay -->
+          <div class="dashboard-loading-overlay" id="dashboard-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading dashboard...</p>
+          </div>
+
+          <!-- Empty State View -->
+          <div class="dashboard-empty-state hidden" id="dashboard-empty">
+            <div class="empty-state-card glass-card">
+              <span class="empty-icon">📂</span>
+              <h3>No data yet</h3>
+              <p>Start by creating your first student, course, event, or AI Agent task to populate the dashboard metrics.</p>
+              <div class="empty-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="openNewStudentModal()">👥 Create Student</button>
+                <button class="btn btn-secondary" onclick="openNewCourseModal()">📚 Create Course</button>
+                <button class="btn btn-secondary" onclick="openNewEventModal()">📅 Create Event</button>
+                <button class="btn btn-secondary" onclick="switchTab('agents')">🤖 Configure AI Agent</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real Data Grid -->
+          <div class="dashboard-grid hidden" id="dashboard-data-grid">
             <!-- Business Overview Rows -->
             <div class="kpi-row">
               <div class="glass-card kpi-card">
                 <span class="kpi-icon">👥</span>
                 <div class="kpi-data">
-                  <span class="kpi-num" id="kpi-students">124 名</span>
+                  <span class="kpi-num" id="kpi-students">0</span>
                   <span class="kpi-label">學員總數 (Students)</span>
                 </div>
               </div>
               <div class="glass-card kpi-card">
                 <span class="kpi-icon">💰</span>
                 <div class="kpi-data">
-                  <span class="kpi-num" id="kpi-revenue">$156,000</span>
+                  <span class="kpi-num" id="kpi-revenue">NT$0</span>
                   <span class="kpi-label">營業收入 (Revenue)</span>
                 </div>
               </div>
               <div class="glass-card kpi-card">
                 <span class="kpi-icon">📅</span>
                 <div class="kpi-data">
-                  <span class="kpi-num">12 場</span>
+                  <span class="kpi-num" id="kpi-events">0</span>
                   <span class="kpi-label">排定課程與活動 (Events)</span>
                 </div>
               </div>
               <div class="glass-card kpi-card">
                 <span class="kpi-icon">📈</span>
                 <div class="kpi-data">
-                  <span class="kpi-num" id="kpi-growth">+14.2%</span>
+                  <span class="kpi-num" id="kpi-growth">--</span>
                   <span class="kpi-label">本月增長率 (Growth)</span>
                 </div>
               </div>
@@ -907,6 +929,70 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeNewStudentModal()">取消</button>
         <button class="btn btn-primary" onclick="saveNewStudent()">💾 儲存學員</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Course Modal -->
+  <div class="modal-overlay hidden" id="new-course-modal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>新增課程資料</h3>
+        <button class="btn btn-icon" onclick="closeNewCourseModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="nc-title">課程名稱</label>
+          <input type="text" id="nc-title" class="form-control" placeholder="例如：Dancehall Foundation...">
+        </div>
+        <div class="form-group">
+          <label for="nc-style">舞蹈風格</label>
+          <input type="text" id="nc-style" class="form-control" value="Dancehall">
+        </div>
+        <div class="form-group">
+          <label for="nc-time">上課時段</label>
+          <input type="text" id="nc-time" class="form-control" value="14:00 - 15:30">
+        </div>
+        <div class="form-group">
+          <label for="nc-location">教室位置</label>
+          <input type="text" id="nc-location" class="form-control" value="Studio A">
+        </div>
+        <div class="form-group">
+          <label for="nc-students">預估學員人數</label>
+          <input type="number" id="nc-students" class="form-control" value="15">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeNewCourseModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveNewCourse()">💾 儲存課程</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Event Modal -->
+  <div class="modal-overlay hidden" id="new-event-modal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>新增活動/工作坊資料</h3>
+        <button class="btn btn-icon" onclick="closeNewEventModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="ne-title">活動名稱</label>
+          <input type="text" id="ne-title" class="form-control" placeholder="例如：Dancehall 燃脂特訓工作坊...">
+        </div>
+        <div class="form-group">
+          <label for="ne-date">活動日期</label>
+          <input type="date" id="ne-date" class="form-control" value="2026-07-19">
+        </div>
+        <div class="form-group">
+          <label for="ne-location">活動地點</label>
+          <input type="text" id="ne-location" class="form-control" value="Studio A">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeNewEventModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveNewEvent()">💾 儲存活動</button>
       </div>
     </div>
   </div>

@@ -2188,3 +2188,68 @@ body {
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
+/* Creator Dashboard - Loading & Empty States */
+.dashboard-loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 20px;
+  background: rgba(15, 15, 18, 0.4);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  min-height: 400px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.05);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dashboard-empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  min-height: 400px;
+}
+
+.empty-state-card {
+  max-width: 500px;
+  text-align: center;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.empty-state-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.empty-state-card p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+
