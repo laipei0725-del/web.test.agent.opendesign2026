@@ -6,7 +6,23 @@
 let globalConsoleErrors = [];
 const originalConsoleError = console.error;
 console.error = function(...args) {
-  globalConsoleErrors.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+  globalConsoleErrors.push(args.map(a => {
+    if (a instanceof Error) {
+      return `${a.name}: ${a.message}\n${a.stack}`;
+    }
+    if (a && typeof a === 'object') {
+      try {
+        // If it's an object with message/status/error properties (like Supabase API error responses)
+        if (a.message || a.error_description || a.error || a.code) {
+          return `${a.name || 'Error'} [Code: ${a.code || 'N/A'}]: ${a.message || a.error_description || a.error}\n${JSON.stringify(a)}`;
+        }
+        return JSON.stringify(a);
+      } catch (e) {
+        return String(a);
+      }
+    }
+    return String(a);
+  }).join(' '));
   originalConsoleError.apply(console, args);
 };
 
