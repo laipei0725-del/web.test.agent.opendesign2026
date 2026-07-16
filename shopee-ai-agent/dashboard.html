@@ -885,12 +885,28 @@
                 <textarea id="set-brand" class="form-control" rows="2">品牌名稱為「Dance Creator OS / Dancehall Hub」。致力於推廣牙買加雷鬼舞及街頭排舞文化，提供最高質感的線下排舞課與工作坊。</textarea>
               </div>
 
-              <div class="form-group">
-                <label for="set-api-key">OpenAI / Supabase API 密鑰 (安全模擬)</label>
-                <input type="password" id="set-api-key" class="form-control" value="sk-proj-••••••••••••••••••••••••">
+              <div class="form-group" style="margin-top: 24px; border-top: 1px solid var(--border-subtle); padding-top: 24px;">
+                <label style="font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                  🎨 System Theme Color (系統底色主題切換)
+                </label>
+                <p class="section-intro" style="margin-bottom: 12px; font-size: 13px;">在「黑色模式（暗夜星空）」、「白色模式（簡約亮白）」與「藍色模式（霓虹海洋）」之間切換，讓整體畫面更符合您的個人風格。</p>
+                <div class="theme-options-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px;">
+                  <button class="theme-option-btn dark" onclick="switchTheme('dark')" style="background: #090710; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all var(--transition-fast);">
+                    <span style="font-size: 20px;">🌌</span>
+                    <span style="font-size: 13px;">黑色模式</span>
+                  </button>
+                  <button class="theme-option-btn light" onclick="switchTheme('light')" style="background: #F4F4F9; color: #090710; border: 1px solid rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all var(--transition-fast);">
+                    <span style="font-size: 20px;">☀️</span>
+                    <span style="font-size: 13px;">白色模式</span>
+                  </button>
+                  <button class="theme-option-btn blue" onclick="switchTheme('blue')" style="background: #0B1E36; color: #5FFBF1; border: 1px solid rgba(95,251,241,0.15); padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all var(--transition-fast);">
+                    <span style="font-size: 20px;">🌊</span>
+                    <span style="font-size: 13px;">藍色模式</span>
+                  </button>
+                </div>
               </div>
 
-              <button class="btn btn-primary" onclick="saveSystemSettings()">💾 Save Settings (寫入個人 AI 大腦)</button>
+              <button class="btn btn-primary" onclick="saveSystemSettings()" style="margin-top: 20px;">💾 Save Settings (寫入個人 AI 大腦)</button>
             </div>
           </div>
         </section>

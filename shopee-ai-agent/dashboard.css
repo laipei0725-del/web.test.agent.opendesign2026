@@ -2354,5 +2354,163 @@ body {
   color: var(--text-muted);
 }
 
+/* ==========================================
+   Theme Switching Support
+   ========================================== */
+
+/* Default Dark Theme variables and styles */
+body.theme-dark {
+  --bg-app: #090710;
+  --bg-sidebar: rgba(14, 11, 23, 0.7);
+  --bg-card: rgba(28, 24, 46, 0.45);
+  --bg-card-hover: rgba(42, 36, 68, 0.65);
+  --border-glow: rgba(134, 168, 231, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --text-main: #F2F1F8;
+  --text-muted: #9C99A8;
+  --text-link: #5FFBF1;
+  --color-primary: #86A8E7;
+  --color-primary-glow: rgba(134, 168, 231, 0.3);
+  --color-accent: #5FFBF1;
+}
+body.theme-dark {
+  background-image: 
+    radial-gradient(circle at 85% 0%, rgba(95, 251, 241, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 15% 95%, rgba(209, 107, 165, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(134, 168, 231, 0.05) 0%, transparent 60%);
+}
+
+/* Light Theme overrides */
+body.theme-light {
+  --bg-app: #FAF9FD; 
+  --bg-sidebar: rgba(238, 235, 246, 0.85); 
+  --bg-card: rgba(255, 255, 255, 0.82); 
+  --bg-card-hover: rgba(255, 255, 255, 0.98);
+  --border-glow: rgba(134, 168, 231, 0.15);
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --text-main: #1C192E; 
+  --text-muted: #6C6885; 
+  --text-link: #86A8E7;
+  --color-primary: #86A8E7;
+  --color-primary-glow: rgba(134, 168, 231, 0.2);
+  --color-accent: #D16BA5; 
+}
+body.theme-light {
+  background-image: 
+    radial-gradient(circle at 85% 0%, rgba(95, 251, 241, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 15% 95%, rgba(209, 107, 165, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(134, 168, 231, 0.02) 0%, transparent 65%);
+}
+body.theme-light .glass-card, 
+body.theme-light .metric-card, 
+body.theme-light .list-card, 
+body.theme-light .detail-card, 
+body.theme-light .chat-thread-card {
+  box-shadow: 0 8px 24px 0 rgba(142, 142, 142, 0.06);
+}
+body.theme-light .nav-btn:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+  color: var(--text-main);
+}
+body.theme-light .form-control {
+  background-color: rgba(0, 0, 0, 0.025) !important;
+  color: #1C192E !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+body.theme-light .form-control:focus {
+  border-color: #86A8E7 !important;
+  background-color: #FFFFFF !important;
+}
+body.theme-light .btn-secondary {
+  background-color: rgba(0, 0, 0, 0.025) !important;
+  color: #1C192E !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+body.theme-light .sidebar {
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+body.theme-light .card-title,
+body.theme-light h1,
+body.theme-light h2,
+body.theme-light h3,
+body.theme-light h4 {
+  color: #1C192E !important;
+}
+body.theme-light .settings-panel-card p {
+  color: #6C6885 !important;
+}
+body.theme-light .agent-status-card {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.theme-light .quick-action-btn {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #1C192E;
+}
+body.theme-light .crm-detail-layout {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1C192E;
+}
+body.theme-light .crm-detail-layout .btn {
+  color: #1C192E;
+}
+body.theme-light .crm-detail-layout .btn-primary {
+  color: #090710 !important;
+}
+body.theme-light .crm-row:hover {
+  background-color: rgba(0, 0, 0, 0.015);
+}
+body.theme-light .chat-inbox-sidebar,
+body.theme-light .chat-messages-container,
+body.theme-light .chat-detail-sidebar {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+body.theme-light .chat-bubble.student {
+  background: #E8E7FC;
+  color: #1C192E;
+}
+body.theme-light .chat-bubble.teacher {
+  background: #F0EFF5;
+  color: #1C192E;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.theme-light .flow-node {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #1C192E;
+}
+
+/* Blue Theme overrides */
+body.theme-blue {
+  --bg-app: #050d18; 
+  --bg-sidebar: rgba(9, 21, 39, 0.75); 
+  --bg-card: rgba(13, 30, 56, 0.55); 
+  --bg-card-hover: rgba(19, 42, 78, 0.7);
+  --border-glow: rgba(95, 251, 241, 0.25);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --text-main: #E2F1FD; 
+  --text-muted: #7D94B8; 
+  --text-link: #5FFBF1;
+  --color-primary: #1E88E5; 
+  --color-primary-glow: rgba(30, 136, 229, 0.35);
+  --color-accent: #5FFBF1;
+}
+body.theme-blue {
+  background-image: 
+    radial-gradient(circle at 85% 0%, rgba(95, 251, 241, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 15% 95%, rgba(30, 136, 229, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(95, 251, 241, 0.05) 0%, transparent 60%);
+}
+body.theme-blue .glass-card, 
+body.theme-blue .metric-card, 
+body.theme-blue .list-card, 
+body.theme-blue .detail-card, 
+body.theme-blue .chat-thread-card {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+
 
 

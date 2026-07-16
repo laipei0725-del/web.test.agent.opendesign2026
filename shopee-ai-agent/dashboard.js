@@ -1680,6 +1680,114 @@ function initAutomations() {
   selectAutomationFlow(activeFlowId);
 }
 
+// Theme Switcher Functions
+function switchTheme(themeName) {
+  const body = document.body;
+  body.className = `theme-${themeName}`;
+  
+  // Remove active state from all theme option buttons
+  document.querySelectorAll('.theme-option-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.outline = 'none';
+    if (themeName === 'light') {
+       btn.style.border = '1px solid rgba(0,0,0,0.15)';
+    } else {
+       btn.style.border = '1px solid rgba(255,255,255,0.15)';
+    }
+  });
+  
+  // Add active state to selected button
+  const selectedBtn = document.querySelector(`.theme-option-btn.${themeName}`);
+  if (selectedBtn) {
+    selectedBtn.classList.add('active');
+    if (themeName === 'light') {
+      selectedBtn.style.border = '2px solid #86a8e7';
+      selectedBtn.style.outline = '2px solid rgba(134,168,231,0.2)';
+    } else if (themeName === 'blue') {
+      selectedBtn.style.border = '2px solid #5ffbf1';
+      selectedBtn.style.outline = '2px solid rgba(95,251,241,0.2)';
+    } else {
+      selectedBtn.style.border = '2px solid rgba(255,255,255,0.6)';
+      selectedBtn.style.outline = '2px solid rgba(255,255,255,0.1)';
+    }
+  }
+  
+  // Save preference to localStorage
+  localStorage.setItem('dance-creator-theme', themeName);
+}
+
+function initThemePreference() {
+  const savedTheme = localStorage.getItem('dance-creator-theme') || 'dark';
+  switchTheme(savedTheme);
+}
+
+// Page Load Initializer
+// ==========================================
+window.addEventListener('DOMContentLoaded', async () => {
+  // Initialize Theme Preference
+  initThemePreference();
+
+  // Initialize Global Event Bus listeners for reactive dashboard rendering
+  initEventBusListeners();
+
+  // Switch to Dashboard (will trigger async module loads & UI render)
+  switchTab('dashboard');
+
+  // Supabase Realtime Change Listener Setup
+  subscribeToSupabaseRealtime();
+
+  // Load chat messages
+  await fetchMessagesFromSupabase();
+});
+
+// Expose all functions to global window scope to prevent Vite tree-shaking
+window.switchTab = switchTab;
+window.quickAction = quickAction;
+window.switchAgent = switchAgent;
+window.onAgentTemplateChange = onAgentTemplateChange;
+window.generateAgentOutput = generateAgentOutput;
+window.modifyAgentOutputText = modifyAgentOutputText;
+window.copyAgentOutputText = copyAgentOutputText;
+window.generateStudioScripts = generateStudioScripts;
+window.switchStudioPreviewPlatform = switchStudioPreviewPlatform;
+window.copyStudioScriptText = copyStudioScriptText;
+window.scheduleStudioScript = scheduleStudioScript;
+window.selectChatThread = selectChatThread;
+window.sendUserChatMessage = sendUserChatMessage;
+window.regenerateAICopilotReply = regenerateAICopilotReply;
+window.applyCopilotReply = applyCopilotReply;
+window.modifyCopilotTone = modifyCopilotTone;
+window.selectCrmStudent = selectCrmStudent;
+window.triggerCrmAction = triggerCrmAction;
+window.openNewStudentModal = openNewStudentModal;
+window.closeNewStudentModal = closeNewStudentModal;
+window.saveNewStudent = saveNewStudent;
+window.openNewCourseModal = openNewCourseModal;
+window.closeNewCourseModal = closeNewCourseModal;
+window.saveNewCourse = saveNewCourse;
+window.openNewEventModal = openNewEventModal;
+window.closeNewEventModal = closeNewEventModal;
+window.saveNewEvent = saveNewEvent;
+window.selectAutomationFlow = selectAutomationFlow;
+window.toggleIntegration = toggleIntegration;
+window.triggerTestWorkflowRun = triggerTestWorkflowRun;
+window.triggerFileInputClick = triggerFileInputClick;
+window.handleMockFileUpload = handleMockFileUpload;
+window.queryRagDatabase = queryRagDatabase;
+window.generateWeeklyAnalyticsReport = generateWeeklyAnalyticsReport;
+window.saveSystemSettings = saveSystemSettings;
+window.prevMonth = prevMonth;
+window.nextMonth = nextMonth;
+window.closeModal = closeModal;
+window.saveModalEvent = saveModalEvent;
+window.deleteModalEvent = deleteModalEvent;
+window.switchSocialView = switchSocialView;
+window.loadHistoryItem = loadHistoryItem;
+window.toggleNotificationCenter = toggleNotificationCenter;
+window.markAllNotificationsRead = markAllNotificationsRead;
+window.retryLoadDashboard = retryLoadDashboard;
+window.switchTheme = switchTheme;
+
 function selectAutomationFlow(flowId) {
   activeFlowId = flowId;
   document.querySelectorAll('.flow-item').forEach(item => item.classList.remove('active'));
