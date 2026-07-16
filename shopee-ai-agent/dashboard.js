@@ -1717,7 +1717,7 @@ function switchTheme(themeName) {
 }
 
 function initThemePreference() {
-  const savedTheme = localStorage.getItem('dance-creator-theme') || 'dark';
+  const savedTheme = localStorage.getItem('dance-creator-theme') || 'light';
   switchTheme(savedTheme);
 }
 
