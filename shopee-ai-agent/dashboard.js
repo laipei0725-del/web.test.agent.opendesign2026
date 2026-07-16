@@ -2,6 +2,24 @@
 // Dance Creator OS - SaaS Architecture Core
 // ==========================================
 
+// Global Error Catch for UI Display
+let globalConsoleErrors = [];
+const originalConsoleError = console.error;
+console.error = function(...args) {
+  globalConsoleErrors.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+  originalConsoleError.apply(console, args);
+};
+
+window.addEventListener('error', function(event) {
+  globalConsoleErrors.push(`[Runtime Error] ${event.message} at ${event.filename}:${event.lineno}`);
+});
+
+window.addEventListener('unhandledrejection', function(event) {
+  const reason = event.reason;
+  globalConsoleErrors.push(`[Promise Rejection] ${reason?.stack || reason?.message || reason}`);
+});
+
+
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase Client
@@ -489,13 +507,19 @@ async function loadDashboardData() {
       errorEl.classList.remove('hidden');
       const descEl = errorEl.querySelector('p');
       if (descEl) {
-        descEl.innerHTML = `An error occurred while connecting to the database modules.<br><br>
-        <div style="background: rgba(248, 208, 110, 0.1); border: 1px solid rgba(248, 208, 110, 0.3); padding: 12px; border-radius: 6px; margin-top: 10px; text-align: left; font-size: 13px; line-height: 1.5; color: #F8D06E; max-width: 450px; margin-left: auto; margin-right: auto;">
-          <strong>⚠️ 偵測到瀏覽器連線阻擋 (Connection Blocked)：</strong><br>
-          您電腦的網路連線正常，但 Chrome 瀏覽器拒絕了資料庫請求。<br>
-          這通常是因為您啟用了 <strong>AdBlock / uBlock Origin</strong> 等廣告攔截外掛。<br><br>
-          <strong>💡 解決方法 (Resolution)：</strong><br>
-          請點選您瀏覽器右上角的 <strong>AdBlock 紅色圖標</strong>，選擇「<strong>在此網站上暫停 / Pause on this site</strong>」，然後重新整理網頁或點選下方按鈕重試即可！
+        // Collect errors to display
+        const errLogs = globalConsoleErrors.length > 0 
+          ? `<pre style="background: rgba(0,0,0,0.6); color: #FF6666; padding: 12px; border-radius: 6px; font-family: monospace; text-align: left; font-size: 11px; overflow-x: auto; margin-top: 10px; border: 1px solid rgba(255,0,0,0.2); max-height: 150px; white-space: pre-wrap; word-break: break-all;">${globalConsoleErrors.join('\n')}</pre>` 
+          : `<pre style="background: rgba(0,0,0,0.6); color: #FF6666; padding: 12px; border-radius: 6px; font-family: monospace; text-align: left; font-size: 11px; overflow-x: auto; margin-top: 10px; border: 1px solid rgba(255,0,0,0.2); white-space: pre-wrap; word-break: break-all;">${err.stack || err.message || err}</pre>`;
+
+        descEl.innerHTML = `An error occurred while connecting to the database modules.<br>
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 6px; margin-top: 10px; text-align: left; font-size: 13px; line-height: 1.5; color: #E0E0E0; max-width: 550px; margin-left: auto; margin-right: auto;">
+          <strong>🔍 系統偵測到以下錯誤日誌 (Debug Logs)：</strong><br>
+          ${errLogs}
+          <br>
+          <strong>💡 疑難排解 (Troubleshooting)：</strong><br>
+          1. 若顯示 <code>TypeError: Failed to fetch</code>，代表您瀏覽器的<strong>廣告攔截器（如 AdBlock / uBlock）</strong>或安全軟體/防火牆擋住了與 Supabase 的連線，請點選攔截器圖標並設為排除/白名單。<br>
+          2. 請確認網路是否穩定連線。
         </div>`;
       }
     }
