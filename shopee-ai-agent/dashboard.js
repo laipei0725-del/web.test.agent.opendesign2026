@@ -485,7 +485,20 @@ async function loadDashboardData() {
     failedToLoadDashboard = true;
 
     if (loadingEl) loadingEl.classList.add('hidden');
-    if (errorEl) errorEl.classList.remove('hidden');
+    if (errorEl) {
+      errorEl.classList.remove('hidden');
+      const descEl = errorEl.querySelector('p');
+      if (descEl) {
+        descEl.innerHTML = `An error occurred while connecting to the database modules.<br><br>
+        <div style="background: rgba(248, 208, 110, 0.1); border: 1px solid rgba(248, 208, 110, 0.3); padding: 12px; border-radius: 6px; margin-top: 10px; text-align: left; font-size: 13px; line-height: 1.5; color: #F8D06E; max-width: 450px; margin-left: auto; margin-right: auto;">
+          <strong>⚠️ 偵測到瀏覽器連線阻擋 (Connection Blocked)：</strong><br>
+          您電腦的網路連線正常，但 Chrome 瀏覽器拒絕了資料庫請求。<br>
+          這通常是因為您啟用了 <strong>AdBlock / uBlock Origin</strong> 等廣告攔截外掛。<br><br>
+          <strong>💡 解決方法 (Resolution)：</strong><br>
+          請點選您瀏覽器右上角的 <strong>AdBlock 紅色圖標</strong>，選擇「<strong>在此網站上暫停 / Pause on this site</strong>」，然後重新整理網頁或點選下方按鈕重試即可！
+        </div>`;
+      }
+    }
   }
 }
 
