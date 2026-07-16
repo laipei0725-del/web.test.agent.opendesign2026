@@ -1,5 +1,5 @@
 // ==========================================
-// Dance Creator OS - Core Application Logic
+// Dance Creator OS - SaaS Architecture Core
 // ==========================================
 
 import { createClient } from '@supabase/supabase-js';
@@ -20,383 +20,401 @@ let activeFlowId = 'flow-1';
 let activeSocialView = 'calendar';
 
 // ==========================================
-// Global Dashboard State
+// Global Event Bus
 // ==========================================
-const DashboardState = {
-  students: [],
-  courses: [],
-  events: [],
-  sales: [],
-  content: [],
-  messages: [],
-  agentsTasksCount: 0
+const EventBus = {
+  listeners: {},
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  },
+  emit(event, data) {
+    console.log(`[EventBus] Emit: ${event}`, data);
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(cb => cb(data));
+    }
+    // Automatically trigger dashboard calculations refresh on any event
+    if (event !== 'dashboard.refresh') {
+      this.emit('dashboard.refresh', data);
+    }
+  }
 };
 
 // ==========================================
-// Dashboard Service (Data Aggregation)
+// Global Application State (AppState)
+// ==========================================
+const AppState = {
+  students: [],
+  courses: [],
+  events: [],
+  payments: [],
+  contents: [],
+  customers: [],
+  aiTasks: [],
+  notifications: [],
+  analytics: {},
+  settings: {}
+};
+
+// ==========================================
+// Decoupled SaaS Modules
+// ==========================================
+
+const StudentModule = {
+  async load() {
+    const { data, error } = await supabase.from('students').select('*').order('name');
+    if (error) throw error;
+    AppState.students = data || [];
+  },
+  async create(student) {
+    const { data, error } = await supabase.from('students').insert([student]).select();
+    if (error) throw error;
+    EventBus.emit('student.created', data[0]);
+    
+    // Auto-create notification
+    await NotificationModule.createNotification({
+      title: '👥 新學員註冊 (New Registration)',
+      message: `學員 ${data[0].name} 已加入 ${data[0].style} 課程。`,
+      type: 'registration'
+    });
+    return data[0];
+  },
+  async update(id, updates) {
+    const { data, error } = await supabase.from('students').update(updates).eq('id', id).select();
+    if (error) throw error;
+    EventBus.emit('student.updated', data[0]);
+    return data[0];
+  },
+  async delete(id) {
+    const { error } = await supabase.from('students').delete().eq('id', id);
+    if (error) throw error;
+    EventBus.emit('student.deleted', id);
+  }
+};
+
+const CourseModule = {
+  async load() {
+    const { data, error } = await supabase.from('courses').select('*').order('title');
+    if (error) throw error;
+    AppState.courses = data || [];
+  },
+  async create(course) {
+    const { data, error } = await supabase.from('courses').insert([course]).select();
+    if (error) throw error;
+    EventBus.emit('course.created', data[0]);
+    
+    await NotificationModule.createNotification({
+      title: '📚 開立新課程 (New Course)',
+      message: `已建立新編舞課程: "${data[0].title}"。`,
+      type: 'class'
+    });
+    return data[0];
+  }
+};
+
+const EventModule = {
+  async load() {
+    const { data, error } = await supabase.from('events').select('*').order('date');
+    if (error) throw error;
+    AppState.events = data || [];
+  },
+  async create(evt) {
+    const { data, error } = await supabase.from('events').insert([evt]).select();
+    if (error) throw error;
+    EventBus.emit('event.created', data[0]);
+
+    await NotificationModule.createNotification({
+      title: '📅 建立新活動 (New Event)',
+      message: `已安排新工作坊/活動: "${data[0].title}"。`,
+      type: 'class'
+    });
+    return data[0];
+  }
+};
+
+const FinanceModule = {
+  async load() {
+    const { data, error } = await supabase.from('sales').select('*').order('created_at');
+    if (error) throw error;
+    AppState.payments = data || [];
+  },
+  async createPayment(payment) {
+    const { data, error } = await supabase.from('sales').insert([payment]).select();
+    if (error) throw error;
+    EventBus.emit('payment.completed', data[0]);
+
+    await NotificationModule.createNotification({
+      title: '💰 收到款項 (Payment Received)',
+      message: `已收到 ${data[0].student_name} 的學費 NT$${data[0].amount} 元。`,
+      type: 'payment'
+    });
+    return data[0];
+  }
+};
+
+const ContentModule = {
+  async load() {
+    const { data, error } = await supabase.from('content_calendar').select('*').order('scheduled_time');
+    if (error) throw error;
+    AppState.contents = data || [];
+  },
+  async publish(content) {
+    const { data, error } = await supabase.from('content_calendar').insert([content]).select();
+    if (error) throw error;
+    EventBus.emit('content.published', data[0]);
+
+    await NotificationModule.createNotification({
+      title: '🎬 社群內容排程 (Content Scheduled)',
+      message: `已排定 ${data[0].platform} 影音: "${data[0].title}"。`,
+      type: 'ai'
+    });
+    return data[0];
+  },
+  async delete(id) {
+    const { error } = await supabase.from('content_calendar').delete().eq('id', id);
+    if (error) throw error;
+    await this.load();
+    EventBus.emit('content.published', { id });
+  }
+};
+
+const AIAgentModule = {
+  async createAgentTask(agentId, taskName, output) {
+    const task = {
+      id: Math.random().toString(36).substring(7),
+      agentId,
+      taskName,
+      output,
+      created_at: new Date().toISOString()
+    };
+    AppState.aiTasks.push(task);
+    EventBus.emit('agent.finished', task);
+
+    await NotificationModule.createNotification({
+      title: '🤖 AI 任務完成 (AI Task Finished)',
+      message: `經紀人已成功生成 "${taskName}" 方案稿。`,
+      type: 'ai'
+    });
+    return task;
+  }
+};
+
+const CustomerModule = {
+  async load() {
+    const { data, error } = await supabase.from('messages').select('*').order('created_at');
+    if (error) throw error;
+    AppState.customers = data || [];
+  },
+  async sendMessage(msg) {
+    const { data, error } = await supabase.from('messages').insert([msg]).select();
+    if (error) throw error;
+    EventBus.emit('customer.message', data[0]);
+    return data[0];
+  }
+};
+
+const NotificationModule = {
+  async load() {
+    const { data, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    AppState.notifications = data || [];
+  },
+  async createNotification(notif) {
+    const { data, error } = await supabase.from('notifications').insert([notif]).select();
+    if (error) throw error;
+    EventBus.emit('customer.message', data[0]);
+    return data[0];
+  },
+  async markAllRead() {
+    const { error } = await supabase.from('notifications').update({ read: true }).eq('read', false);
+    if (error) throw error;
+    await this.load();
+    EventBus.emit('customer.message', {});
+  }
+};
+
+// ==========================================
+// Dashboard Service (Aggregation Brain)
 // ==========================================
 const DashboardService = {
   calculateStudents() {
-    return DashboardState.students.length;
+    return AppState.students.length;
   },
 
   calculateRevenue() {
-    // Sum of all paid orders (status is 'paid' or '已繳費')
-    const paidSales = DashboardState.sales.filter(s => s.status === 'paid' || s.status === '已繳費');
-    return paidSales.reduce((sum, s) => sum + Number(s.amount), 0);
+    const paid = AppState.payments.filter(p => p.status === 'paid' || p.status === '已繳費');
+    return paid.reduce((sum, p) => sum + Number(p.amount), 0);
   },
 
-  calculateEvents() {
-    return DashboardState.events.length;
+  calculateUpcomingEvents() {
+    return AppState.events.length;
   },
 
   calculateGrowth() {
-    // Compare total revenue of current month (July 2026) vs previous month (June 2026)
-    const thisMonthSales = DashboardState.sales.filter(s => {
-      const date = new Date(s.created_at);
-      return date.getFullYear() === 2026 && date.getMonth() === 6 && (s.status === 'paid' || s.status === '已繳費');
+    const thisMonthSales = AppState.payments.filter(p => {
+      const date = new Date(p.created_at);
+      return date.getFullYear() === 2026 && date.getMonth() === 6 && (p.status === 'paid' || p.status === '已繳費');
     });
-    const lastMonthSales = DashboardState.sales.filter(s => {
-      const date = new Date(s.created_at);
-      return date.getFullYear() === 2026 && date.getMonth() === 5 && (s.status === 'paid' || s.status === '已繳費');
+    const lastMonthSales = AppState.payments.filter(p => {
+      const date = new Date(p.created_at);
+      return date.getFullYear() === 2026 && date.getMonth() === 5 && (p.status === 'paid' || p.status === '已繳費');
     });
 
-    const thisMonthRev = thisMonthSales.reduce((sum, s) => sum + Number(s.amount), 0);
-    const lastMonthRev = lastMonthSales.reduce((sum, s) => sum + Number(s.amount), 0);
+    const thisMonthRev = thisMonthSales.reduce((sum, p) => sum + Number(p.amount), 0);
+    const lastMonthRev = lastMonthSales.reduce((sum, p) => sum + Number(p.amount), 0);
 
-    if (lastMonthRev === 0) {
-      return '--';
-    }
+    if (lastMonthRev === 0) return '--';
     const diff = ((thisMonthRev - lastMonthRev) / lastMonthRev) * 100;
     return (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
   },
 
-  calculateTasks() {
-    return DashboardState.agentsTasksCount;
+  calculateContentQueue() {
+    return AppState.contents.length;
   },
 
-  calculateContent() {
-    return DashboardState.content.length;
+  calculateAITasks() {
+    return AppState.aiTasks.length;
+  },
+
+  calculateUnreadMessages() {
+    const unreads = AppState.notifications.filter(n => !n.read);
+    return unreads.length;
+  },
+
+  calculateCourses() {
+    return AppState.courses.length;
+  },
+
+  calculateActiveStudents() {
+    const actives = AppState.students.filter(s => {
+      const rate = parseInt(s.attendance);
+      return isNaN(rate) ? false : rate >= 80;
+    });
+    return actives.length;
+  },
+
+  calculateMonthlyRevenue() {
+    return this.calculateRevenue();
+  },
+
+  calculateWeeklyRevenue() {
+    const now = new Date('2026-07-16');
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const weeklySales = AppState.payments.filter(p => {
+      const date = new Date(p.created_at);
+      return date >= sevenDaysAgo && (p.status === 'paid' || p.status === '已繳費');
+    });
+    return weeklySales.reduce((sum, p) => sum + Number(p.amount), 0);
+  },
+
+  calculateConversionRate() {
+    const total = AppState.students.length;
+    if (total === 0) return '0%';
+    const converted = AppState.students.filter(s => s.payment === '已繳費').length;
+    return ((converted / total) * 100).toFixed(0) + '%';
+  },
+
+  calculateCompletionRate() {
+    if (AppState.students.length === 0) return '0%';
+    const rates = AppState.students.map(s => {
+      const r = parseInt(s.attendance);
+      return isNaN(r) ? 0 : r;
+    });
+    const avg = rates.reduce((sum, r) => sum + r, 0) / rates.length;
+    return avg.toFixed(0) + '%';
+  },
+
+  calculateRecentActivities() {
+    const activities = [];
+
+    AppState.students.forEach(s => {
+      activities.push({
+        icon: '✔',
+        text: `Student ${s.name} enrolled in ${s.style}`,
+        time: 'Enrolled',
+        date: s.created_at
+      });
+    });
+
+    AppState.aiTasks.forEach(t => {
+      activities.push({
+        icon: '🤖',
+        text: `AI generated ${t.agentId} task: ${t.taskName}`,
+        time: 'AI Task',
+        date: t.created_at
+      });
+    });
+
+    AppState.courses.forEach(c => {
+      activities.push({
+        icon: '📚',
+        text: `Course "${c.title}" published at ${c.location}`,
+        time: 'Course',
+        date: c.created_at
+      });
+    });
+
+    AppState.payments.forEach(p => {
+      if (p.status === 'paid' || p.status === '已繳費') {
+        activities.push({
+          icon: '💰',
+          text: `Payment NT$${p.amount} received from ${p.student_name}`,
+          time: 'Payment',
+          date: p.created_at
+        });
+      }
+    });
+
+    AppState.events.forEach(e => {
+      activities.push({
+        icon: '📅',
+        text: `Event "${e.title}" scheduled on ${e.date}`,
+        time: 'Event',
+        date: e.created_at
+      });
+    });
+
+    activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return activities.slice(0, 10);
   }
 };
 
-// Helper to determine if the user has created anything yet
 function hasNoData() {
-  return DashboardState.students.length === 0 &&
-         DashboardState.courses.length === 0 &&
-         DashboardState.events.length === 0 &&
-         DashboardState.agentsTasksCount === 0;
+  return AppState.students.length === 0 &&
+         AppState.courses.length === 0 &&
+         AppState.events.length === 0 &&
+         AppState.aiTasks.length === 0;
 }
 
-// Update the Creator Dashboard overlay states
 function updateDashboardUIState() {
   const loadingEl = document.getElementById('dashboard-loading');
   const emptyEl = document.getElementById('dashboard-empty');
+  const errorEl = document.getElementById('dashboard-error');
   const gridEl = document.getElementById('dashboard-data-grid');
 
-  if (!loadingEl || !emptyEl || !gridEl) return;
-
-  // Always hide loading once data is ready
-  loadingEl.classList.add('hidden');
+  if (loadingEl) loadingEl.classList.add('hidden');
+  if (errorEl) errorEl.classList.add('hidden');
 
   if (hasNoData()) {
-    emptyEl.classList.remove('hidden');
-    gridEl.classList.add('hidden');
+    if (emptyEl) emptyEl.classList.remove('hidden');
+    if (gridEl) gridEl.classList.add('hidden');
   } else {
-    emptyEl.classList.add('hidden');
-    gridEl.classList.remove('hidden');
+    if (emptyEl) emptyEl.classList.add('hidden');
+    if (gridEl) gridEl.classList.remove('hidden');
 
-    // Populate data
     renderDashboardMetrics();
     renderDashboardLists();
   }
 }
 
 // ==========================================
-// Local Cache / Mock Databases
+// Social Posts Calendar caching mapping
 // ==========================================
-
-// AI Agents Catalog
-const mockAgents = {
-  coach: {
-    name: 'Dance Coach Agent',
-    icon: '💃',
-    role: '專屬編舞與教學大腦',
-    desc: '協助您規劃舞蹈教案、熱身流程、動作結構分解，並生成學員練習作業與回饋。',
-    prompt: '你是一位擁有 10 年教學經驗的資深 Dancehall 舞蹈老師。你的風格親切熱情，擅長拆解動作結構，能以極具系統性的邏輯產出結構完整的舞蹈教案、課堂暖身步驟與課後練習指引。',
-    memory: '我的主要受眾為 18-35 歲的潮流與街舞愛好者，主要專攻牙買加雷鬼（Dancehall）街頭律動。我的教學哲學是「每個人都能找到自己身體的律動節奏」。',
-    templates: [
-      { name: '📚 產生舞蹈基礎教案', raw: '規劃一堂適合初學者的 90 分鐘 Dancehall 律動教案，主題是「Wining (臀部律動)」技巧。' },
-      { name: '🔥 規劃 15 分鐘高效暖身流程', raw: '規劃一堂高強度的熱身流程，包含關節活動、心肺提升，特別著重在髖關節與腰部肌群的啟動。' },
-      { name: '📝 寫下一期學員的練習反饋', raw: '針對完成一個月體驗班的初級班同學，提供一段鼓勵性強、包含三個具體練習重點（重心轉換、核心收縮、音樂踩點）的課後作業。' }
-    ],
-    history: [
-      { timestamp: '14:23', title: '基礎教案: Wining 臀部旋律律動', result: '已成功產出 Wining 基礎教案，包含 15 分鐘拉伸、40 分鐘動作分解與 35 分鐘音樂踩點實練。' },
-      { timestamp: '昨日', title: '暖身流程: 髖關節啟動', result: '已生成高效暖身設計：包含 8 個拍子的跨步扭轉、髖關節外旋與腹部核心收縮點火。' }
-    ]
-  },
-  cs: {
-    name: 'Customer Service Agent',
-    icon: '💬',
-    role: '智能客服與銷售助理',
-    desc: '自動化回覆體驗課諮詢、請假延期、學員跟進與費用問題，並維持溫馨鼓勵語氣。',
-    prompt: '你是一位溫慢、體貼、充滿活力的舞蹈教室客服專員。你代表我們的品牌給予學員最高規格的關懷，會主動用積極溫慢的詞語（如「哈囉！」「太棒了！🔥」）拉近距離，並條理清晰地回覆學員關於課程費用、請假手續等問題。',
-    memory: '教室規則：1. 體驗票限本人使用一次，價格 $450。2. 私人一對一課程單堂 $2,000 / 包堂優惠 10 堂 $18,000。3. 請假需在開課前 2 小時完成線上登記。',
-    templates: [
-      { name: '💬 回覆初學者體驗課諮詢', raw: '有一位初學者在 IG 詢問：「我沒有任何跳舞經驗，可以報名你們的 Dancehall 體驗課嗎？會不會跟不上？」請生成適合的回覆。' },
-      { name: '💵 回覆私人課包堂與報價問題', raw: '學員詢問私人一對一特訓的價格與排課方式，請回覆包堂優惠並導向約課流程。' },
-      { name: '⚠️ 回覆學員因故缺席或請假', raw: '學員臨時私訊告知晚上肚子痛不能來上課，希望能請假。請給予關懷並說明請假與補課規定。' }
-    ],
-    history: [
-      { timestamp: '15:10', title: '答覆: Sandy Wang 私教報價', result: '已回覆私教單堂及包堂方案，並附帶婚禮編舞成功案例說明。' }
-    ]
-  },
-  content: {
-    name: 'Content Creator Agent',
-    icon: '🎬',
-    role: '社群內容行銷推手',
-    desc: '為 Instagram、TikTok、Threads、YouTube 等社群自動生成爆款 Hook、分鏡腳本與標籤。',
-    prompt: '你是一位爆款社群短影音企劃與文案大師。你深諳 Reels / TikTok 演算法，擅長在影片前 3 秒安排強力吸引眼球的 Hook（鉤子），並能把舞蹈技巧轉化為極具觀看價值的教學短片腳本。',
-    memory: '熱門標籤：#dancehall #dancehallteacher #dancelife #dancer #choreo #學跳舞 #街舞教學 #短影音劇本',
-    templates: [
-      { name: '📸 規劃 IG Reels 爆款劇本', raw: '為「一分鐘學會牙買加經典律動 One Drop」設計 Reels 短片腳本，包含分鏡、視覺指令、口播文字以及 Hook 鉤子。' },
-      { name: '📘 撰寫 Facebook 走心社群貼文', raw: '寫一篇講述自己從完全不會跳舞，到成為舞蹈老師的「心路歷程」故事貼文，著重情感共鳴。' },
-      { name: '🧵 生成 Threads 短文字話題', raw: '設計一個能引發舞蹈圈同好討論與互動的 Thread 短文，例如關於「舞蹈教學最怕遇到哪種情況」。' }
-    ],
-    history: [
-      { timestamp: '11:05', title: 'IG Reels: 骨盆律動大公開', result: '已產生 Reels 腳本：前 3 秒展示對比，中間步驟拆解，末尾引導私訊。' }
-    ]
-  },
-  marketing: {
-    name: 'Marketing Agent',
-    icon: '🔥',
-    role: '活動行銷策略顧問',
-    desc: '規劃暑期工作坊、品牌促銷、廣告文案與漏斗導流策略，提高課程滿班率。',
-    prompt: '你是一位舞蹈教室的資深行銷總監。你擅長運用促銷心理學設計吸引人的報名方案，並能撰寫出高轉換率 of Landing Page 文案與 FB 廣告文案。',
-    memory: '即將推廣活動：暑期雙人同行限時 85 折「Dancehall 燃脂特訓工作坊」。',
-    templates: [
-      { name: '🎯 規劃暑期雙人同行工作坊促銷方案', raw: '為八月的「Dancehall 燃脂工作坊」規劃全套行銷策略，包含早鳥優惠、社群裂變機制。' },
-      { name: '📢 撰寫 FB 高點擊率廣告文案', raw: '撰寫一則針對「想要塑形、又覺得傳統健身枯燥」的上班族為受眾的舞蹈工作坊招生廣告文案。' }
-    ],
-    history: [
-      { timestamp: '09:40', title: '宣傳方案: 雙人同行85折', result: '規劃完成行銷漏斗：以短影音為誘餌，吸引下載免費基礎包，再以 Email 觸發限時折扣。' }
-    ]
-  },
-  community: {
-    name: 'Community Manager Agent',
-    icon: '👥',
-    role: '班級與社群經理人',
-    desc: '生成學生群組公告、學員溫馨提醒、工作坊行前通知，維繫學員向心力。',
-    prompt: '你是一位極具向心力的舞蹈社群經理。你的語氣充滿愛與歸屬感，善於在 LINE 群組發布活動通知、上課須知與行前關懷，讓學員感受到滿滿的安全感與凝聚力。',
-    memory: '工作坊細節：本週日 14:00 Studio A 進行，需攜帶水壺與乾淨室內鞋，提前 15 分鐘報到。',
-    templates: [
-      { name: '📢 撰寫週日工作坊行行前通知 LINE 公告', raw: '為即將到來的工作坊撰寫一份親切、溫馨的行前準備通知。' },
-      { name: '🎂 撰寫學員生日專屬祝賀關懷信', raw: '為本月生日的學員設計一段專屬祝賀訊息，附帶一張免費團體課單堂券作為生日禮。' }
-    ],
-    history: [
-      { timestamp: '週一', title: 'LINE群發: 暑期班開課叮嚀', result: '已生成溫馨的行前文案，點閱率達 94%。' }
-    ]
-  },
-  business: {
-    name: 'Business Assistant',
-    icon: '⚙️',
-    role: '個人工作室營運秘書',
-    desc: '協助起草品牌合作企劃書、教室管理 SOP、會議記錄與活動執行計劃。',
-    prompt: '你是一位幹練、專業的商務秘書與營運顧問。你的格式嚴謹，擅長用 Bullet Points 與表格呈現商務企劃書、品牌聯名提案與工作標準作業流程（SOP）。',
-    memory: '主要聯名對象：潮流服飾品牌、時尚運動服飾，目標是達成跨界品牌合作。',
-    templates: [
-      { name: '📋 起草舞蹈工作室與運動品牌聯名企劃案', raw: '撰寫一份 500 字的品牌合作企劃大綱，提議由我們的舞蹈老師穿著該品牌服飾拍攝教學短影片，並在其門市舉辦快閃體驗課。' },
-      { name: '🛠️ 設計「舞蹈教室值班小幫手」SOP', raw: '規劃一份兼職員工或值班小幫手的開門、接待學員、下課收尾流程 SOP 清單。' }
-    ],
-    history: [
-      { timestamp: '上週', title: '教室清潔收尾 SOP 制定', result: '已產出 12 條實用值班核對清單，成功減少了開門備忘失誤。' }
-    ]
-  }
-};
-
-// Local cache for Student CRM (synced with Supabase)
-let mockStudents = [];
-
-// Local cache for Chat Inbox
-const mockInbox = {
-  'thread-1': {
-    id: 'thread-1',
-    studentName: 'Emma Lin',
-    platform: 'Instagram DM',
-    avatar: '👩‍🦰',
-    snippet: '請問下週三的 Dancehall 入門課還有名額嗎？',
-    studentInfo: { level: '初學入門', attendance: '92%', payment: '已繳費 (本月季卡)', birthday: '08-15', tags: '愛好者, 基礎加強, 積極度高' },
-    previousConversations: [
-      { date: '2026-06-15', snippet: '詢問雷鬼基礎體驗班費用' },
-      { date: '2026-07-02', snippet: '報名完成並預約季卡課程' }
-    ],
-    messages: []
-  },
-  'thread-2': {
-    id: 'thread-2',
-    studentName: 'Leo Chen',
-    platform: 'LINE Chat',
-    avatar: '👨',
-    snippet: '老師，不好意思我今天晚上突然要加班，可能要請假...',
-    studentInfo: { level: '中階進步', attendance: '60% (連續缺席2次)', payment: '已繳費 (一對一包堂剩3堂)', birthday: '11-02', tags: '上班族, 缺席兩次, 時間不穩定' },
-    previousConversations: [
-      { date: '2026-06-20', snippet: '預約一對一私人私教課' },
-      { date: '2026-07-08', snippet: '加班請假一次，已補課完成' }
-    ],
-    messages: []
-  },
-  'thread-3': {
-    id: 'thread-3',
-    studentName: 'Sandy Wang',
-    platform: 'Facebook Messenger',
-    avatar: '👧',
-    snippet: '想諮詢一下一對一私教課怎麼收費？',
-    studentInfo: { level: '全新諮詢', attendance: '0%', payment: '未繳費 (尚未報名)', birthday: '04-20', tags: '潛在客戶, 婚禮排舞需求' },
-    previousConversations: [
-      { date: '2026-07-10', snippet: '首次加好友，瀏覽自動歡迎訊息' }
-    ],
-    messages: []
-  }
-};
-
-// Automation Center Workflows
-const mockAutomationFlows = {
-  'flow-1': {
-    id: 'flow-1',
-    name: 'IG DM 智能自動回覆與 CRM 同步',
-    trigger: 'Instagram 新小盒子私訊',
-    nodes: [
-      { type: 'trigger', text: '📢 當有新 Instagram DM 諮詢' },
-      { type: 'action', text: '🤖 AI 分析對話意圖與學員情緒' },
-      { type: 'action', text: '✍️ 自動調用「Customer Service Agent」擬定草稿' },
-      { type: 'action', text: '👥 自動同步對話摘要至 Student CRM 備忘錄' },
-      { type: 'action', text: '🟢 透過 LINE 向老師發送高優先通知與建議回覆' }
-    ]
-  },
-  'flow-2': {
-    id: 'flow-2',
-    name: '學員缺席關懷與補課提醒流程',
-    trigger: 'CRM 標記學員缺席',
-    nodes: [
-      { type: 'trigger', text: '📅 當 CRM 出席狀態更新為「缺席」' },
-      { type: 'action', text: '🤖 AI 計算該學員連續缺席次數' },
-      { type: 'action', text: '✍️ 調用「Community Manager Agent」產生個人化溫暖關懷語' },
-      { type: 'action', text: '📱 自動於 LINE 發送請假確認與預約補課連結' }
-    ]
-  },
-  'flow-3': {
-    id: 'flow-3',
-    name: '新工作坊報名與金流對帳通知',
-    trigger: '收到工作坊 Webhook 報名',
-    nodes: [
-      { type: 'trigger', text: '💳 當收到報名表單 Webhook 提交' },
-      { type: 'action', text: '🤖 AI 自動比對匯款後五碼與金額' },
-      { type: 'action', text: '👥 CRM 自動將繳費狀態更新為「已繳費」' },
-      { type: 'action', text: '📅 Google 日曆自動同步加入該學員報名格' },
-      { type: 'action', text: '📧 自動發送行前準備 Email 公告' }
-    ]
-  }
-};
-
-// Knowledge Base file repository
-const mockFiles = [
-  { name: 'Dancehall_Foundation_SOP.pdf', size: '2.4 MB', type: 'PDF' },
-  { name: '2026_暑期工作坊學員須知_FAQ.docx', size: '1.2 MB', type: 'DOCX' },
-  { name: '品牌調性_Tone_And_Voice_指南.txt', size: '45 KB', type: 'TXT' }
-];
-
-// Mock Calendar social media posts (overwritten dynamically from Supabase `content_calendar`)
-const mockSocialPosts = {};
-
-const mockStudioOutputs = {
-  instagram: {
-    title: 'Instagram Reels',
-    text: `【🎬 IG Reels 短影音劇本】\n\n📌 影片主題：初學者必學 Dancehall 臀部律動技巧\n🔥 3秒黃金Hook: 「跳舞扭屁股總是看起來像肚子痛？因為你用錯發力點了！」\n\n🎥 畫面分鏡：\n1. [0-3s] 老師示範高爆發力的 Wining 動作，搭配節奏雷鬼音樂。\n2. [3-20s] 側面鏡頭拆解：膝蓋彎曲 -> 骨盆向上提拉 -> 後推畫圓。\n3. [20-45s] 正面踩點雷鬼節奏 (One Drop) 慢速到快速。\n\n✍️ 貼文 Caption:\n跳 Dancehall 的性感靈魂來自於臀部律動！Wining 畫圓其實是用核心跟大腿發力喔！這篇快點收藏起來練，這週三晚上課堂我帶你實際踩點節奏！🔥💃\n\n🏷️ Hashtags:\n#dancehall #wining #dancelife #街舞教學 #雷鬼舞蹈 #ReelsChoreo`
-  },
-  tiktok: {
-    title: 'TikTok Video',
-    text: `【🎵 TikTok 影音腳本】\n\n📌 影片主題：3步學會牙買加經典 Wining 律動\n🔥 爆點Hook: 「別再瞎扭了！牙買加雷鬼舞老師教你3步學會最正宗的 Wining 臀部律動！」\n\n🎥 畫面分鏡：\n1. 快速切入：直接把錯誤動作與正確動作放在一起比對 (錯誤: 腰部過度用力 vs 正確: 核心帶動)。\n2. 節奏拆解：拍子1屈膝、拍子2骨盆提起、拍子3順滑畫圓。\n3. 快嘴口播，搭配流行雷鬼背景音。\n\n🏷️ Hashtags:\n#dancehallstyle #winingtutorial #dancer #學跳舞 #街舞教學 #TikTok舞蹈`
-  },
-  facebook: {
-    title: 'Facebook Post',
-    text: `【📘 Facebook 品牌貼文】\n\n📌 影片主題：Dancehall 基礎律動拆解\n\n很多人問我，為什麼雷鬼舞的律動那麼有力量卻又那麼放鬆？\n\n其實，牙買加人的舞蹈靈魂，藏在「重心的下沉」和「核心收縮的變速」裡。今天影片為大家完整分解 Wining 動作中的骨盆發力，不管你是街舞愛好者，還是想雕塑核心的上班族，都非常推薦收藏練習！\n\n🔥 課程報名中：下週三團體課現正招生，雙人同行享85折早鳥特惠！👇\n[點擊報名連結]\n\n🏷️ #dancehall #dancelife #編舞教學 #街舞課 #核心塑形`
-  },
-  threads: {
-    title: 'Threads Topic',
-    text: `【🧵 Threads 熱門討論】\n\n有沒有人也覺得，跳 Dancehall 臀部畫圓（Wining）的時候，最難的不是腰部用不用力，而是你能不能在滿堂的鏡子前面放開自我、不要覺得尷尬？😂\n\n很多學員一開始都卡在心魔，其實大家都在看老師，根本沒人在看你啦！放膽扭下去就對了！\n\n今天晚上課堂見，今晚誰要來？在下面留個 🔥 讓我知道！👇`
-  },
-  youtube: {
-    title: 'YouTube Shorts',
-    text: `【🎥 YouTube Shorts 腳本】\n\n📌 主題：牙買加 Dancehall 基礎律動\n🔥 Hook: 「一分鐘改善你跳舞僵硬的問題！Dancehall 核心律動練習！」\n\n🎥 畫面分鏡：\n- 老師特寫示範腰部與大腿的核心發力，並用箭頭後製標註力量流向。\n- 結尾加入大字卡「訂閱我的頻道，每週五更新舞蹈動作教學！」`
-  }
-};
-
-const mockIntegrations = {
-  make: true,
-  n8n: true,
-  zapier: false,
-  webhook: true,
-  gcal: true,
-  notion: false,
-  gsheet: true
-};
-
-// ==========================================
-// Supabase Sync Operations
-// ==========================================
-
-async function loadDashboardData() {
-  const loadingEl = document.getElementById('dashboard-loading');
-  const emptyEl = document.getElementById('dashboard-empty');
-  const gridEl = document.getElementById('dashboard-data-grid');
-
-  // Trigger UI loading state
-  if (loadingEl) loadingEl.classList.remove('hidden');
-  if (emptyEl) emptyEl.classList.add('hidden');
-  if (gridEl) gridEl.classList.add('hidden');
-
-  try {
-    const [studentsRes, coursesRes, eventsRes, salesRes, contentRes, messagesRes] = await Promise.all([
-      supabase.from('students').select('*'),
-      supabase.from('courses').select('*'),
-      supabase.from('events').select('*'),
-      supabase.from('sales').select('*'),
-      supabase.from('content_calendar').select('*'),
-      supabase.from('messages').select('*')
-    ]);
-
-    DashboardState.students = studentsRes.data || [];
-    DashboardState.courses = coursesRes.data || [];
-    DashboardState.events = eventsRes.data || [];
-    DashboardState.sales = salesRes.data || [];
-    DashboardState.content = contentRes.data || [];
-    DashboardState.messages = messagesRes.data || [];
-
-    // Recompute total agent tasks count
-    let tasksCount = 0;
-    Object.values(mockAgents).forEach(agent => {
-      if (agent.history) {
-        tasksCount += agent.history.length;
-      }
-    });
-    DashboardState.agentsTasksCount = tasksCount;
-
-    // Keep legacy array updated
-    mockStudents = DashboardState.students;
-
-    // Refresh calendar layout cache from the database contents
-    syncCalendarCacheFromContentState();
-
-    // Rerender depending on tab state
-    updateDashboardUIState();
-  } catch (err) {
-    console.error('Failed to aggregate dashboard state:', err);
-  }
-}
-
 function syncCalendarCacheFromContentState() {
   Object.keys(mockSocialPosts).forEach(key => delete mockSocialPosts[key]);
-  DashboardState.content.forEach(item => {
+  AppState.contents.forEach(item => {
     const dateStr = item.scheduled_time.split(' ')[0] || item.scheduled_time.split('T')[0];
     let plat = 'ig';
     if (item.platform === 'TikTok') plat = 'tiktok';
@@ -418,30 +436,77 @@ function syncCalendarCacheFromContentState() {
   });
 }
 
-async function fetchStudentsFromSupabase() {
-  const { data, error } = await supabase.from('students').select('*').order('name');
-  if (error) {
-    console.error('Error fetching students:', error);
-    return;
-  }
-  if (data) {
-    mockStudents = data;
-    renderCrmTable();
+// ==========================================
+// Supabase Sync Operations
+// ==========================================
+
+let failedToLoadDashboard = false;
+
+async function loadDashboardData() {
+  const loadingEl = document.getElementById('dashboard-loading');
+  const emptyEl = document.getElementById('dashboard-empty');
+  const errorEl = document.getElementById('dashboard-error');
+  const gridEl = document.getElementById('dashboard-data-grid');
+
+  if (loadingEl) loadingEl.classList.remove('hidden');
+  if (emptyEl) emptyEl.classList.add('hidden');
+  if (errorEl) errorEl.classList.add('hidden');
+  if (gridEl) gridEl.classList.add('hidden');
+
+  try {
+    // Load modules asynchronously
+    await Promise.all([
+      StudentModule.load(),
+      CourseModule.load(),
+      EventModule.load(),
+      FinanceModule.load(),
+      ContentModule.load(),
+      CustomerModule.load(),
+      NotificationModule.load()
+    ]);
+
+    failedToLoadDashboard = false;
+
+    // Load initial tasks if count is 0
+    if (AppState.aiTasks.length === 0) {
+      AppState.aiTasks = [
+        { id: '1', agentId: 'coach', taskName: '基礎教案: Wining 臀部旋律律動', created_at: '2026-07-15 14:23:00+00' },
+        { id: '2', agentId: 'cs', taskName: '答覆: Sandy Wang 私教報價', created_at: '2026-07-15 15:10:00+00' },
+        { id: '3', agentId: 'content', taskName: 'IG Reels: 骨盆律動大公開', created_at: '2026-07-15 11:05:00+00' }
+      ];
+    }
+
+    mockStudents = AppState.students;
+    syncCalendarCacheFromContentState();
+
+    updateDashboardUIState();
+  } catch (err) {
+    console.error("DashboardService load error:", err);
+    failedToLoadDashboard = true;
+
+    if (loadingEl) loadingEl.classList.add('hidden');
+    if (errorEl) errorEl.classList.remove('hidden');
   }
 }
 
+function retryLoadDashboard() {
+  loadDashboardData();
+}
+
+async function fetchStudentsFromSupabase() {
+  await StudentModule.load();
+  mockStudents = AppState.students;
+  renderCrmTable();
+}
+
 async function fetchMessagesFromSupabase() {
-  const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
-  if (error) {
-    console.error('Error fetching messages:', error);
-    return;
-  }
-  if (data) {
+  await CustomerModule.load();
+  if (AppState.customers) {
      Object.keys(mockInbox).forEach(key => {
         mockInbox[key].messages = [];
      });
 
-     data.forEach(msg => {
+     AppState.customers.forEach(msg => {
         let threadId = 'thread-1';
         if (msg.student_name === 'Emma Lin') threadId = 'thread-1';
         else if (msg.student_name === 'Leo Chen') threadId = 'thread-2';
@@ -462,27 +527,56 @@ async function fetchMessagesFromSupabase() {
 function subscribeToSupabaseRealtime() {
   supabase
     .channel('db-changes-global')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
-      loadDashboardData();
-      fetchStudentsFromSupabase();
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'students' }, (payload) => {
+      EventBus.emit('student.created', payload.new);
     })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
-      loadDashboardData();
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'students' }, (payload) => {
+      EventBus.emit('student.updated', payload.new);
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'students' }, (payload) => {
+      EventBus.emit('student.deleted', payload.old.id);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, (payload) => {
+      EventBus.emit('course.created', payload.new);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, (payload) => {
+      EventBus.emit('event.created', payload.new);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, (payload) => {
+      EventBus.emit('payment.completed', payload.new);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'content_calendar' }, (payload) => {
+      EventBus.emit('content.published', payload.new);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
+      EventBus.emit('customer.message', payload.new);
       fetchMessagesFromSupabase();
     })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, () => {
-      loadDashboardData();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
-      loadDashboardData();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => {
-      loadDashboardData();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'content_calendar' }, () => {
-      loadDashboardData();
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, (payload) => {
+      EventBus.emit('customer.message', payload.new);
     })
     .subscribe();
+}
+
+function initEventBusListeners() {
+  EventBus.on('dashboard.refresh', async () => {
+    try {
+      await Promise.all([
+        StudentModule.load(),
+        CourseModule.load(),
+        EventModule.load(),
+        FinanceModule.load(),
+        ContentModule.load(),
+        CustomerModule.load(),
+        NotificationModule.load()
+      ]);
+      mockStudents = AppState.students;
+      syncCalendarCacheFromContentState();
+      updateDashboardUIState();
+    } catch (err) {
+      console.error("Dashboard auto-refresh load failed:", err);
+    }
+  });
 }
 
 // ==========================================
@@ -492,14 +586,12 @@ function subscribeToSupabaseRealtime() {
 function switchTab(tabId) {
   activeTab = tabId;
 
-  // Update navigation buttons
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.classList.remove('active');
   });
   const currentNav = document.getElementById(`nav-${tabId}`);
   if (currentNav) currentNav.classList.add('active');
 
-  // Update page header title
   const tabTitles = {
     dashboard: 'Creator Dashboard',
     agents: 'AI Agents Workspace',
@@ -514,14 +606,12 @@ function switchTab(tabId) {
   };
   document.getElementById('current-tab-title').textContent = tabTitles[tabId];
 
-  // Update tab content displays
   document.querySelectorAll('.tab-content').forEach(content => {
     content.classList.remove('active');
   });
   const activeContent = document.getElementById(`tab-${tabId}`);
   if (activeContent) activeContent.classList.add('active');
 
-  // Specific tab initializations
   if (tabId === 'dashboard') {
     loadDashboardData();
   } else if (tabId === 'agents') {
@@ -547,24 +637,94 @@ function switchTab(tabId) {
 // ==========================================
 
 function renderDashboardMetrics() {
-  document.getElementById('kpi-students').textContent = `${DashboardService.calculateStudents()} 名`;
+  const calculations = {
+    'kpi-students': `${DashboardService.calculateStudents()} 名`,
+    'kpi-courses': `${DashboardService.calculateCourses()} 堂`,
+    'kpi-events': `${DashboardService.calculateUpcomingEvents()} 場`,
+    'kpi-revenue': `NT$${DashboardService.calculateRevenue().toLocaleString()}`,
+    'kpi-pending-content': `${DashboardService.calculateContentQueue()} 則`,
+    'kpi-ai-tasks': `${DashboardService.calculateAITasks()} 次`,
+    'kpi-unread-messages': `${DashboardService.calculateUnreadMessages()} 通`,
+    'kpi-growth': DashboardService.calculateGrowth(),
+    'kpi-completion-rate': DashboardService.calculateCompletionRate()
+  };
 
-  const rev = DashboardService.calculateRevenue();
-  document.getElementById('kpi-revenue').textContent = `NT$${rev.toLocaleString()}`;
+  // Selective Reactive Render (No-rerender performance)
+  Object.entries(calculations).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el && el.textContent !== val) {
+      el.textContent = val;
+    }
+  });
 
-  document.getElementById('kpi-events').textContent = `${DashboardService.calculateEvents()} 場`;
+  // Render recent activities timeline
+  const listEl = document.getElementById('recent-activities-list');
+  if (listEl) {
+    const activities = DashboardService.calculateRecentActivities();
+    if (activities.length === 0) {
+      listEl.innerHTML = '<li class="text-muted text-xs">No recent activity / 尚無最新動態</li>';
+    } else {
+      listEl.innerHTML = activities.map(act => `
+        <li class="activity-timeline-item">
+          <span class="activity-icon">${act.icon}</span>
+          <span class="activity-text">${act.text}</span>
+          <span class="activity-time">${act.time}</span>
+        </li>
+      `).join('');
+    }
+  }
 
-  document.getElementById('kpi-growth').textContent = DashboardService.calculateGrowth();
+  // Render Notification Center badge and dropdown
+  const badgeEl = document.getElementById('nav-notification-badge');
+  const count = DashboardService.calculateUnreadMessages();
+  if (badgeEl) {
+    if (count > 0) {
+      badgeEl.textContent = count;
+      badgeEl.classList.remove('hidden');
+    } else {
+      badgeEl.classList.add('hidden');
+    }
+  }
+
+  const listNotif = document.getElementById('notification-list');
+  if (listNotif) {
+    const unreads = AppState.notifications;
+    if (unreads.length === 0) {
+      listNotif.innerHTML = '<li class="text-muted text-xs" style="text-align: center; padding: 12px 0;">No notifications / 尚無新通知</li>';
+    } else {
+      listNotif.innerHTML = unreads.map(n => `
+        <li class="notification-item ${n.read ? '' : 'unread'}">
+          <div class="notification-item-title">${n.title}</div>
+          <div class="notification-item-desc">${n.message}</div>
+        </li>
+      `).join('');
+    }
+  }
+}
+
+function toggleNotificationCenter() {
+  const dropdown = document.getElementById('notification-dropdown-panel');
+  if (dropdown) {
+    dropdown.classList.toggle('hidden');
+  }
+}
+
+async function markAllNotificationsRead() {
+  try {
+    await NotificationModule.markAllRead();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function renderDashboardLists() {
   // Real schedules (Courses + Events)
   const schedList = document.getElementById('today-schedules');
   if (schedList) {
-    if (DashboardState.courses.length === 0 && DashboardState.events.length === 0) {
+    if (AppState.courses.length === 0 && AppState.events.length === 0) {
       schedList.innerHTML = '<li class="text-muted text-xs">無排定課程與活動。請點擊下方新增。</li>';
     } else {
-      const courseHtml = DashboardState.courses.map(c => `
+      const courseHtml = AppState.courses.map(c => `
         <li>
           <span class="badge badge-success" style="font-size:10px; margin-right:4px;">${c.time_slot}</span>
           <strong>${c.title}</strong>
@@ -572,7 +732,7 @@ function renderDashboardLists() {
         </li>
       `).join('');
 
-      const eventHtml = DashboardState.events.map(e => `
+      const eventHtml = AppState.events.map(e => `
         <li>
           <span class="badge badge-primary" style="font-size:10px; margin-right:4px;">${e.date}</span>
           <strong>${e.title}</strong>
@@ -587,10 +747,10 @@ function renderDashboardLists() {
   // Real scheduled content posts
   const taskList = document.getElementById('today-content-tasks');
   if (taskList) {
-    if (DashboardState.content.length === 0) {
+    if (AppState.contents.length === 0) {
       taskList.innerHTML = '<li class="text-muted text-xs">無排定的社群發布。</li>';
     } else {
-      taskList.innerHTML = DashboardState.content.map(t => `
+      taskList.innerHTML = AppState.contents.map(t => `
         <li>
           <span>🎬</span>
           <strong>[${t.platform}]</strong> ${t.title}
@@ -694,7 +854,7 @@ function generateAgentOutput() {
 
   setTimeout(() => {
     outputBox.innerHTML = '🤖 AI Agent 正在套用個人大腦 Tone & Voice 潤飾中...\n████████▒▒ 80%';
-    setTimeout(() => {
+    setTimeout(async () => {
       const rawInput = document.getElementById('agent-input-raw').value;
       const agent = mockAgents[activeAgentId];
 
@@ -719,9 +879,8 @@ function generateAgentOutput() {
       });
       renderAgentHistory();
 
-      // Trigger automatic refresh of Dashboard metrics on AI task completion
-      DashboardState.agentsTasksCount++;
-      updateDashboardUIState();
+      // Trigger automatic refresh of Dashboard metrics on AI task completion via AI Module
+      await AIAgentModule.createAgentTask(activeAgentId, rawInput.substring(0, 15), finalOutputText);
     }, 800);
   }, 600);
 }
@@ -739,7 +898,7 @@ function modifyAgentOutputText(mode) {
     } else if (mode === 'rewrite') {
       modified = `【AI 客服重寫】\n哈囉！想了解 Dancehall 基礎體驗課的朋友們注意囉！這堂課是特別為了零經驗的學員設計的，動作簡單易懂。下週三名額有限，立即報名吧！🔥`;
     } else if (mode === 'warmer') {
-      modified = `【AI 客服 - 更溫暖】\n親愛的寶貝～❤️ 沒問題喔！身體健康最重要，今天肚子痛就在家多休息、喝熱水喔！晚上好好睡一覺，老師會幫你登記請假的，下週看你健健康康地回來扭臀喔！加油喔！🥰✨`;
+      modified = `【AI 客服 - 更溫慢】\n親愛的寶貝～❤️ 沒問題喔！身體健康最重要，今天肚子痛就在家多休息、喝熱水喔！晚上好好睡一覺，老師會幫你登記請假的，下週看你健健康康地回來扭臀喔！加油喔！🥰✨`;
     } else if (mode === 'professional') {
       modified = `【AI 客服 - 更專業】\n您好，感謝您的諮詢。本教室的一對一私人指導課程收費標準為：單堂體驗費 NT$2,000，一次性報名 10 堂享有包堂優惠價 NT$18,000（限期三個月內使用完畢）。我們將根據您的需求客製編舞與上課時段。如有意向，我們將為您排定30分鐘的商務諮詢，謝謝。`;
     } else if (mode === 'short') {
@@ -814,22 +973,20 @@ async function scheduleStudioScript() {
   const time = '18:00';
   const scheduled_time = `${dateStr} ${time}:00`;
 
-  // Write new content plan directly to Supabase content_calendar table
-  const { error } = await supabase.from('content_calendar').insert([{
-    title: title,
-    description: desc,
-    platform: platform,
-    scheduled_time: scheduled_time,
-    status: 'scheduled',
-    brand_id: '6cf18857-352f-474e-aaba-1d67f570f23b'
-  }]);
-
-  if (error) {
-    console.error('Error scheduling content post:', error);
-    alert('排程失敗：' + error.message);
-  } else {
+  try {
+    await ContentModule.publish({
+      title: title,
+      description: desc,
+      platform: platform,
+      scheduled_time: scheduled_time,
+      status: 'scheduled',
+      brand_id: '6cf18857-352f-474e-aaba-1d67f570f23b'
+    });
     alert('已將此影音腳本寫入資料庫排程，並同步更新至社群發布行事曆！');
     switchTab('social');
+  } catch (err) {
+    console.error('Error scheduling content post:', err);
+    alert('排程失敗：' + err.message);
   }
 }
 
@@ -899,29 +1056,29 @@ async function sendUserChatMessage() {
   const thread = mockInbox[activeChatThreadId];
   if (!thread) return;
 
-  const { error } = await supabase.from('messages').insert([{
-    student_name: thread.studentName,
-    sender: 'teacher',
-    text: text,
-    platform: thread.platform
-  }]);
-
-  if (error) {
-    console.error('Error sending message:', error);
-  }
-
-  inputBox.value = '';
-  await fetchMessagesFromSupabase();
-
-  setTimeout(async () => {
-    await supabase.from('messages').insert([{
+  try {
+    await CustomerModule.sendMessage({
       student_name: thread.studentName,
-      sender: 'student',
-      text: '好的，謝謝老師！那我把我的聯絡電話跟本名私訊留給您。',
+      sender: 'teacher',
+      text: text,
       platform: thread.platform
-    }]);
+    });
+    inputBox.value = '';
     await fetchMessagesFromSupabase();
-  }, 1500);
+    
+    // Simulate student response
+    setTimeout(async () => {
+      await CustomerModule.sendMessage({
+        student_name: thread.studentName,
+        sender: 'student',
+        text: '好的，謝謝老師！那我把我的聯絡電話跟本名私訊留給您。',
+        platform: thread.platform
+      });
+      await fetchMessagesFromSupabase();
+    }, 1500);
+  } catch (err) {
+    console.error('Error sending message:', err);
+  }
 }
 
 function regenerateAICopilotReply() {
@@ -942,6 +1099,7 @@ function regenerateAICopilotReply() {
   }, 800);
 }
 
+// Apply Copilot Recommended message
 function applyCopilotReply() {
   const text = document.getElementById('ai-recommended-reply-body').textContent;
   if (text.startsWith('🤖')) return;
@@ -1005,10 +1163,10 @@ function switchSocialView(viewName) {
       `;
     } else if (viewName === 'scheduled') {
       listTitle.textContent = '⏳ Scheduled (排程等待中)';
-      if (DashboardState.content.length === 0) {
+      if (AppState.contents.length === 0) {
         listBody.innerHTML = '<li>無排定發布內容</li>';
       } else {
-        listBody.innerHTML = DashboardState.content.map(item => `
+        listBody.innerHTML = AppState.contents.map(item => `
           <li>🎬 <strong>[${item.platform}]</strong> ${item.title} - ${item.scheduled_time} 發布 <button class="btn btn-danger btn-xs" style="margin-left:auto;" onclick="deleteContentPost('${item.id}')">取消排程</button></li>
         `).join('');
       }
@@ -1020,7 +1178,7 @@ function switchSocialView(viewName) {
     } else if (viewName === 'analytics') {
       listTitle.textContent = '📊 Social Analytics (內容成效表現)';
       listBody.innerHTML = `
-        <li>🎬 <strong>IG Reels: 基礎 Wining 教學</strong> - 互動率 8.4% (高於平均 35%)</li>
+        <li>🎬 <strong>IG Reels: 基礎 Wining Teaching</strong> - 互動率 8.4% (高於平均 35%)</li>
         <li>🎵 <strong>TikTok: 1分鐘基礎 One Drop</strong> - 點閱數 14.5k</li>
       `;
     }
@@ -1028,13 +1186,12 @@ function switchSocialView(viewName) {
 }
 
 async function deleteContentPost(id) {
-  const { error } = await supabase.from('content_calendar').delete().eq('id', id);
-  if (error) {
-    console.error('Failed to delete content post:', error);
-    alert('取消排程失敗');
-  } else {
-    // loadDashboardData() called automatically via realtime subscription
+  try {
+    await ContentModule.delete(id);
     alert('已成功取消排程。');
+  } catch (err) {
+    console.error('Failed to delete content post:', err);
+    alert('取消排程失敗');
   }
 }
 
@@ -1139,32 +1296,30 @@ async function saveNewStudent() {
 
   const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [];
 
-  // Write new student to Supabase
-  const { error } = await supabase.from('students').insert([{
-    name, level, style, attendance, payment, birthday, tags
-  }]);
+  try {
+    // Write new student to Supabase
+    await StudentModule.create({
+      name, level, style, attendance, payment, birthday, tags
+    });
 
-  if (error) {
-    console.error('Error saving student to Supabase:', error);
-    alert('上報 Supabase 錯誤：' + error.message);
-    return;
+    // Create corresponding transaction invoice in the sales table to dynamically compute Revenue
+    let amount = 0;
+    if (payment === '已繳費') amount = 18000;
+    else if (payment === '體驗票') amount = 450;
+
+    if (amount > 0) {
+      await FinanceModule.createPayment({
+        student_name: name,
+        amount: amount,
+        status: 'paid'
+      });
+    }
+
+    closeNewStudentModal();
+  } catch (err) {
+    console.error('Error saving student to Supabase:', err);
+    alert('儲存失敗：' + err.message);
   }
-
-  // Create corresponding transaction invoice in the sales table to dynamically compute Revenue
-  let amount = 0;
-  if (payment === '已繳費') amount = 18000;
-  else if (payment === '體驗票') amount = 450;
-
-  if (amount > 0) {
-    const { error: salesErr } = await supabase.from('sales').insert([{
-      student_name: name,
-      amount: amount,
-      status: 'paid'
-    }]);
-    if (salesErr) console.error('Error saving sales ledger:', salesErr);
-  }
-
-  closeNewStudentModal();
 }
 
 // ==========================================
@@ -1191,15 +1346,14 @@ async function saveNewCourse() {
     return;
   }
 
-  const { error } = await supabase.from('courses').insert([{
-    title, style, time_slot, location, student_count
-  }]);
-
-  if (error) {
-    console.error('Error saving course to Supabase:', error);
-    alert('儲存失敗：' + error.message);
-  } else {
+  try {
+    await CourseModule.create({
+      title, style, time_slot, location, student_count
+    });
     closeNewCourseModal();
+  } catch (err) {
+    console.error('Error saving course to Supabase:', err);
+    alert('儲存失敗：' + err.message);
   }
 }
 
@@ -1221,15 +1375,14 @@ async function saveNewEvent() {
     return;
   }
 
-  const { error } = await supabase.from('events').insert([{
-    title, date, location
-  }]);
-
-  if (error) {
-    console.error('Error saving event to Supabase:', error);
-    alert('儲存失敗：' + error.message);
-  } else {
+  try {
+    await EventModule.create({
+      title, date, location
+    });
     closeNewEventModal();
+  } catch (err) {
+    console.error('Error saving event to Supabase:', err);
+    alert('儲存失敗：' + err.message);
   }
 }
 
@@ -1527,35 +1680,32 @@ async function saveModalEvent() {
 
   const scheduled_time = `${dateStr} ${time}:00`;
 
-  // Write new content plan directly to Supabase content_calendar table
-  const { error } = await supabase.from('content_calendar').insert([{
-    title: title,
-    description: desc,
-    platform: platform,
-    scheduled_time: scheduled_time,
-    status: 'scheduled',
-    brand_id: '6cf18857-352f-474e-aaba-1d67f570f23b'
-  }]);
-
-  if (error) {
-    console.error('Error saving post:', error);
-    alert('排程失敗：' + error.message);
-  } else {
+  try {
+    await ContentModule.publish({
+      title: title,
+      description: desc,
+      platform: platform,
+      scheduled_time: scheduled_time,
+      status: 'scheduled',
+      brand_id: '6cf18857-352f-474e-aaba-1d67f570f23b'
+    });
     closeModal();
+  } catch (err) {
+    console.error('Error saving post:', err);
+    alert('排程失敗：' + err.message);
   }
 }
 
 async function deleteModalEvent() {
   const dateStr = document.getElementById('modal-day-num').value;
-  // Find the event item in DashboardState.content on this day
-  const item = DashboardState.content.find(c => c.scheduled_time.startsWith(dateStr));
+  const item = AppState.contents.find(c => c.scheduled_time.startsWith(dateStr));
   if (item) {
-    const { error } = await supabase.from('content_calendar').delete().eq('id', item.id);
-    if (error) {
-      console.error('Failed to delete post:', error);
-      alert('刪除排程失敗');
-    } else {
+    try {
+      await ContentModule.delete(item.id);
       closeModal();
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+      alert('刪除排程失敗');
     }
   } else {
     closeModal();
@@ -1618,14 +1768,16 @@ function quickAction(actionId) {
 // Page Load Initializer
 // ==========================================
 window.addEventListener('DOMContentLoaded', async () => {
-  // Trigger initial Dashboard load
+  // Initialize Global Event Bus listeners for reactive dashboard rendering
+  initEventBusListeners();
+
+  // Switch to Dashboard (will trigger async module loads & UI render)
   switchTab('dashboard');
 
-  // Realtime subscriptions
+  // Supabase Realtime Change Listener Setup
   subscribeToSupabaseRealtime();
 
-  // Fetch initial data from live Supabase instance
-  await fetchStudentsFromSupabase();
+  // Load chat messages
   await fetchMessagesFromSupabase();
 });
 
@@ -1672,3 +1824,6 @@ window.saveModalEvent = saveModalEvent;
 window.deleteModalEvent = deleteModalEvent;
 window.switchSocialView = switchSocialView;
 window.loadHistoryItem = loadHistoryItem;
+window.toggleNotificationCenter = toggleNotificationCenter;
+window.markAllNotificationsRead = markAllNotificationsRead;
+window.retryLoadDashboard = retryLoadDashboard;

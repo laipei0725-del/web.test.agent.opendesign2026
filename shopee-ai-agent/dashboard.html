@@ -111,6 +111,12 @@
             <span class="tag-label">Studio</span>
             <span class="tag-value">Dancehall Hub</span>
           </div>
+          <!-- Notification Bell Trigger -->
+          <div class="notification-trigger" onclick="toggleNotificationCenter()" style="position: relative; cursor: pointer; margin-right: 20px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); transition: all 0.2s;">
+            <span style="font-size: 16px;">🔔</span>
+            <span class="notification-badge hidden" id="nav-notification-badge" style="position: absolute; top: -2px; right: -2px; background: #EF4444; color: white; border-radius: 50%; padding: 1px 5px; font-size: 8px; font-weight: bold; line-height: 1;">0</span>
+          </div>
+
           <div class="user-profile">
             <span class="user-avatar">沛</span>
             <span class="user-name">Dance Owner</span>
@@ -118,90 +124,142 @@
         </div>
       </header>
 
+      <!-- Notification Center Dropdown -->
+      <div class="glass-card notification-dropdown hidden" id="notification-dropdown-panel" style="position: absolute; top: 75px; right: 20px; z-index: 1000; width: 320px; max-height: 400px; overflow-y: auto; padding: 16px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px; margin-bottom: 12px;">
+          <h4 style="margin: 0; color: var(--text-main); font-size: 13px; font-weight: 700;">通知中心 / Notifications</h4>
+          <button class="btn btn-secondary btn-xs" onclick="markAllNotificationsRead()" style="font-size: 10px; padding: 2px 6px;">全部已讀</button>
+        </div>
+        <ul id="notification-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+          <li class="text-muted text-xs" style="text-align: center; padding: 12px 0;">No notifications / 尚無新通知</li>
+        </ul>
+      </div>
+
       <!-- Content Area -->
       <main class="content-container">
         
         <!-- =================== 1. CREATOR DASHBOARD =================== -->
         <section class="tab-content active" id="tab-dashboard">
-          <!-- Loading State Overlay -->
+          <!-- Loading State Overlay with Skeletons -->
           <div class="dashboard-loading-overlay" id="dashboard-loading">
-            <div class="loading-spinner"></div>
-            <p>Loading dashboard...</p>
+            <div class="skeleton-header" style="text-align: center;">
+              <div class="loading-spinner" style="margin: 0 auto 12px auto;"></div>
+              <p style="font-size: 16px; font-weight: 700; color: var(--text-main);">Loading Dashboard...</p>
+              <p style="font-size: 12px; color: var(--text-muted);">Please wait while we sync with Supabase modules</p>
+            </div>
+            <div class="kpi-grid skeleton-row" style="width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 24px; opacity: 0.3;">
+              <div class="glass-card kpi-card skeleton-card" style="height: 90px; background: rgba(255,255,255,0.02); position: relative; overflow: hidden;"></div>
+              <div class="glass-card kpi-card skeleton-card" style="height: 90px; background: rgba(255,255,255,0.02); position: relative; overflow: hidden;"></div>
+              <div class="glass-card kpi-card skeleton-card" style="height: 90px; background: rgba(255,255,255,0.02); position: relative; overflow: hidden;"></div>
+              <div class="glass-card kpi-card skeleton-card" style="height: 90px; background: rgba(255,255,255,0.02); position: relative; overflow: hidden;"></div>
+            </div>
+          </div>
+
+          <!-- Error State View -->
+          <div class="dashboard-error-state hidden" id="dashboard-error" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 80px 20px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: var(--radius-lg); text-align: center; min-height: 400px;">
+            <span style="font-size: 48px;">⚠️</span>
+            <h3 style="color: var(--text-main); margin: 0; font-size: 20px;">Unable to load dashboard / 無法載入儀表板</h3>
+            <p style="color: var(--text-muted); max-width: 400px; margin: 0; font-size: 14px;">An error occurred while connecting to the database modules. Please check your internet or retry.</p>
+            <button class="btn btn-primary" onclick="retryLoadDashboard()" style="background: var(--color-primary); padding: 10px 28px; font-weight: bold; border-radius: 6px;">🔄 Retry / 重試連線</button>
           </div>
 
           <!-- Empty State View -->
           <div class="dashboard-empty-state hidden" id="dashboard-empty">
             <div class="empty-state-card glass-card">
               <span class="empty-icon">📂</span>
-              <h3>No data yet</h3>
-              <p>Start by creating your first student, course, event, or AI Agent task to populate the dashboard metrics.</p>
+              <h3>No data yet / 尚無數據</h3>
+              <p>Start by creating your first Student, Course, Event, Content or AI Agent task to configure the system.</p>
               <div class="empty-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                 <button class="btn btn-primary" onclick="openNewStudentModal()">👥 Create Student</button>
                 <button class="btn btn-secondary" onclick="openNewCourseModal()">📚 Create Course</button>
                 <button class="btn btn-secondary" onclick="openNewEventModal()">📅 Create Event</button>
                 <button class="btn btn-secondary" onclick="switchTab('agents')">🤖 Configure AI Agent</button>
+                <button class="btn btn-secondary" onclick="switchTab('studio')">🎬 Create Content</button>
               </div>
             </div>
           </div>
 
           <!-- Real Data Grid -->
           <div class="dashboard-grid hidden" id="dashboard-data-grid">
-            <!-- Business Overview Rows -->
-            <div class="kpi-row">
-              <div class="glass-card kpi-card">
+            <!-- Business Overview Rows (9 KPI Grid) -->
+            <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+              <div class="glass-card kpi-card" id="card-students">
                 <span class="kpi-icon">👥</span>
                 <div class="kpi-data">
                   <span class="kpi-num" id="kpi-students">0</span>
                   <span class="kpi-label">學員總數 (Students)</span>
                 </div>
               </div>
-              <div class="glass-card kpi-card">
+              <div class="glass-card kpi-card" id="card-courses">
+                <span class="kpi-icon">📚</span>
+                <div class="kpi-data">
+                  <span class="kpi-num" id="kpi-courses">0</span>
+                  <span class="kpi-label">開立課程 (Courses)</span>
+                </div>
+              </div>
+              <div class="glass-card kpi-card" id="card-events">
+                <span class="kpi-icon">📅</span>
+                <div class="kpi-data">
+                  <span class="kpi-num" id="kpi-events">0</span>
+                  <span class="kpi-label">排定活動 (Upcoming Events)</span>
+                </div>
+              </div>
+              <div class="glass-card kpi-card" id="card-revenue">
                 <span class="kpi-icon">💰</span>
                 <div class="kpi-data">
                   <span class="kpi-num" id="kpi-revenue">NT$0</span>
                   <span class="kpi-label">營業收入 (Revenue)</span>
                 </div>
               </div>
-              <div class="glass-card kpi-card">
-                <span class="kpi-icon">📅</span>
+              <div class="glass-card kpi-card" id="card-pending-content">
+                <span class="kpi-icon">🎬</span>
                 <div class="kpi-data">
-                  <span class="kpi-num" id="kpi-events">0</span>
-                  <span class="kpi-label">排定課程與活動 (Events)</span>
+                  <span class="kpi-num" id="kpi-pending-content">0</span>
+                  <span class="kpi-label">待發社群 (Pending Content)</span>
                 </div>
               </div>
-              <div class="glass-card kpi-card">
+              <div class="glass-card kpi-card" id="card-ai-tasks">
+                <span class="kpi-icon">🤖</span>
+                <div class="kpi-data">
+                  <span class="kpi-num" id="kpi-ai-tasks">0</span>
+                  <span class="kpi-label">AI 經紀任務 (AI Tasks)</span>
+                </div>
+              </div>
+              <div class="glass-card kpi-card" id="card-unread-messages">
+                <span class="kpi-icon">💬</span>
+                <div class="kpi-data">
+                  <span class="kpi-num" id="kpi-unread-messages">0</span>
+                  <span class="kpi-label">未讀客服 (Unread Messages)</span>
+                </div>
+              </div>
+              <div class="glass-card kpi-card" id="card-growth">
                 <span class="kpi-icon">📈</span>
                 <div class="kpi-data">
                   <span class="kpi-num" id="kpi-growth">--</span>
-                  <span class="kpi-label">本月增長率 (Growth)</span>
+                  <span class="kpi-label">本月增長率 (Monthly Growth)</span>
+                </div>
+              </div>
+              <div class="glass-card kpi-card" id="card-completion-rate">
+                <span class="kpi-icon">🎯</span>
+                <div class="kpi-data">
+                  <span class="kpi-num" id="kpi-completion-rate">0%</span>
+                  <span class="kpi-label">平均出席率 (Completion Rate)</span>
                 </div>
               </div>
             </div>
 
             <!-- Insights and Quick Actions -->
             <div class="grid-2col">
-              <!-- AI Realtime Insights / Recommendations -->
-              <div class="glass-card action-card">
+              <!-- Recent Activities Timeline -->
+              <div class="glass-card preview-card" id="card-recent-activities">
                 <div class="card-header">
-                  <h3 class="card-title">💡 AI Recommendation Card</h3>
-                  <span class="badge badge-live">AI Insight</span>
+                  <h3 class="card-title">✔ Recent Activities / 最新動態</h3>
+                  <span class="badge badge-live">Timeline</span>
                 </div>
-                <div class="action-list">
-                  <div class="action-item warning">
-                    <div class="action-icon">🔥</div>
-                    <div class="action-details">
-                      <h4>今日發布建議</h4>
-                      <p>"Today you should post your Dancehall tutorial because engagement is higher than average."</p>
-                      <span class="text-xs text-muted">數據支撐：週三雷鬼教學影片平均互動率提升 35%</span>
-                    </div>
-                  </div>
-                  <div class="action-item info">
-                    <div class="action-icon">🎯</div>
-                    <div class="action-details">
-                      <h4>學員回訪提醒</h4>
-                      <p>學員 Leo Chen 已經連續缺席 2 堂課，且體驗卡即將到期。建議立即傳送溫暖問候以促進回購。</p>
-                    </div>
-                  </div>
+                <div style="max-height: 250px; overflow-y: auto; margin-top: 12px;">
+                  <ul class="activity-timeline" id="recent-activities-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+                    <li class="text-muted text-xs">No recent activity / 尚無最新動態</li>
+                  </ul>
                 </div>
               </div>
 
