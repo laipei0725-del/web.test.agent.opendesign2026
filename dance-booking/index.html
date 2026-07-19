@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dance Creator OS - 線上預約約課系統</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- CryptoJS Library for ECPay Signature Calculation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    /* Custom booking overrides */
+    .booking-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    .booking-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .booking-logo {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+    .booking-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .booking-subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    .booking-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .course-card {
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .course-card:hover {
+      transform: translateY(-4px);
+    }
+    .course-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .course-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .course-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .course-price-box {
+      margin-top: auto;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+    }
+    .price-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .price-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--color-accent);
+    }
+    .btn-book {
+      width: 100%;
+      margin-top: 16px;
+      justify-content: center;
+    }
+    
+    /* Checkout Modal */
+    .checkout-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      overflow-y: auto;
+      padding: 40px 20px;
+    }
+    .checkout-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .checkout-card {
+      width: 100%;
+      max-width: 500px;
+      padding: 30px;
+      border-radius: var(--radius-lg);
+    }
+    .checkout-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
+    }
+    .checkout-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .btn-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .test-box {
+      background: rgba(134, 168, 231, 0.08);
+      border: 1px solid rgba(134, 168, 231, 0.25);
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .test-box strong {
+      color: var(--color-primary);
+    }
+    
+    /* Loader inside modal */
+    .checkout-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 40px 0;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3.5px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="theme-light">
+  <div class="booking-container">
+    <header class="booking-header">
+      <span class="booking-logo">💃</span>
+      <h1 class="booking-title">Dance Creator OS</h1>
+      <p class="booking-subtitle">線上預約約課與綠界金流 (ECPay) 測試支付系統</p>
+    </header>
+
+    <!-- Classes Grid -->
+    <main class="booking-grid" id="booking-classes-grid">
+      <!-- Loading placeholder skeletons -->
+      <div class="glass-card course-card skeleton">
+        <div style="height: 24px; background: rgba(0,0,0,0.05); width: 60%; margin-bottom: 12px; border-radius: 4px;"></div>
+        <div style="height: 14px; background: rgba(0,0,0,0.05); width: 80%; margin-bottom: 8px; border-radius: 4px;"></div>
+        <div style="height: 14px; background: rgba(0,0,0,0.05); width: 40%; margin-bottom: 24px; border-radius: 4px;"></div>
+        <div style="height: 40px; background: rgba(0,0,0,0.05); margin-top: auto; border-radius: 8px;"></div>
+      </div>
+      <div class="glass-card course-card skeleton">
+        <div style="height: 24px; background: rgba(0,0,0,0.05); width: 50%; margin-bottom: 12px; border-radius: 4px;"></div>
+        <div style="height: 14px; background: rgba(0,0,0,0.05); width: 70%; margin-bottom: 8px; border-radius: 4px;"></div>
+        <div style="height: 14px; background: rgba(0,0,0,0.05); width: 50%; margin-bottom: 24px; border-radius: 4px;"></div>
+        <div style="height: 40px; background: rgba(0,0,0,0.05); margin-top: auto; border-radius: 8px;"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Checkout / ECPay Form Modal -->
+  <div class="checkout-overlay" id="checkout-modal">
+    <div class="glass-card checkout-card" id="checkout-form-container">
+      <div class="checkout-header">
+        <h3>💳 填寫預約與付款資料</h3>
+        <button class="btn-close" onclick="closeCheckoutModal()">✕</button>
+      </div>
+
+      <!-- Test Mode Guidelines -->
+      <div class="test-box">
+        <strong>⚙️ 綠界金流測試特店 (ECPay Stage Test Mode)</strong><br>
+        測試特店編號：<code>3002607</code><br>
+        測試信用卡卡號：<strong><code>4311-9522-2222-2222</code></strong><br>
+        有效年月：需大於當下（例如 12/2029）<br>
+        安全碼：輸入任意三碼（例如 222）
+      </div>
+
+      <!-- Form Inputs -->
+      <div id="checkout-fields">
+        <div class="form-group">
+          <label>已選課程 (Course Selected)</label>
+          <input type="text" id="pay-course-title" class="form-control" readonly style="opacity: 0.8;">
+        </div>
+        <div class="form-group">
+          <label>單堂約課金額 (Amount)</label>
+          <input type="text" id="pay-course-price" class="form-control" readonly style="opacity: 0.8; font-weight: 700; color: var(--color-accent);">
+        </div>
+        <div class="form-group">
+          <label for="pay-student-name">預約人姓名 (Name)</label>
+          <input type="text" id="pay-student-name" class="form-control" placeholder="請輸入您的姓名" value="林艾瑪">
+        </div>
+        <div class="form-group">
+          <label for="pay-student-email">電子信箱 (Email)</label>
+          <input type="email" id="pay-student-email" class="form-control" placeholder="example@email.com" value="emma.lin@test.com">
+        </div>
+        <div class="form-group">
+          <label for="pay-student-phone">手機號碼 (Phone)</label>
+          <input type="text" id="pay-student-phone" class="form-control" placeholder="請輸入手機號碼" value="0912345678">
+        </div>
+        
+        <button class="btn btn-primary btn-book" onclick="submitECPayPayment()" style="margin-top: 24px;">
+          💳 前往綠界金流進行信用卡支付
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div class="checkout-loading" id="checkout-loading-state">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; color: var(--text-main);">正在進行綠界 SHA256 簽章加密，前往安全收銀台...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real Hidden ECPay Form -->
+  <form id="ecpay-checkout-form" method="POST" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" style="display: none;">
+    <input type="hidden" name="MerchantID" id="ecpay-MerchantID">
+    <input type="hidden" name="MerchantTradeNo" id="ecpay-MerchantTradeNo">
+    <input type="hidden" name="MerchantTradeDate" id="ecpay-MerchantTradeDate">
+    <input type="hidden" name="PaymentType" id="ecpay-PaymentType">
+    <input type="hidden" name="TotalAmount" id="ecpay-TotalAmount">
+    <input type="hidden" name="TradeDesc" id="ecpay-TradeDesc">
+    <input type="hidden" name="ItemName" id="ecpay-ItemName">
+    <input type="hidden" name="ReturnURL" id="ecpay-ReturnURL">
+    <input type="hidden" name="ChoosePayment" id="ecpay-ChoosePayment">
+    <input type="hidden" name="EncryptType" id="ecpay-EncryptType">
+    <input type="hidden" name="ClientBackURL" id="ecpay-ClientBackURL">
+    <input type="hidden" name="CheckMacValue" id="ecpay-CheckMacValue">
+  </form>
+
+  <script type="module" src="booking.js"></script>
+</body>
+</html>
