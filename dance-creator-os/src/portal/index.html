@@ -98,19 +98,16 @@
     <!-- Right Column: 9:16 Vertical Video / Motion Frame -->
     <div class="flex justify-center md:justify-end">
       <div class="w-full max-w-[340px] aspect-[9/16] bg-[#ebe2d3]/50 rounded-[32px] overflow-hidden shadow-polaroid border-[8px] border-white relative group">
-        <!-- Mock Vertical Video Stream representing warm body movement -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-brand-coral/10 to-transparent flex flex-col justify-end p-6 z-10">
+        <!-- Real HTML5 Video element -->
+        <video class="absolute inset-0 w-full h-full object-cover z-0" src="assets/instagram_video.mp4" autoplay loop muted playsinline></video>
+        <!-- Overlay text content -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 z-10">
           <span class="text-2xl mb-1">📽️</span>
           <h4 class="text-white text-sm font-bold font-serif italic">Body Awareness Film</h4>
           <p class="text-white/80 text-[10px] mt-1 leading-relaxed">流暢、帶有情緒張力的身體律動與溫暖光影特寫</p>
         </div>
         <!-- Stylized Warm Film Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-br from-orange-400/20 via-transparent to-purple-400/20 mix-blend-screen pointer-events-none z-20"></div>
-        <div class="absolute inset-0 bg-slate-900/10 z-0"></div>
-        <!-- Background Animation Effect placeholder -->
-        <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-6xl animate-bounce">🌊</span>
-        </div>
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-400/10 via-transparent to-purple-400/10 mix-blend-screen pointer-events-none z-20"></div>
       </div>
     </div>
   </section>
@@ -162,6 +159,26 @@
         </div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- 2.5. CINEMATIC VIDEO SHOWCASE -->
+  <section class="max-w-6xl mx-auto px-6 py-12">
+    <div class="bg-white/40 border border-brand-warmText/5 p-6 md:p-8 rounded-[36px] shadow-retro space-y-6">
+      <div class="flex justify-between items-center border-b border-brand-warmText/5 pb-4">
+        <div>
+          <span class="text-xs uppercase tracking-widest font-bold text-brand-peach">SOLMIÉ Movement Film</span>
+          <h3 class="text-xl font-bold font-serif mt-1">「尋找身體的純粹」常態編舞排練紀錄</h3>
+        </div>
+        <span class="text-xs text-brand-coral font-serif italic">Play with Sound 🔊</span>
+      </div>
+      
+      <!-- Widescreen video player with vintage play-stop vibes -->
+      <div class="relative w-full aspect-video rounded-3xl overflow-hidden shadow-polaroid bg-slate-900">
+        <video id="showcase-video" class="w-full h-full object-cover" src="assets/video.mp4" controls loop muted playsinline></video>
+        <!-- Warm color overlay (light leaks style) -->
+        <div class="absolute inset-0 bg-gradient-to-tr from-brand-peach/5 via-transparent to-brand-marshmallow/5 mix-blend-screen pointer-events-none"></div>
+      </div>
     </div>
   </section>
 
