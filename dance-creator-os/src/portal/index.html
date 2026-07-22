@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dance Creator OS - 線上預約約課系統</title>
+  <title>SOLMIÉ - Soul first. Style follows.</title>
   <!-- Tailwind CSS Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -12,15 +12,18 @@
         extend: {
           colors: {
             brand: {
-              pink: '#D16BA5',
-              blue: '#86A8E7',
-              cyan: '#5FFBF1',
-              lightBg: '#FAF9FD',
-              cardLight: 'rgba(255, 255, 255, 0.85)',
+              coral: '#E85A4F',       /* Coral Red */
+              peach: '#E98074',       /* Gentle Peach Orange */
+              lavender: '#D8C3A5',    /* Warm Sand */
+              marshmallow: '#CFA8E8', /* Marshmallow Purple */
+              warmBg: '#FAF6F0',      /* Warm White background */
+              warmText: '#2C2623',    /* Dark Warm Grey instead of pure black */
+              cardWarm: 'rgba(255, 255, 255, 0.9)',
             }
           },
           boxShadow: {
-            glassLight: '0 8px 32px 0 rgba(134, 168, 231, 0.08)',
+            retro: '0 8px 30px rgba(232, 90, 79, 0.08)',
+            polaroid: '0 10px 25px -5px rgba(44, 38, 35, 0.15), 0 8px 10px -6px rgba(44, 38, 35, 0.15)',
           }
         }
       }
@@ -28,100 +31,244 @@
   </script>
   <!-- CryptoJS Library for ECPay Signature Calculation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Merriweather (Serif) & Inter (Sans-serif) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    h1, h2, h3, h4, .font-serif {
+      font-family: 'Merriweather', Georgia, serif;
+    }
+    body, .font-sans {
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    /* Polaroid retro frame look */
+    .polaroid-frame {
+      background: #FFFFFF;
+      padding: 12px 12px 24px 12px;
+      border: 1px solid rgba(44, 38, 35, 0.08);
     }
   </style>
 </head>
-<body class="bg-brand-lightBg text-slate-800 min-h-screen relative pb-12 overflow-x-hidden">
+<body class="bg-brand-warmBg text-brand-warmText min-h-screen relative pb-16 overflow-x-hidden selection:bg-brand-coral/20 selection:text-brand-coral">
 
-  <!-- Background pastel glows -->
-  <div class="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-b from-brand-cyan/5 to-transparent blur-[70px] pointer-events-none -z-10"></div>
-  <div class="absolute bottom-0 left-0 w-[450px] h-[450px] bg-gradient-to-t from-brand-pink/5 to-transparent blur-[70px] pointer-events-none -z-10"></div>
+  <!-- Subtle light leak decoration (1980s film warm tint) -->
+  <div class="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-b from-[#F99B72]/15 to-transparent blur-[90px] pointer-events-none -z-10 animate-pulse" style="animation-duration: 8s;"></div>
+  <div class="absolute top-[20%] left-0 w-[450px] h-[450px] bg-brand-marshmallow/10 blur-[80px] pointer-events-none -z-10"></div>
+  <div class="absolute bottom-[10%] right-[-100px] w-[500px] h-[500px] bg-brand-coral/8 blur-[100px] pointer-events-none -z-10"></div>
 
-  <!-- Header Section -->
-  <header class="py-12 text-center max-w-4xl mx-auto px-6">
-    <span class="text-5xl mb-4 inline-block">💃</span>
-    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-brand-pink via-brand-blue to-brand-cyan bg-clip-text text-transparent">DANCE CREATOR</h1>
-    <p class="text-gray-500 text-xs mt-2 uppercase tracking-widest font-semibold">Online Class Booking & Portfolio</p>
+  <!-- Navigation bar -->
+  <header class="py-6 px-8 max-w-6xl mx-auto flex items-center justify-between border-b border-brand-warmText/5">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">💃</span>
+      <span class="font-serif font-black text-xl tracking-tight text-brand-coral">SOLMIÉ</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-8 text-xs font-semibold tracking-widest uppercase text-brand-warmText/70">
+      <a href="#home" class="hover:text-brand-coral transition-colors">首頁</a>
+      <a href="#about" class="hover:text-brand-coral transition-colors">品牌故事</a>
+      <a href="#bookings" class="hover:text-brand-coral transition-colors">課程預約</a>
+      <a href="#journal" class="hover:text-brand-coral transition-colors">創作者誌</a>
+    </nav>
   </header>
 
-  <main class="max-w-4xl mx-auto px-6 space-y-12">
+  <!-- 1. HERO SECTION (Home) -->
+  <section id="home" class="max-w-6xl mx-auto px-6 py-12 md:py-20 grid md:grid-cols-2 gap-12 items-center">
     
-    <!-- 1. Creator Bio & Philosophy -->
-    <section class="bg-white/75 backdrop-blur-md border border-slate-200/50 p-8 rounded-3xl shadow-glassLight space-y-4">
-      <h2 class="text-xl font-bold border-b border-slate-100 pb-3">✨ 關於創作者 (Brand Story)</h2>
-      <p class="text-sm leading-relaxed text-slate-600">
-        專注於牙買加雷鬼（Dancehall）基礎與排舞編舞特訓。我們的理念是：「每個人都能找到自己身體的律動節奏」。
-        在此您可以找到最新的短影音作品，並直接線上刷卡約課，開啟您的跳舞旅程！
+    <!-- Left Column: Story text and Brand Statement -->
+    <div class="space-y-8">
+      <span class="text-xs uppercase tracking-widest font-bold text-brand-coral bg-brand-coral/10 px-3.5 py-1.5 rounded-full inline-block">Brand Statement</span>
+      <div class="space-y-4">
+        <h2 class="text-4xl md:text-5xl font-black leading-tight italic font-serif">
+          Soul first.<br>Style follows.
+        </h2>
+        <p class="text-base text-brand-warmText/80 leading-relaxed max-w-md pt-4 border-t border-brand-warmText/10">
+          「在這個世界上，妳不必為了誰變得安靜。」
+        </p>
+      </div>
+      <p class="text-xs text-brand-warmText/60 leading-relaxed max-w-sm">
+        SOLMIÉ 是一個充滿「人味」與「身體故事感」的角落。我們透過肢體覺察、帶有溫度的律動與呼吸，引導妳卸下防備，找回靈魂最真實、最自信的形狀。
       </p>
-    </section>
+      <div class="pt-2">
+        <a href="#bookings" class="px-6 py-3.5 bg-brand-coral text-white font-bold rounded-full text-xs tracking-widest uppercase shadow-retro hover:bg-brand-coral/95 hover:scale-[1.01] transition-all inline-block">
+          ⚡ 立即預約課程 (Book Now)
+        </a>
+      </div>
+    </div>
 
-    <!-- 2. Video Reels Showcase (Embeds) -->
-    <section class="space-y-4">
-      <h2 class="text-xl font-bold text-slate-800">🎬 精彩短影音作品集 (Reels / Portfolio)</h2>
-      <div class="grid grid-cols-2 gap-6">
-        <!-- Mock Reels Container -->
-        <div class="bg-white/75 border border-slate-200/50 p-4 rounded-3xl shadow-glassLight flex flex-col items-center">
-          <div class="w-full aspect-[9/16] bg-slate-100 rounded-2xl flex items-center justify-center relative overflow-hidden group">
-            <span class="text-4xl text-slate-300">▶️</span>
-            <!-- Decorative play icon overlay -->
-            <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors flex items-center justify-center cursor-pointer">
-              <span class="text-xs font-semibold text-white bg-slate-900/60 px-3 py-1 rounded-full backdrop-blur-sm">點擊觀看 Dancehall Choreo</span>
-            </div>
-          </div>
-          <p class="text-xs font-bold mt-3 text-slate-700">雷鬼排舞編舞成果演示 🔥</p>
+    <!-- Right Column: 9:16 Vertical Video / Motion Frame -->
+    <div class="flex justify-center md:justify-end">
+      <div class="w-full max-w-[340px] aspect-[9/16] bg-[#ebe2d3]/50 rounded-[32px] overflow-hidden shadow-polaroid border-[8px] border-white relative group">
+        <!-- Mock Vertical Video Stream representing warm body movement -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-brand-coral/10 to-transparent flex flex-col justify-end p-6 z-10">
+          <span class="text-2xl mb-1">📽️</span>
+          <h4 class="text-white text-sm font-bold font-serif italic">Body Awareness Film</h4>
+          <p class="text-white/80 text-[10px] mt-1 leading-relaxed">流暢、帶有情緒張力的身體律動與溫暖光影特寫</p>
         </div>
-
-        <div class="bg-white/75 border border-slate-200/50 p-4 rounded-3xl shadow-glassLight flex flex-col items-center">
-          <div class="w-full aspect-[9/16] bg-slate-100 rounded-2xl flex items-center justify-center relative overflow-hidden group">
-            <span class="text-4xl text-slate-300">▶️</span>
-            <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors flex items-center justify-center cursor-pointer">
-              <span class="text-xs font-semibold text-white bg-slate-900/60 px-3 py-1 rounded-full backdrop-blur-sm">點擊觀看 Foundation Class</span>
-            </div>
-          </div>
-          <p class="text-xs font-bold mt-3 text-slate-700">雷鬼基礎班學員精華紀錄 💃</p>
+        <!-- Stylized Warm Film Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-400/20 via-transparent to-purple-400/20 mix-blend-screen pointer-events-none z-20"></div>
+        <div class="absolute inset-0 bg-slate-900/10 z-0"></div>
+        <!-- Background Animation Effect placeholder -->
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-6xl animate-bounce">🌊</span>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- 3. Dynamic Booking Catalog Grid -->
-    <section class="space-y-4">
-      <h2 class="text-xl font-bold text-slate-800">📅 即時排定課程清單 (Book Classes)</h2>
-      <div class="grid grid-cols-2 gap-6" id="booking-classes-grid">
-        <!-- Placeholder Skeletons -->
-        <div class="bg-white/75 border border-slate-200/50 p-6 rounded-3xl shadow-glassLight h-48 animate-pulse flex flex-col justify-between">
-          <div class="w-2/3 h-6 bg-slate-200 rounded"></div>
-          <div class="w-full h-4 bg-slate-100 rounded"></div>
-          <div class="w-1/3 h-8 bg-slate-200 rounded self-end"></div>
+  <!-- 2. ABOUT SECTION (Brand Story) -->
+  <section id="about" class="py-16 md:py-24 border-t border-brand-warmText/5 bg-white/20">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+      
+      <!-- Left Column: Founder's Polaroid Gallery using uploaded image -->
+      <div class="flex flex-col items-center justify-center gap-6">
+        <div class="polaroid-frame shadow-polaroid rotate-[-2deg] hover:rotate-0 transition-transform duration-300 max-w-[280px]">
+          <div class="aspect-[3/4] overflow-hidden bg-slate-100 mb-4 rounded">
+            <!-- founder portrait -->
+            <img src="assets/founder.jpg" alt="SOLMIÉ Founder" class="w-full h-full object-cover grayscale object-top">
+          </div>
+          <div class="text-center font-serif text-xs italic text-brand-warmText/70">
+            So, this is me.
+          </div>
         </div>
-        <div class="bg-white/75 border border-slate-200/50 p-6 rounded-3xl shadow-glassLight h-48 animate-pulse flex flex-col justify-between">
-          <div class="w-1/2 h-6 bg-slate-200 rounded"></div>
-          <div class="w-full h-4 bg-slate-100 rounded"></div>
-          <div class="w-1/3 h-8 bg-slate-200 rounded self-end"></div>
+        
+        <div class="polaroid-frame shadow-polaroid rotate-[3deg] hover:rotate-0 transition-transform duration-300 max-w-[240px] self-end md:-mt-16 md:mr-12">
+          <div class="aspect-[3/4] overflow-hidden bg-slate-100 mb-3 rounded">
+            <!-- founder alternate portrait -->
+            <img src="assets/founder.jpg" alt="SOLMIÉ Pose" class="w-full h-full object-cover object-center">
+          </div>
+          <div class="text-center font-serif text-[10px] uppercase tracking-widest font-bold text-brand-coral">
+            Bloom without apology.
+          </div>
         </div>
       </div>
-    </section>
 
-  </main>
+      <!-- Right Column: Heartfelt heart-to-heart Story text -->
+      <div class="space-y-6">
+        <span class="text-xs uppercase tracking-widest font-bold text-brand-peach">Our Founder</span>
+        <h2 class="text-3xl font-bold font-serif leading-tight">So, this is me.</h2>
+        <div class="space-y-4 text-xs text-brand-warmText/80 leading-relaxed font-sans">
+          <p>
+            「從小，我們就被教育要乖巧、要安靜、要融入人群。但當我第一次站在鏡子前，跟著心跳聲跳舞時，我才發現，靈魂本來就有自己的呼吸。」
+          </p>
+          <p>
+            創辦人以真實的肢體創作成人心路歷程建立 SOLMIÉ。這不是一個訓練完美舞姿的培訓所，而是一個溫暖、知性、充滿 1980 年代復古陽光調性的女性肢體自覺空間。
+          </p>
+          <p>
+            在這裡，我們只專注在：**「讓靈魂以最舒適的姿態盛開 (Bloom without apology)」**。不管妳年齡多少、身體柔軟度如何，都值得 wear your soul out loud。
+          </p>
+        </div>
+        <div class="pt-2 border-t border-brand-warmText/10">
+          <span class="text-sm font-serif italic text-brand-coral block">"Bloom without apology."</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3. BOOKINGS SECTION (Class Reservation) -->
+  <section id="bookings" class="max-w-6xl mx-auto px-6 py-16 md:py-24 space-y-12">
+    <div class="text-center max-w-xl mx-auto space-y-3">
+      <span class="text-xs uppercase tracking-widest font-bold text-brand-coral">Bookings</span>
+      <h2 class="text-3xl font-bold font-serif">身體覺察與自信表達課程</h2>
+      <p class="text-xs text-brand-warmText/70 leading-relaxed">
+        在陽光灑落的教室中，透過緩慢的肢體呼吸、雷鬼的律動爆發、以及自我表達編舞，找回與身體的連結。
+      </p>
+    </div>
+
+    <!-- Dynamic Classes Grid -->
+    <div class="grid md:grid-cols-2 gap-8" id="booking-classes-grid">
+      <!-- Loading skeletons placeholder -->
+      <div class="bg-white/70 border border-brand-warmText/5 p-8 rounded-3xl h-56 animate-pulse flex flex-col justify-between shadow-retro">
+        <div class="w-1/2 h-6 bg-slate-200 rounded"></div>
+        <div class="w-full h-4 bg-slate-100 rounded"></div>
+        <div class="w-1/3 h-8 bg-slate-200 rounded self-end"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CREATORS HUB (Journal Magazine) -->
+  <section id="journal" class="py-16 md:py-24 border-t border-brand-warmText/5 bg-[#F3ECE1]/30">
+    <div class="max-w-6xl mx-auto px-6 space-y-12">
+      
+      <div class="flex justify-between items-end border-b border-brand-warmText/10 pb-4">
+        <div>
+          <span class="text-xs uppercase tracking-widest font-bold text-brand-peach">Creators Hub</span>
+          <h2 class="text-3xl font-bold font-serif mt-2">SOLMIÉ 創作者誌 (Journal)</h2>
+        </div>
+        <span class="text-xs text-brand-warmText/50 font-semibold tracking-wider font-serif">Wear your soul out loud.</span>
+      </div>
+
+      <!-- Journal layout - Magazine Editorial style -->
+      <div class="grid md:grid-cols-3 gap-8">
+        
+        <!-- Article Card 1 -->
+        <article class="bg-white p-6 rounded-3xl shadow-retro space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <span class="text-[10px] font-bold text-brand-coral uppercase tracking-wider block">肢體自覺 • 2026/07</span>
+            <h3 class="text-base font-bold font-serif leading-snug">
+              第一篇：在動作中，找到不必被定義的安靜
+            </h3>
+            <p class="text-xs text-brand-warmText/70 leading-relaxed line-clamp-3">
+              跳舞不是為了在社交媒體上獲得點讚。當我緊閉雙眼，讓身體隨著慢節奏雷鬼左右搖擺時，我找到了不需要迎合任何人的自由...
+            </p>
+          </div>
+          <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-[10px]">
+            <span class="font-serif italic text-brand-warmText/50">Made to move.</span>
+            <span class="font-bold text-brand-coral cursor-pointer hover:underline">閱讀全文 →</span>
+          </div>
+        </article>
+
+        <!-- Article Card 2 -->
+        <article class="bg-white p-6 rounded-3xl shadow-retro space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <span class="text-[10px] font-bold text-brand-coral uppercase tracking-wider block">復古調性 • 2026/06</span>
+            <h3 class="text-base font-bold font-serif leading-snug">
+              第二篇：為什麼 1990 年代的陽光最溫暖？
+            </h3>
+            <p class="text-xs text-brand-warmText/70 leading-relaxed line-clamp-3">
+              底片機的顆粒感、陽光照在肩膀上的炙熱、未經修飾的肢體律動。我們尋求的不是無瑕，而是有生命厚度的真實...
+            </p>
+          </div>
+          <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-[10px]">
+            <span class="font-serif italic text-brand-warmText/50">Born to glow.</span>
+            <span class="font-bold text-brand-coral cursor-pointer hover:underline">閱讀全文 →</span>
+          </div>
+        </article>
+
+        <!-- Dynamic Magazine Golden Quote Box -->
+        <div class="bg-brand-coral/5 border border-brand-coral/20 p-8 rounded-3xl flex flex-col justify-between text-center relative overflow-hidden">
+          <div class="absolute -right-10 -top-10 w-24 h-24 bg-brand-coral/10 rounded-full blur-xl"></div>
+          <span class="text-3xl text-brand-coral block">“</span>
+          <p class="font-serif italic text-sm text-brand-warmText leading-relaxed">
+            Wear your soul out loud.<br>
+            Made to move.<br>
+            Born to glow.
+          </p>
+          <span class="text-3xl text-brand-coral block self-end">”</span>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="pt-12 text-center text-xs text-brand-warmText/40 border-t border-brand-warmText/5 max-w-6xl mx-auto px-6">
+    <p>© 2026 SOLMIÉ Co. All rights reserved.</p>
+  </footer>
 
   <!-- Checkout / ECPay Form Modal Overlay (Scrollable optimized) -->
   <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto p-10 opacity-0 pointer-events-none transition-all duration-300" id="checkout-modal">
     <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl relative my-auto">
       
       <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
-        <h3 class="text-lg font-bold text-slate-800">💳 填寫預約與付款資料</h3>
+        <h3 class="text-lg font-bold font-serif text-slate-800">💳 填寫預約與付款資料</h3>
         <button class="text-slate-400 hover:text-slate-600 text-xl font-bold" onclick="closeCheckoutModal()">✕</button>
       </div>
 
       <!-- ECPay Stage Instructions banner -->
-      <div class="bg-brand-blue/10 border border-brand-blue/30 p-4 rounded-2xl text-xs text-slate-700 leading-relaxed mb-6">
-        <strong class="text-brand-pink block mb-1">⚙️ 綠界金流測試收銀台 (ECPay Stage Test Mode)</strong>
+      <div class="bg-orange-50 border border-orange-200/60 p-4 rounded-2xl text-xs text-slate-700 leading-relaxed mb-6">
+        <strong class="text-brand-coral block mb-1">⚙️ 綠界金流測試收銀台 (ECPay Stage Test Mode)</strong>
         特店編號：<code>3002607</code><br>
         測試信用卡卡號：<strong><code>4311-9522-2222-2222</code></strong><br>
         有效年月：需大於當下（例如 `12/2029`），安全碼任意 3 碼。
@@ -135,29 +282,29 @@
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-600 block mb-1">繳費金額 (Amount)</label>
-          <input type="text" id="pay-course-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-brand-pink focus:outline-none" readonly>
+          <input type="text" id="pay-course-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-brand-coral focus:outline-none" readonly>
         </div>
         <div>
           <label for="pay-student-name" class="text-xs font-semibold text-slate-600 block mb-1">學員姓名 (Name)</label>
-          <input type="text" id="pay-student-name" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue" value="林艾瑪">
+          <input type="text" id="pay-student-name" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-peach" value="林艾瑪">
         </div>
         <div>
           <label for="pay-student-email" class="text-xs font-semibold text-slate-600 block mb-1">電子信箱 (Email)</label>
-          <input type="email" id="pay-student-email" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue" value="emma.lin@test.com">
+          <input type="email" id="pay-student-email" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-peach" value="emma.lin@test.com">
         </div>
         <div>
           <label for="pay-student-phone" class="text-xs font-semibold text-slate-600 block mb-1">手機號碼 (Phone)</label>
-          <input type="text" id="pay-student-phone" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue" value="0912345678">
+          <input type="text" id="pay-student-phone" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-peach" value="0912345678">
         </div>
 
-        <button class="w-full py-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-cyan text-[#090710] rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition-transform mt-6" onclick="submitECPayPayment()">
+        <button class="w-full py-3 bg-brand-coral text-white rounded-xl text-xs font-bold shadow-md hover:bg-brand-coral/95 hover:scale-[1.01] transition-transform mt-6" onclick="submitECPayPayment()">
           💳 確認資料，前往綠界金流刷卡支付
         </button>
       </div>
 
       <!-- Loading Overlay -->
       <div id="checkout-loading-state" class="hidden flex-col items-center justify-center py-10 space-y-4">
-        <div class="w-10 h-10 border-4 border-slate-200 border-t-brand-pink rounded-full animate-spin"></div>
+        <div class="w-10 h-10 border-4 border-slate-200 border-t-brand-coral rounded-full animate-spin"></div>
         <p class="text-xs font-semibold text-slate-600">正在生成綠界加密校驗碼，前往安全支付頁面...</p>
       </div>
 
