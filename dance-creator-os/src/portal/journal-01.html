@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOLMIÉ Journal - 在動作中，找到不必被定義的安靜</title>
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              coral: '#E85A4F',
+              peach: '#E98074',
+              warmBg: '#FAF6F0',
+              warmText: '#2C2623',
+            }
+          },
+          boxShadow: {
+            retro: '0 8px 30px rgba(232, 90, 79, 0.08)',
+            polaroid: '0 10px 25px -5px rgba(44, 38, 35, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts: Merriweather (Serif) & Inter (Sans-serif) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    h1, h2, h3, h4, .font-serif {
+      font-family: 'Merriweather', Georgia, serif;
+    }
+    body, .font-sans {
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .polaroid-frame {
+      background: #FFFFFF;
+      padding: 16px 16px 32px 16px;
+      border: 1px solid rgba(44, 38, 35, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-brand-warmBg text-brand-warmText min-h-screen relative pb-20 selection:bg-brand-coral/20 selection:text-brand-coral">
+
+  <!-- Subtle warm gradient glow -->
+  <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-b from-[#F99B72]/10 to-transparent blur-[80px] pointer-events-none -z-10"></div>
+
+  <!-- Header strip -->
+  <header class="py-6 px-8 max-w-4xl mx-auto flex items-center justify-between border-b border-brand-warmText/5">
+    <a href="index.html" class="flex items-center gap-2 hover:opacity-85 transition-opacity">
+      <span class="text-xl">💃</span>
+      <span class="font-serif font-black text-lg tracking-tight text-brand-coral">SOLMIÉ</span>
+    </a>
+    <a href="index.html" class="text-xs font-semibold tracking-wider text-brand-warmText/60 hover:text-brand-coral transition-colors">← 返回品牌首頁</a>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-12 space-y-12">
+    
+    <!-- Title Area -->
+    <div class="space-y-4 text-center md:text-left">
+      <span class="text-xs uppercase tracking-widest font-bold text-brand-coral bg-brand-coral/10 px-3.5 py-1.5 rounded-full inline-block">Journal • 肢體自覺</span>
+      <h1 class="text-3xl md:text-4xl font-bold leading-tight font-serif text-brand-warmText">
+        在動作中，找到不必被定義的安靜
+      </h1>
+      <p class="text-xs text-brand-warmText/50 font-medium">發布日期：2026 年 7 月 22 日 • 撰文：SOLMIÉ 編輯部</p>
+    </div>
+
+    <!-- Main Image Polaroid Style -->
+    <div class="flex justify-center">
+      <div class="polaroid-frame shadow-polaroid rounded-lg max-w-xl w-full">
+        <div class="aspect-[3/2] overflow-hidden bg-slate-100 mb-4 rounded">
+          <img src="assets/journal_corner.jpg" alt="Sunlit wooden floor studio" class="w-full h-full object-cover">
+        </div>
+        <div class="text-center font-serif text-xs italic text-brand-warmText/70">
+          "Wear your soul out loud. Made to move." - SOLMIÉ Studio.
+        </div>
+      </div>
+    </div>
+
+    <!-- Article Content -->
+    <article class="space-y-6 text-sm text-brand-warmText/90 leading-relaxed font-sans max-w-2xl mx-auto">
+      <p class="font-bold text-base text-brand-warmText font-serif italic border-l-4 border-brand-coral pl-4">
+        「跳舞不是為了在鏡子前拼湊出完美的姿態，而是為了在流動的汗水與呼吸中，聽見心跳在說些什麼。」
+      </p>
+      
+      <p>
+        在擁擠的城市裡，我們每天都在迎合別人的標準——在辦公室要專業、在家庭要溫柔、在社群網路上要活得光鮮亮麗。漸漸地，我們把真正的自己鎖了起來，變得越來越安靜，甚至忘記了自己身體原本的溫度。
+      </p>
+
+      <p>
+        來到 SOLMIÉ 的教室，許多學員一開始甚至不敢看著鏡子裡的自己。她們羞怯、拘謹，每一個跨步都像是被尺規量過一般小心翼翼。然而，當我們將音樂的重低音緩緩調大，引導大家閉上雙眼，純粹跟著音樂左右搖擺時，魔法就發生了。
+      </p>
+
+      <p>
+        「在這裡，妳不必完美，也不必為了討好誰而收斂。」這是老師最常說的一句話。當妳不再把跳舞當作是一門功課，而是把手腳擺動當作是靈魂的宣洩時，妳會在這裡感受到久違的「心靈靜止」。
+      </p>
+    </article>
+
+    <!-- Golden Quote Box -->
+    <div class="bg-brand-coral/5 border-y border-brand-coral/20 py-8 px-6 text-center max-w-xl mx-auto">
+      <span class="font-serif italic text-lg text-brand-coral block mb-2">So, this is me.</span>
+      <p class="text-xs text-brand-warmText/70 leading-relaxed font-sans">
+        在緩慢的律動中，釋放積壓已久的壓力。這不只是一堂跳舞課，而是一場找回身體主導權的自覺旅程。
+      </p>
+    </div>
+
+    <!-- Navigation & CTA Button Bar -->
+    <div class="pt-8 border-t border-brand-warmText/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <a href="index.html" class="text-xs font-bold uppercase tracking-wider text-brand-warmText/60 hover:text-brand-coral transition-colors">
+        ← 返回首頁 (Back Home)
+      </a>
+      <a href="index.html#bookings" class="px-8 py-3.5 bg-brand-coral text-white font-bold rounded-full text-xs tracking-widest uppercase shadow-retro hover:bg-brand-coral/95 hover:scale-[1.01] transition-all">
+        ⚡ 立即預約課程 (Book Class Now)
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="pt-12 text-center text-xs text-brand-warmText/40 border-t border-brand-warmText/5 max-w-3xl mx-auto px-6">
+    <p>© 2026 SOLMIÉ Co. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
