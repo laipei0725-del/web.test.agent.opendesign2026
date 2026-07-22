@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+.env
+*.mp4
+claude-real-video/
+crv-out/
+n8n.log
+*.log

@@ -1,0 +1,63 @@
+{
+  "size": {
+    "width": 2500,
+    "height": 1686
+  },
+  "selected": true,
+  "name": "Dance Creator OS Rich Menu",
+  "chatBarText": "💃 舞蹈創作者選單",
+  "areas": [
+    {
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1250,
+        "height": 843
+      },
+      "action": {
+        "type": "uri",
+        "label": "線上約課 (Book)",
+        "uri": "https://laipei0725-del.github.io/web.test.agent.opendesign2026/dance-creator-os/src/portal/index.html"
+      }
+    },
+    {
+      "bounds": {
+        "x": 1250,
+        "y": 0,
+        "width": 1250,
+        "height": 843
+      },
+      "action": {
+        "type": "message",
+        "label": "查詢剩餘堂數",
+        "text": "查詢剩餘堂數"
+      }
+    },
+    {
+      "bounds": {
+        "x": 0,
+        "y": 843,
+        "width": 1250,
+        "height": 843
+      },
+      "action": {
+        "type": "message",
+        "label": "最新課表異動",
+        "text": "線上約課"
+      }
+    },
+    {
+      "bounds": {
+        "x": 1250,
+        "y": 843,
+        "width": 1250,
+        "height": 843
+      },
+      "action": {
+        "type": "uri",
+        "label": "觀看 Reels 作品集",
+        "uri": "https://laipei0725-del.github.io/web.test.agent.opendesign2026/dance-creator-os/src/portal/index.html#reels"
+      }
+    }
+  ]
+}

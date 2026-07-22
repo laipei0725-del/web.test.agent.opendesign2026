@@ -1,0 +1,66 @@
+
+> dance-creator-dashboard@1.0.0 dev
+> vite --port 5174
+
+
+  VITE v8.1.5  ready in 912 ms
+
+  ➜  Local:   http://localhost:5174/
+  ➜  Network: use --host to expose
+5:02:36 PM [vite] (client) [Unhandled rejection] Error: cannot add `postgres_changes` callbacks for realtime:db-changes-global after `subscribe()`.
+ > RealtimeChannel.on node_modules/@supabase/realtime-js/dist/module/RealtimeChannel.js:412:18
+ > subscribeToSupabaseRealtime dashboard.js:805:6
+    803 |    supabase
+    804 |      .channel('db-changes-global')
+    805 |      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'students' }, (payload) => {
+        |        ^
+    806 |        EventBus.emit('student.created', payload.new);
+    807 |      })
+ > dashboard.js:2161:3
+
+5:03:15 PM [vite] (client) [Unhandled rejection] Error: cannot add `postgres_changes` callbacks for realtime:db-changes-global after `subscribe()`.
+ > RealtimeChannel.on node_modules/@supabase/realtime-js/dist/module/RealtimeChannel.js:412:18
+ > subscribeToSupabaseRealtime dashboard.js:805:6
+    803 |    supabase
+    804 |      .channel('db-changes-global')
+    805 |      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'students' }, (payload) => {
+        |        ^
+    806 |        EventBus.emit('student.created', payload.new);
+    807 |      })
+ > dashboard.js:2161:3
+
+6:30:16 PM [vite] (client) [Unhandled rejection] Error: cannot add `postgres_changes` callbacks for realtime:db-changes-global after `subscribe()`.
+ > RealtimeChannel.on node_modules/@supabase/realtime-js/dist/module/RealtimeChannel.js:412:18
+ > subscribeToSupabaseRealtime dashboard.js:805:6
+    803 |    supabase
+    804 |      .channel('db-changes-global')
+    805 |      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'students' }, (payload) => {
+        |        ^
+    806 |        EventBus.emit('student.created', payload.new);
+    807 |      })
+ > dashboard.js:2161:3
+
+11:58:31 PM [vite] (client) [Unhandled rejection] Error: cannot add `postgres_changes` callbacks for realtime:db-changes-global after `subscribe()`.
+ > RealtimeChannel.on node_modules/@supabase/realtime-js/dist/module/RealtimeChannel.js:412:18
+ > subscribeToSupabaseRealtime dashboard.js:805:6
+    803 |    supabase
+    804 |      .channel('db-changes-global')
+    805 |      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'students' }, (payload) => {
+        |        ^
+    806 |        EventBus.emit('student.created', payload.new);
+    807 |      })
+ > dashboard.js:2161:3
+
+12:31:24 AM [vite] (client) [Unhandled rejection] Error: cannot add `postgres_changes` callbacks for realtime:db-changes-global after `subscribe()`.
+ > RealtimeChannel.on node_modules/@supabase/realtime-js/dist/module/RealtimeChannel.js:412:18
+ > subscribeToSupabaseRealtime dashboard.js:805:6
+    803 |    supabase
+    804 |      .channel('db-changes-global')
+    805 |      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'students' }, (payload) => {
+        |        ^
+    806 |        EventBus.emit('student.created', payload.new);
+    807 |      })
+ > dashboard.js:2161:3
+
+10:02:23 AM [vite] (client) [console.error] DashboardService load error: {"message":"TypeError: Failed to fetch","details":"TypeError: Failed to fetch\n    at http://localhost:5174/node_modules/.vite/deps/@supabase_supabase-js.js?v=ecb04f89:20291:22\n    at http://localhost:5174/node_modules/.vite/deps/@supabase_supabase-js.js?v=ecb04f89:20341:10\n    at async executeWithRetry (http://localhost:5174/node_modules/.vite/deps/@supabase_supabase-js.js?v=ecb04f89:674:14)\n    at async Object.load (http://localhost:5174/dashboard.js:375:29)\n    at async Promise.all (index 2)\n    at async loadDashboardData (http://localhost:5174/dashboard.js:714:5)","hint":"","code":""}
+10:02:23 AM [vite] (client) [console.error] DashboardService load error: {"message":"TypeError: Failed to fetch","details":"TypeError: Failed to fetch\n    at http://localhost:5174/node_modules/.vite/deps/@supabase_supabase-js.js?v=ecb04f89:20291:22\n    at http://localhost:5174/node_modules/.vite/deps/@supabase_supabase-js.js?v=ecb04f89:20341:10\n    at async executeWithRetry (http://localhost:5174/node_modules/.vite/deps/@supabase_supabase-js.js?v=ecb04f89:674:14)\n    at async Object.load (http://localhost:5174/dashboard.js:476:29)\n    at async Promise.all (index 6)\n    at async loadDashboardData (http://localhost:5174/dashboard.js:714:5)","hint":"","code":""}

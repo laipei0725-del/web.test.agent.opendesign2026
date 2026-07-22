@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dance Creator OS - 線上預約約課系統</title>
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              pink: '#D16BA5',
+              blue: '#86A8E7',
+              cyan: '#5FFBF1',
+              lightBg: '#FAF9FD',
+              cardLight: 'rgba(255, 255, 255, 0.85)',
+            }
+          },
+          boxShadow: {
+            glassLight: '0 8px 32px 0 rgba(134, 168, 231, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- CryptoJS Library for ECPay Signature Calculation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-brand-lightBg text-slate-800 min-h-screen relative pb-12 overflow-x-hidden">
+
+  <!-- Background pastel glows -->
+  <div class="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-b from-brand-cyan/5 to-transparent blur-[70px] pointer-events-none -z-10"></div>
+  <div class="absolute bottom-0 left-0 w-[450px] h-[450px] bg-gradient-to-t from-brand-pink/5 to-transparent blur-[70px] pointer-events-none -z-10"></div>
+
+  <!-- Header Section -->
+  <header class="py-12 text-center max-w-4xl mx-auto px-6">
+    <span class="text-5xl mb-4 inline-block">💃</span>
+    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-brand-pink via-brand-blue to-brand-cyan bg-clip-text text-transparent">DANCE CREATOR</h1>
+    <p class="text-gray-500 text-xs mt-2 uppercase tracking-widest font-semibold">Online Class Booking & Portfolio</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 space-y-12">
+    
+    <!-- 1. Creator Bio & Philosophy -->
+    <section class="bg-white/75 backdrop-blur-md border border-slate-200/50 p-8 rounded-3xl shadow-glassLight space-y-4">
+      <h2 class="text-xl font-bold border-b border-slate-100 pb-3">✨ 關於創作者 (Brand Story)</h2>
+      <p class="text-sm leading-relaxed text-slate-600">
+        專注於牙買加雷鬼（Dancehall）基礎與排舞編舞特訓。我們的理念是：「每個人都能找到自己身體的律動節奏」。
+        在此您可以找到最新的短影音作品，並直接線上刷卡約課，開啟您的跳舞旅程！
+      </p>
+    </section>
+
+    <!-- 2. Video Reels Showcase (Embeds) -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-bold text-slate-800">🎬 精彩短影音作品集 (Reels / Portfolio)</h2>
+      <div class="grid grid-cols-2 gap-6">
+        <!-- Mock Reels Container -->
+        <div class="bg-white/75 border border-slate-200/50 p-4 rounded-3xl shadow-glassLight flex flex-col items-center">
+          <div class="w-full aspect-[9/16] bg-slate-100 rounded-2xl flex items-center justify-center relative overflow-hidden group">
+            <span class="text-4xl text-slate-300">▶️</span>
+            <!-- Decorative play icon overlay -->
+            <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors flex items-center justify-center cursor-pointer">
+              <span class="text-xs font-semibold text-white bg-slate-900/60 px-3 py-1 rounded-full backdrop-blur-sm">點擊觀看 Dancehall Choreo</span>
+            </div>
+          </div>
+          <p class="text-xs font-bold mt-3 text-slate-700">雷鬼排舞編舞成果演示 🔥</p>
+        </div>
+
+        <div class="bg-white/75 border border-slate-200/50 p-4 rounded-3xl shadow-glassLight flex flex-col items-center">
+          <div class="w-full aspect-[9/16] bg-slate-100 rounded-2xl flex items-center justify-center relative overflow-hidden group">
+            <span class="text-4xl text-slate-300">▶️</span>
+            <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors flex items-center justify-center cursor-pointer">
+              <span class="text-xs font-semibold text-white bg-slate-900/60 px-3 py-1 rounded-full backdrop-blur-sm">點擊觀看 Foundation Class</span>
+            </div>
+          </div>
+          <p class="text-xs font-bold mt-3 text-slate-700">雷鬼基礎班學員精華紀錄 💃</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Dynamic Booking Catalog Grid -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-bold text-slate-800">📅 即時排定課程清單 (Book Classes)</h2>
+      <div class="grid grid-cols-2 gap-6" id="booking-classes-grid">
+        <!-- Placeholder Skeletons -->
+        <div class="bg-white/75 border border-slate-200/50 p-6 rounded-3xl shadow-glassLight h-48 animate-pulse flex flex-col justify-between">
+          <div class="w-2/3 h-6 bg-slate-200 rounded"></div>
+          <div class="w-full h-4 bg-slate-100 rounded"></div>
+          <div class="w-1/3 h-8 bg-slate-200 rounded self-end"></div>
+        </div>
+        <div class="bg-white/75 border border-slate-200/50 p-6 rounded-3xl shadow-glassLight h-48 animate-pulse flex flex-col justify-between">
+          <div class="w-1/2 h-6 bg-slate-200 rounded"></div>
+          <div class="w-full h-4 bg-slate-100 rounded"></div>
+          <div class="w-1/3 h-8 bg-slate-200 rounded self-end"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Checkout / ECPay Form Modal Overlay (Scrollable optimized) -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto p-10 opacity-0 pointer-events-none transition-all duration-300" id="checkout-modal">
+    <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl relative my-auto">
+      
+      <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
+        <h3 class="text-lg font-bold text-slate-800">💳 填寫預約與付款資料</h3>
+        <button class="text-slate-400 hover:text-slate-600 text-xl font-bold" onclick="closeCheckoutModal()">✕</button>
+      </div>
+
+      <!-- ECPay Stage Instructions banner -->
+      <div class="bg-brand-blue/10 border border-brand-blue/30 p-4 rounded-2xl text-xs text-slate-700 leading-relaxed mb-6">
+        <strong class="text-brand-pink block mb-1">⚙️ 綠界金流測試收銀台 (ECPay Stage Test Mode)</strong>
+        特店編號：<code>3002607</code><br>
+        測試信用卡卡號：<strong><code>4311-9522-2222-2222</code></strong><br>
+        有效年月：需大於當下（例如 `12/2029`），安全碼任意 3 碼。
+      </div>
+
+      <!-- Checkout inputs -->
+      <div id="checkout-fields" class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-600 block mb-1">已選課程 (Course)</label>
+          <input type="text" id="pay-course-title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:outline-none" readonly>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-600 block mb-1">繳費金額 (Amount)</label>
+          <input type="text" id="pay-course-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-brand-pink focus:outline-none" readonly>
+        </div>
+        <div>
+          <label for="pay-student-name" class="text-xs font-semibold text-slate-600 block mb-1">學員姓名 (Name)</label>
+          <input type="text" id="pay-student-name" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue" value="林艾瑪">
+        </div>
+        <div>
+          <label for="pay-student-email" class="text-xs font-semibold text-slate-600 block mb-1">電子信箱 (Email)</label>
+          <input type="email" id="pay-student-email" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue" value="emma.lin@test.com">
+        </div>
+        <div>
+          <label for="pay-student-phone" class="text-xs font-semibold text-slate-600 block mb-1">手機號碼 (Phone)</label>
+          <input type="text" id="pay-student-phone" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue" value="0912345678">
+        </div>
+
+        <button class="w-full py-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-cyan text-[#090710] rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition-transform mt-6" onclick="submitECPayPayment()">
+          💳 確認資料，前往綠界金流刷卡支付
+        </button>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div id="checkout-loading-state" class="hidden flex-col items-center justify-center py-10 space-y-4">
+        <div class="w-10 h-10 border-4 border-slate-200 border-t-brand-pink rounded-full animate-spin"></div>
+        <p class="text-xs font-semibold text-slate-600">正在生成綠界加密校驗碼，前往安全支付頁面...</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hidden ECPay gateway submission form -->
+  <form id="ecpay-checkout-form" method="POST" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" style="display: none;">
+    <input type="hidden" name="MerchantID" id="ecpay-MerchantID">
+    <input type="hidden" name="MerchantTradeNo" id="ecpay-MerchantTradeNo">
+    <input type="hidden" name="MerchantTradeDate" id="ecpay-MerchantTradeDate">
+    <input type="hidden" name="PaymentType" id="ecpay-PaymentType">
+    <input type="hidden" name="TotalAmount" id="ecpay-TotalAmount">
+    <input type="hidden" name="TradeDesc" id="ecpay-TradeDesc">
+    <input type="hidden" name="ItemName" id="ecpay-ItemName">
+    <input type="hidden" name="ReturnURL" id="ecpay-ReturnURL">
+    <input type="hidden" name="ChoosePayment" id="ecpay-ChoosePayment">
+    <input type="hidden" name="EncryptType" id="ecpay-EncryptType">
+    <input type="hidden" name="ClientBackURL" id="ecpay-ClientBackURL">
+    <input type="hidden" name="CheckMacValue" id="ecpay-CheckMacValue">
+  </form>
+
+  <script type="module" src="portal.js"></script>
+</body>
+</html>
