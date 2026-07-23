@@ -98,13 +98,13 @@
     <!-- Right Column: 9:16 Vertical Video / Motion Frame -->
     <div class="flex justify-center md:justify-end">
       <div class="w-full max-w-[340px] aspect-[9/16] bg-[#ebe2d3]/50 rounded-[32px] overflow-hidden shadow-polaroid border-[8px] border-white relative group">
-        <!-- Real HTML5 Video element -->
-        <video class="absolute inset-0 w-full h-full object-cover rounded-2xl z-0" src="assets/instagram_video.mp4" autoplay loop muted playsinline></video>
+        <!-- YouTube Shorts Embed -->
+        <iframe class="absolute inset-0 w-full h-full border-0 z-0" src="https://www.youtube.com/embed/3hXIAdn3VZA?autoplay=1&mute=1&loop=1&playlist=3hXIAdn3VZA" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         <!-- Overlay text content -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 z-10 pointer-events-none">
           <span class="text-2xl mb-1">📽️</span>
           <h4 class="text-white text-sm font-bold font-serif italic">Body Awareness Film</h4>
-          <p class="text-white/80 text-[10px] mt-1 leading-relaxed">流暢、帶有情緒張力的身體律動與溫暖光影特寫</p>
+          <p class="text-white/80 text-[10px] mt-1 leading-relaxed">流暢、帶有情緒張力的身體律動與溫慢光影特寫</p>
         </div>
         <!-- Stylized Warm Film Overlay -->
         <div class="absolute inset-0 bg-gradient-to-br from-orange-400/10 via-transparent to-purple-400/10 mix-blend-screen pointer-events-none z-20"></div>
@@ -174,10 +174,10 @@
       </div>
       
       <!-- Widescreen video player with vintage play-stop vibes -->
-      <div class="relative w-full shadow-polaroid bg-slate-900 rounded-lg overflow-hidden">
-        <video id="rehearsal-video" class="w-full rounded-lg" src="assets/video.mp4" controls playsinline></video>
+      <div class="relative w-full aspect-video shadow-polaroid bg-slate-900 rounded-lg overflow-hidden">
+        <iframe id="rehearsal-video" class="absolute inset-0 w-full h-full border-0 rounded-lg z-0" src="https://www.youtube.com/embed/x0zaGC7FMoE" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         <!-- Warm color overlay (light leaks style) -->
-        <div class="absolute inset-0 bg-gradient-to-tr from-brand-peach/5 via-transparent to-brand-marshmallow/5 mix-blend-screen pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-brand-peach/5 via-transparent to-brand-marshmallow/5 mix-blend-screen pointer-events-none z-10"></div>
       </div>
     </div>
   </section>
