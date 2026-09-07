@@ -1,148 +1,704 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>中華民國全國建築師公會 - 首頁改版</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOLMIÉ - Soul first. Style follows.</title>
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              coral: '#E85A4F',       /* Coral Red */
+              peach: '#E98074',       /* Gentle Peach Orange */
+              lavender: '#D8C3A5',    /* Warm Sand */
+              marshmallow: '#CFA8E8', /* Marshmallow Purple */
+              warmBg: '#FAF6F0',      /* Warm White background */
+              warmText: '#2C2623',    /* Dark Warm Grey */
+            }
+          },
+          boxShadow: {
+            retro: '0 8px 30px rgba(232, 90, 79, 0.08)',
+            polaroid: '0 10px 25px -5px rgba(44, 38, 35, 0.15), 0 8px 10px -6px rgba(44, 38, 35, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- CryptoJS Library for ECPay Signature Calculation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <!-- Google Fonts: Merriweather & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    h1, h2, h3, h4, .font-serif {
+      font-family: 'Merriweather', Georgia, serif;
+    }
+    body, .font-sans {
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .polaroid-frame {
+      background: #FFFFFF;
+      padding: 12px 12px 24px 12px;
+      border: 1px solid rgba(44, 38, 35, 0.08);
+    }
+  </style>
 </head>
-<body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <img src="file:///Users/peipei/.gemini/antigravity/brain/27962213-518f-47e6-89cd-fabbfdae6a1b/logo_placeholder_1783576976881.jpg" alt="NAA Logo" class="logo" />
-      <nav class="nav">
-        <ul>
-          <li><a href="#home">首頁</a></li>
-          <li><a href="#news">最新消息</a></li>
-          <li><a href="blog.html">部落格</a></li>
-          <li><a href="#contact">聯絡我們</a></li>
-          <li id="auth-nav-item"><button class="btn-login" id="btn-login-trigger">會員快捷登入</button></li>
-        </ul>
+<body class="bg-brand-warmBg text-brand-warmText min-h-screen relative pb-16 overflow-x-hidden selection:bg-brand-coral/20 selection:text-brand-coral">
+
+  <!-- Subtle light leak decoration (1980s film warm tint) -->
+  <div class="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-b from-[#F99B72]/15 to-transparent blur-[90px] pointer-events-none -z-10 animate-pulse" style="animation-duration: 8s;"></div>
+  <div class="absolute top-[20%] left-0 w-[450px] h-[450px] bg-brand-marshmallow/10 blur-[80px] pointer-events-none -z-10"></div>
+  <div class="absolute bottom-[10%] right-[-100px] w-[500px] h-[500px] bg-brand-coral/8 blur-[100px] pointer-events-none -z-10"></div>
+
+  <!-- ================= HEADER NAVBAR ================= -->
+  <header class="sticky top-0 bg-brand-warmBg/85 backdrop-blur-md z-40 border-b border-brand-warmText/5 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="javascript:void(0)" onclick="navigateTo('home')" class="flex items-center gap-2 hover:opacity-95 transition-opacity">
+        <span class="text-2xl">💃</span>
+        <span class="font-serif font-black text-xl tracking-tight text-brand-coral">SOLMIÉ</span>
+      </a>
+
+      <!-- Navigation Menu -->
+      <nav class="hidden md:flex items-center gap-8 text-xs font-bold tracking-widest uppercase text-brand-warmText/70">
+        <a href="javascript:void(0)" id="nav-link-home" onclick="navigateTo('home')" class="hover:text-brand-coral text-brand-coral transition-colors">首頁</a>
+        <a href="javascript:void(0)" id="nav-link-about" onclick="navigateTo('about')" class="hover:text-brand-coral transition-colors">品牌故事</a>
+        <a href="javascript:void(0)" id="nav-link-courses" onclick="navigateTo('courses')" class="hover:text-brand-coral transition-colors">線上課程</a>
+        <a href="javascript:void(0)" id="nav-link-community" onclick="navigateTo('community')" class="hover:text-brand-coral transition-colors">社群交流</a>
+        <a href="javascript:void(0)" id="nav-link-portal" onclick="navigateTo('portal')" class="hover:text-brand-coral transition-colors">學員中心</a>
+        <a href="javascript:void(0)" onclick="openLineModal('NAV_BAR')" class="hover:text-[#06C755] flex items-center gap-1 transition-colors text-[#06C755]">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.578.39.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.589-3.844 2.589-5.961z"/></svg>
+          官方 LINE
+        </a>
       </nav>
+
+      <!-- Shortcut Buttons -->
+      <div class="flex items-center gap-3">
+        <a href="javascript:void(0)" onclick="openLineModal('FREE_EXPERIENCE_HEADER')" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#06C755]/10 hover:bg-[#06C755]/20 border border-[#06C755]/30 text-[#06C755] font-bold rounded-full text-[10px] tracking-wider transition-all">
+          <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.578.39.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.589-3.844 2.589-5.961z"/></svg>
+          LINE 領體驗課
+        </a>
+        <a href="javascript:void(0)" onclick="navigateTo('portal')" class="px-4 py-2 bg-brand-coral text-white font-bold rounded-full text-[10px] tracking-wider uppercase shadow-retro hover:bg-brand-coral/95 transition-all">
+          🔑 學員登入
+        </a>
+      </div>
+
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="hero" id="home">
-    <div class="hero-overlay"></div>
-    <img src="file:///Users/peipei/.gemini/antigravity/brain/27962213-518f-47e6-89cd-fabbfdae6a1b/hero_placeholder_1783576988779.jpg" alt="Hero" class="hero-bg" />
-    <div class="hero-content">
-      <h1>打造更美好的建築未來</h1>
-      <p>全國建築師公會全新形象，專業服務，知識分享。</p>
-      <a href="#services" class="cta-button">立即了解</a>
-      <button class="cta-button" id="btn-apply-trigger" style="margin-left: 10px; border: none; cursor: pointer;">立即線上報名與申辦</button>
+  <!-- ================= WORKSPACE LAYOUT ================= -->
+  <main class="max-w-6xl mx-auto px-6 py-8">
+
+    <!-- ================= 1. HOME SECTION ================= -->
+    <div id="section-home" class="space-y-16 transition-all duration-300">
+      
+      <!-- Hero Banner -->
+      <div class="grid md:grid-cols-2 gap-12 items-center pt-8">
+        <div class="space-y-8">
+          <span class="text-xs uppercase tracking-widest font-bold text-brand-coral bg-brand-coral/10 px-3.5 py-1.5 rounded-full inline-block">Brand Statement</span>
+          <div class="space-y-4">
+            <h2 class="text-4xl md:text-5xl font-black leading-tight italic font-serif">
+              Soul first.<br>Style follows.
+            </h2>
+            <p class="text-base text-brand-warmText/80 leading-relaxed max-w-md pt-4 border-t border-brand-warmText/10">
+              「在這個世界上，妳不必為了誰變得安靜。」
+            </p>
+          </div>
+          <p class="text-xs text-brand-warmText/60 leading-relaxed max-w-sm">
+            SOLMIÉ 透過肢體覺察與復古律動，引導妳卸下防備，找回靈魂最真實、最自信的形狀。
+          </p>
+          <div class="pt-2">
+            <a href="javascript:void(0)" onclick="navigateTo('courses')" class="px-6 py-3.5 bg-brand-coral text-white font-bold rounded-full text-xs tracking-widest uppercase shadow-retro hover:bg-brand-coral/95 hover:scale-[1.01] transition-all inline-block">
+              Explore Courses 探索課程
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Column: YouTube Shorts Embed -->
+        <div class="flex justify-center md:justify-end">
+          <div class="w-full max-w-[340px] aspect-[9/16] bg-[#ebe2d3]/50 rounded-[32px] overflow-hidden shadow-polaroid border-[8px] border-white relative group">
+            <iframe class="absolute inset-0 w-full h-full border-0 z-0" src="https://www.youtube.com/embed/3hXIAdn3VZA?autoplay=1&mute=1&loop=1&playlist=3hXIAdn3VZA" title="YouTube Shorts player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 z-10 pointer-events-none">
+              <span class="text-2xl mb-1">📽️</span>
+              <h4 class="text-white text-sm font-bold font-serif italic">Body Awareness Film</h4>
+              <p class="text-white/80 text-[10px] mt-1 leading-relaxed font-sans">帶有張力的身體律動與溫暖光影</p>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-400/10 via-transparent to-purple-400/10 mix-blend-screen pointer-events-none z-20"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brand Preview / About Preview -->
+      <div class="bg-white/45 border border-brand-warmText/5 p-8 rounded-[36px] shadow-retro grid md:grid-cols-[1fr_200px] gap-8 items-center">
+        <div class="space-y-4">
+          <span class="text-xs uppercase tracking-widest font-bold text-brand-peach">Our Philosophy</span>
+          <h3 class="text-xl font-bold font-serif">不完美，正是生命的厚度與真實所在</h3>
+          <p class="text-xs text-brand-warmText/70 leading-relaxed font-sans">
+            SOLMIÉ 這不是一個訓練完美舞姿的培訓所，而是一個溫暖、知性、充滿 1980 年代復古陽光調性的女性肢體自覺空間。
+          </p>
+        </div>
+        <div class="text-right">
+          <a href="javascript:void(0)" onclick="navigateTo('about')" class="px-5 py-3 bg-brand-warmText text-white rounded-full text-xs font-bold hover:bg-brand-warmText/90 transition-all inline-block">
+            了解更多 →
+          </a>
+        </div>
+      </div>
+
+      <!-- Popular Courses Cards -->
+      <div class="space-y-6">
+        <h3 class="text-xl font-bold font-serif text-center">精選熱門課程 (Featured Courses)</h3>
+        <div class="grid md:grid-cols-2 gap-8" id="booking-classes-grid">
+          <!-- Populated from portal.js -->
+        </div>
+      </div>
+
+      <!-- Student Highlights -->
+      <div class="space-y-6">
+        <h3 class="text-xl font-bold font-serif text-center">學生成果與律動紀錄</h3>
+        <div class="grid grid-cols-2 gap-6">
+          <div class="polaroid-frame shadow-polaroid rounded-lg">
+            <div class="aspect-square bg-slate-100 overflow-hidden mb-3">
+              <img src="dance-creator-os/src/portal/assets/founder_portrait.jpg" class="w-full h-full object-cover">
+            </div>
+            <p class="text-[10px] text-center font-serif text-brand-warmText/70">學員自信笑臉成果課後紀錄 • Emma</p>
+          </div>
+          <div class="polaroid-frame shadow-polaroid rounded-lg">
+            <div class="aspect-square bg-slate-100 overflow-hidden mb-3">
+              <img src="dance-creator-os/src/portal/assets/founder.jpg" class="w-full h-full object-cover grayscale object-top">
+            </div>
+            <p class="text-[10px] text-center font-serif text-brand-warmText/70">常態排練肢體律動捕捉 • Anna</p>
+          </div>
+        </div>
+      </div>
+
     </div>
-  </section>
 
-  <!-- Filter -->
-  <section class="filter-section">
-    <label for="category-select" class="visually-hidden">分類過濾</label>
-    <select id="category-select">
-      <option value="all">全部</option>
-      <option value="news">最新消息</option>
-      <option value="services">服務項目</option>
-      <option value="regulations">法規資訊</option>
-    </select>
-  </section>
+    <!-- ================= 2. ABOUT SECTION ================= -->
+    <div id="section-about" class="hidden space-y-12">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-xl mx-auto space-y-2">
+        <span class="text-xs uppercase tracking-widest font-bold text-brand-coral bg-brand-coral/10 px-3.5 py-1.5 rounded-full inline-block">About SOLMIÉ</span>
+        <h2 class="text-3xl font-bold font-serif">品牌故事與教學理念</h2>
+        <p class="text-xs text-brand-warmText/70">讓靈魂以最舒適的姿態盛開。</p>
+      </div>
 
-  <!-- Card Grid -->
-  <main class="main-content" id="cards-container">
-    <!-- 會由 JavaScript 從 Supabase 動態載入並渲染 -->
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
+      <!-- Grid Layout for Story details -->
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <!-- Polaroid stack -->
+        <div class="flex flex-col items-center justify-center gap-6">
+          <div class="polaroid-frame shadow-polaroid rotate-[-2deg] max-w-[280px]">
+            <div class="aspect-[3/4] overflow-hidden bg-slate-100 mb-4 rounded">
+              <img src="dance-creator-os/src/portal/assets/founder_portrait.jpg" alt="SOLMIÉ Founder" class="w-full h-full object-cover object-center">
+            </div>
+            <div class="text-center font-serif text-xs italic text-brand-warmText/70">So, this is me.</div>
+          </div>
+        </div>
+
+        <!-- Text details -->
+        <div class="space-y-6">
+          <div class="space-y-2">
+            <h3 class="text-lg font-bold font-serif text-brand-coral">一、品牌理念 (Philosophy)</h3>
+            <p class="text-xs text-brand-warmText/80 leading-relaxed">
+              我們深信，每位女性的身體都擁有獨特的故事與能量。在溫和的陽光灑落木質教室中，透過肢體，釋放被壓抑的聲音。
+            </p>
+          </div>
+          <div class="space-y-2">
+            <h3 class="text-lg font-bold font-serif text-brand-coral">二、創辦人故事 (Founder's Story)</h3>
+            <p class="text-xs text-brand-warmText/80 leading-relaxed">
+              「跳舞不是為了解鎖完美動作，而是為了聽見心跳在說什麼。」創辦人以此理念創立 SOLMIÉ，期待每位走進來的女孩，都能 bloom without apology。
+            </p>
+          </div>
+          <div class="space-y-2">
+            <h3 class="text-lg font-bold font-serif text-brand-coral">三、教學理念 (Teaching Vibe)</h3>
+            <p class="text-xs text-brand-warmText/80 leading-relaxed">
+              拒絕制式化的考核，強調感官的覺察、呼吸的流暢與內在爆發力的釋放，是一場結合身心與美學的身體自覺。
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= 3. COURSES SECTION ================= -->
+    <div id="section-courses" class="hidden space-y-12">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-xl mx-auto space-y-2">
+        <span class="text-xs uppercase tracking-widest font-bold text-brand-coral bg-brand-coral/10 px-3.5 py-1.5 rounded-full inline-block">Online Courses</span>
+        <h2 class="text-3xl font-bold font-serif">線上與線下課程表</h2>
+        <p class="text-xs text-brand-warmText/70">專注於身體覺察與自信表達的課程介紹。</p>
+      </div>
+
+      <!-- Experience Highlight Banner -->
+      <div id="free-experience-banner" class="bg-orange-50 border border-brand-peach/30 p-8 rounded-3xl grid md:grid-cols-[1fr_auto] gap-6 items-center">
+        <div class="space-y-2">
+          <span class="text-[10px] font-bold text-brand-coral uppercase tracking-widest">Free Experience</span>
+          <h3 class="text-lg font-bold font-serif">🎁 新手限定：免費體驗單堂課程</h3>
+          <p class="text-xs text-brand-warmText/80 leading-relaxed font-sans">
+            如果您是第一次來到 SOLMIÉ，可以享有一次體驗課堂的免費名額。立即加入官方 LINE 機器人領取專屬體驗代碼與預約時段！
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="openLineModal('FREE_TRIAL_BANNER')" class="px-5 py-3 bg-[#06C755] text-white rounded-xl text-xs font-bold shadow-md hover:bg-[#05b34c] transition-all flex items-center gap-2">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.578.39.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.589-3.844 2.589-5.961z"/></svg>
+            LINE 機器人立即領取
+          </button>
+          <button onclick="openCheckoutModal('新手限定免費體驗課程', 0)" class="px-5 py-3 bg-brand-coral/15 text-brand-coral border border-brand-coral/30 rounded-xl text-xs font-bold hover:bg-brand-coral/25 transition-all">
+            網頁直接登記
+          </button>
+        </div>
+      </div>
+
+      <!-- Widescreen Video Showcase -->
+      <div class="bg-white/40 border border-brand-warmText/5 p-6 md:p-8 rounded-[36px] shadow-retro space-y-6">
+        <div class="flex justify-between items-center border-b border-brand-warmText/5 pb-4">
+          <div>
+            <span class="text-xs uppercase tracking-widest font-bold text-brand-peach">SOLMIÉ Rehearsal Film</span>
+            <h3 class="text-xl font-bold font-serif mt-1">「尋找身體的純粹」常態編舞排練紀錄</h3>
+          </div>
+        </div>
+        
+        <div class="relative w-full aspect-video shadow-polaroid bg-slate-900 rounded-lg overflow-hidden">
+          <iframe id="rehearsal-video" class="absolute inset-0 w-full h-full border-0 rounded-lg z-0" src="https://www.youtube.com/embed/x0zaGC7FMoE" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          <div class="absolute inset-0 bg-gradient-to-tr from-brand-peach/5 via-transparent to-brand-marshmallow/5 mix-blend-screen pointer-events-none z-10"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= 4. COMMUNITY SECTION ================= -->
+    <div id="section-community" class="hidden space-y-12">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-xl mx-auto space-y-2">
+        <span class="text-xs uppercase tracking-widest font-bold text-brand-coral bg-brand-coral/10 px-3.5 py-1.5 rounded-full inline-block">Community Hub</span>
+        <h2 class="text-3xl font-bold font-serif">最新消息與社群活動</h2>
+        <p class="text-xs text-brand-warmText/70">分享彼此的律動日常與最新 Workshop 特訓。</p>
+      </div>
+
+      <!-- Journal cards -->
+      <div class="grid md:grid-cols-2 gap-8">
+        <article class="bg-white p-6 rounded-3xl shadow-retro space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <span class="text-[10px] font-bold text-brand-coral uppercase tracking-wider block">肢體自覺 • 2026/07</span>
+            <h3 class="text-base font-bold font-serif">在動作中，找到不必被定義的安靜</h3>
+            <p class="text-xs text-brand-warmText/70 leading-relaxed line-clamp-3">
+              跳舞不是為了在社交媒體上獲得點讚。當我緊閉雙眼，讓身體隨著慢節奏雷鬼左右搖擺時，我找到了不需要迎合任何人的自由...
+            </p>
+          </div>
+          <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-[10px]">
+            <span class="font-serif italic text-brand-warmText/50">Made to move.</span>
+            <a href="dance-creator-os/src/portal/journal-01.html" class="read-more font-bold text-brand-coral hover:underline">閱讀全文 →</a>
+          </div>
+        </article>
+
+        <article class="bg-white p-6 rounded-3xl shadow-retro space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <span class="text-[10px] font-bold text-brand-coral uppercase tracking-wider block">復古調性 • 2026/06</span>
+            <h3 class="text-base font-bold font-serif">為什麼 1990 年代的陽光最溫暖？</h3>
+            <p class="text-xs text-brand-warmText/70 leading-relaxed line-clamp-3">
+              底片機的顆粒感、陽光照在肩膀上的炙熱、未經修飾的肢體律動。我們尋求的不是無瑕，而是有生命厚度的真實...
+            </p>
+          </div>
+          <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-[10px]">
+            <span class="font-serif italic text-brand-warmText/50">Born to glow.</span>
+            <a href="dance-creator-os/src/portal/journal-02.html" class="read-more font-bold text-brand-coral hover:underline">閱讀全文 →</a>
+          </div>
+        </article>
+      </div>
+
+      <!-- FAQ Accordions -->
+      <div class="max-w-2xl mx-auto space-y-4">
+        <h3 class="text-lg font-bold font-serif text-center pb-2 border-b border-brand-warmText/10">常見問題 FAQ</h3>
+        <details class="bg-white/60 border border-brand-warmText/5 p-4 rounded-2xl group cursor-pointer">
+          <summary class="text-xs font-bold select-none list-none flex justify-between items-center">
+            <span>Q1. 沒有跳舞基礎可以參加嗎？</span>
+            <span class="group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p class="text-xs text-brand-warmText/70 leading-relaxed mt-3 pt-3 border-t border-slate-100">
+            完全可以！我們的課程專注於身體自覺與核心律動的開發，沒有制式化舞步的壓力，適合每一位想探索肢體的女性。
+          </p>
+        </details>
+        <details class="bg-white/60 border border-brand-warmText/5 p-4 rounded-2xl group cursor-pointer">
+          <summary class="text-xs font-bold select-none list-none flex justify-between items-center">
+            <span>Q2. 一對一私人預約如何進行？</span>
+            <span class="group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p class="text-xs text-brand-warmText/70 leading-relaxed mt-3 pt-3 border-t border-slate-100">
+            點選課程選單中的一對一私教，填寫付款資料後，我們的人力客服會主動透過 LINE 官方帳號與您對接時段。
+          </p>
+        </details>
+      </div>
+
+    </div>
+
+    <!-- ================= 5. STUDENT PORTAL SECTION ================= -->
+    <div id="section-portal" class="hidden space-y-12 max-w-xl mx-auto">
+      
+      <!-- Login panel -->
+      <div id="portal-login-card" class="bg-white p-8 rounded-3xl shadow-retro space-y-6">
+        <div class="text-center space-y-1">
+          <h3 class="text-xl font-bold font-serif">🔑 學員中心登入</h3>
+          <p class="text-[10px] text-brand-warmText/50">登入以管理您的剩餘課程與學習進度</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="text-[10px] font-semibold text-slate-500 block mb-1">Email 信箱</label>
+            <input type="email" id="login-email" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none" value="emma.lin@test.com">
+          </div>
+          <div>
+            <label class="text-[10px] font-semibold text-slate-500 block mb-1">Password 密碼</label>
+            <input type="password" id="login-pass" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none" value="••••••••">
+          </div>
+          <button onclick="performPortalLogin()" class="w-full py-3 bg-brand-coral text-white font-bold rounded-xl text-xs shadow-md hover:bg-brand-coral/95 transition-all">
+            確認登入
+          </button>
+        </div>
+      </div>
+
+      <!-- Logged in Panel (Hidden by default) -->
+      <div id="portal-dashboard-card" class="hidden space-y-6 bg-white p-8 rounded-3xl shadow-retro">
+        <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+          <div>
+            <h3 class="text-base font-bold font-serif" id="logged-student-name">林艾瑪 (Emma)</h3>
+            <span class="text-[9px] text-emerald-500 font-bold">學員狀態：使用中</span>
+          </div>
+          <button onclick="performPortalLogout()" class="text-[10px] text-slate-400 hover:text-slate-600 font-semibold">登出 ➔</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-brand-warmBg/50 p-4 rounded-2xl text-center">
+            <span class="text-[9px] text-slate-400 block">剩餘課程點數</span>
+            <span class="text-xl font-bold text-brand-coral mt-1 block">6 堂</span>
+          </div>
+          <div class="bg-brand-warmBg/50 p-4 rounded-2xl text-center">
+            <span class="text-[9px] text-slate-400 block">課程簽到出席率</span>
+            <span class="text-xl font-bold text-slate-800 mt-1 block">92 %</span>
+          </div>
+        </div>
+
+        <!-- Learning progress bar -->
+        <div class="space-y-2">
+          <div class="flex justify-between text-[10px] font-semibold text-slate-500">
+            <span>身體覺察階段二：雷鬼律動</span>
+            <span>已完成 75%</span>
+          </div>
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div class="w-[75%] h-full bg-brand-coral rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Homework Upload -->
+        <div class="space-y-2 border-t border-slate-100 pt-4">
+          <label class="text-[10px] font-bold text-slate-600 block">📹 上傳您的肢體排演作業 (.mp4)</label>
+          <div class="border-2 border-dashed border-slate-200 p-4 text-center rounded-xl hover:bg-slate-50 cursor-pointer">
+            <span class="text-xs text-slate-400 block">點擊此處或拖曳影片檔案至此</span>
+          </div>
+        </div>
+
+        <!-- Certificate Download -->
+        <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex justify-between items-center">
+          <div>
+            <strong class="text-xs text-amber-800 block">🎓 身體覺察階段一證書</strong>
+            <span class="text-[9px] text-amber-600">已於 2026/06 獲得認證</span>
+          </div>
+          <button class="px-3.5 py-1.5 bg-amber-600 text-white rounded text-[10px] font-semibold hover:bg-amber-700 transition-colors">下載 📥</button>
+        </div>
+      </div>
+
+    </div>
+
   </main>
 
-  <!-- Footer -->
-  <footer class="site-footer" id="contact">
-    <div class="container">
-      <p>© 2026 中華民國全國建築師公會</p>
-      <ul class="social-links">
-        <li><a href="#" aria-label="Facebook"><svg width="24" height="24" fill="currentColor"><!-- icon placeholder --></svg></a></li>
-        <li><a href="#" aria-label="Instagram"><svg width="24" height="24" fill="currentColor"><!-- icon placeholder --></svg></a></li>
-      </ul>
+  <!-- ================= FOOTER (Sitemap) ================= -->
+  <footer class="bg-white/45 border-t border-brand-warmText/5 py-12 px-6 mt-16 text-xs text-brand-warmText/60">
+    <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8">
+      
+      <div class="space-y-4 col-span-2">
+        <h4 class="font-serif font-black text-base text-brand-coral">SOLMIÉ</h4>
+        <p class="text-xs text-brand-warmText/50 leading-relaxed max-w-sm">
+          在這個世界上，妳不必為了誰變得安靜。
+        </p>
+        <p class="text-[10px] text-brand-warmText/40 pt-4">© 2026 SOLMIÉ Co. All rights reserved.</p>
+      </div>
+
+      <div class="space-y-2">
+        <h5 class="font-bold text-brand-warmText">品牌選單</h5>
+        <ul class="space-y-1.5 text-brand-warmText/70">
+          <li><a href="javascript:void(0)" onclick="navigateTo('home')" class="hover:text-brand-coral">首頁 Home</a></li>
+          <li><a href="javascript:void(0)" onclick="navigateTo('about')" class="hover:text-brand-coral">品牌故事 About</a></li>
+          <li><a href="javascript:void(0)" onclick="navigateTo('courses')" class="hover:text-brand-coral">線上課程 Courses</a></li>
+        </ul>
+      </div>
+
+      <div class="space-y-2">
+        <h5 class="font-bold text-brand-warmText">學員與社群</h5>
+        <ul class="space-y-1.5 text-brand-warmText/70">
+          <li><a href="javascript:void(0)" onclick="navigateTo('portal')" class="hover:text-brand-coral">學員中心 Portal</a></li>
+          <li><a href="javascript:void(0)" onclick="navigateTo('community')" class="hover:text-brand-coral">社群交流 Community</a></li>
+          <li><a href="dance-creator-os/src/dashboard/index.html" target="_blank" class="hover:text-brand-coral font-bold text-brand-coral">後台管理 Dashboard ↗</a></li>
+        </ul>
+      </div>
+
+      <div class="space-y-2">
+        <h5 class="font-bold text-brand-warmText">社群與連結</h5>
+        <ul class="space-y-1.5 text-brand-warmText/70">
+          <li><a href="https://instagram.com" target="_blank" class="hover:text-brand-coral">Instagram ↗</a></li>
+          <li><a href="javascript:void(0)" onclick="openLineModal('FOOTER_LINK')" class="hover:text-[#06C755] font-semibold flex items-center gap-1"><span class="text-[#06C755]">●</span> LINE 官方機器人 ↗</a></li>
+          <li><a href="javascript:void(0)" onclick="navigateTo('community')" class="hover:text-brand-coral">常見問題 FAQ</a></li>
+        </ul>
+      </div>
+
     </div>
   </footer>
 
-  <!-- Toast Container -->
-  <div class="toast-container" id="toast-container"></div>
+  <!-- ================= FLOATING LINE BOT WIDGET ================= -->
+  <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+    <!-- Chat Speech Bubble Tip -->
+    <div id="line-bubble-tip" class="bg-white px-4 py-2.5 rounded-2xl shadow-xl border border-emerald-100 flex items-center gap-2 text-xs text-slate-700 animate-bounce duration-1000 cursor-pointer" onclick="openLineModal('FLOATING_BUBBLE')">
+      <span class="w-2 h-2 rounded-full bg-[#06C755] animate-ping"></span>
+      <p class="font-semibold">有課程疑問？點擊與 <strong class="text-[#06C755]">LINE AI 助教</strong> 對話 💬</p>
+      <button onclick="event.stopPropagation(); document.getElementById('line-bubble-tip').style.display='none'" class="text-slate-400 hover:text-slate-600 text-xs ml-1">✕</button>
+    </div>
 
-  <!-- Login/Signup Modal -->
-  <div class="modal-backdrop" id="modal-login">
-    <div class="modal-container">
-      <button class="modal-close" id="modal-login-close">&times;</button>
-      <div class="modal-tabs">
-        <button class="modal-tab active" id="tab-login-btn">會員登入</button>
-        <button class="modal-tab" id="tab-signup-btn">註冊新帳號</button>
+    <!-- Main Floating Green Button -->
+    <button onclick="openLineModal('FLOATING_BUTTON')" class="w-14 h-14 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all relative group" title="聯繫官方 LINE 機器人">
+      <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+        <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.578.39.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.589-3.844 2.589-5.961z"/>
+      </svg>
+      <span class="absolute -top-1 -right-1 flex h-4 w-4">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white"></span>
+      </span>
+    </button>
+  </div>
+
+  <!-- ================= LINE OFFICIAL / BOT INTERACTION MODAL ================= -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 opacity-0 pointer-events-none transition-all duration-300" id="line-modal">
+    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl relative text-center space-y-6">
+      <button class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-xl font-bold" onclick="closeLineModal()">✕</button>
+
+      <!-- Modal Header -->
+      <div class="space-y-2">
+        <div class="w-14 h-14 bg-[#06C755]/10 text-[#06C755] rounded-2xl flex items-center justify-center mx-auto mb-2">
+          <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+            <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.578.39.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.589-3.844 2.589-5.961z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold font-serif text-slate-800" id="line-modal-title">SOLMIÉ 官方 LINE 機器人</h3>
+        <p class="text-xs text-slate-500 leading-relaxed" id="line-modal-desc">
+          加入官方 LINE，可享 1 對 1 諮詢、即時查詢課表、領取限定體驗券，並由 AI 助教為您解答身體律動問題！
+        </p>
       </div>
+
+      <!-- QR Code Container -->
+      <div class="bg-slate-50 border border-slate-100 p-6 rounded-2xl flex flex-col items-center justify-center space-y-3">
+        <img id="line-qrcode-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://line.me/R/ti/p/@solmie_dance" alt="LINE QR Code" class="w-40 h-40 rounded-xl shadow-sm border border-white">
+        <p class="text-[11px] text-slate-500 font-mono">LINE ID: <strong class="text-slate-800 font-bold" id="line-id-display">@solmie_dance</strong></p>
+      </div>
+
+      <!-- Action Button (Mobile / Direct Open) -->
+      <div class="space-y-3">
+        <a id="line-direct-btn" href="https://line.me/R/ti/p/@solmie_dance" target="_blank" class="w-full py-3.5 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#06C755]/20 hover:scale-[1.01] transition-all">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.578.39.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.589-3.844 2.589-5.961z"/></svg>
+          開啟 LINE App 加好友 / 開始對話
+        </a>
+        <p class="text-[10px] text-slate-400">若使用電腦版瀏覽，可直接使用手機掃描上方 QR Code</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout / ECPay Form Modal Overlay (Scrollable optimized) -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto p-10 opacity-0 pointer-events-none transition-all duration-300" id="checkout-modal">
+    <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl relative my-auto">
       
-      <!-- Login Form -->
-      <form id="form-login">
-        <div class="form-group">
-          <label for="login-email">電子信箱</label>
-          <input type="email" id="login-email" class="form-control" placeholder="name@example.com" required />
-        </div>
-        <div class="form-group">
-          <label for="login-password">密碼</label>
-          <input type="password" id="login-password" class="form-control" placeholder="請輸入密碼" required />
-        </div>
-        <button type="submit" class="btn-submit" id="btn-login-submit">登入</button>
-      </form>
+      <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
+        <h3 class="text-lg font-bold font-serif text-slate-800">💳 填寫預約與付款資料</h3>
+        <button class="text-slate-400 hover:text-slate-600 text-xl font-bold" onclick="closeCheckoutModal()">✕</button>
+      </div>
 
-      <!-- Signup Form -->
-      <form id="form-signup" style="display: none;">
-        <div class="form-group">
-          <label for="signup-email">電子信箱</label>
-          <input type="email" id="signup-email" class="form-control" placeholder="name@example.com" required />
+      <!-- ECPay Stage Instructions banner -->
+      <div class="bg-orange-50 border border-orange-200/60 p-4 rounded-2xl text-xs text-slate-700 leading-relaxed mb-6">
+        <strong class="text-brand-coral block mb-1">⚙️ 綠界金流測試收銀台 (ECPay Stage Test Mode)</strong>
+        特店編號：<code>3002607</code><br>
+        測試信用卡卡號：<strong><code>4311-9522-2222-2222</code></strong><br>
+        有效年月：需大於當下（例如 `12/2029`），安全碼任意 3 碼。
+      </div>
+
+      <!-- Checkout inputs -->
+      <div id="checkout-fields" class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-600 block mb-1">已選課程 (Course)</label>
+          <input type="text" id="pay-course-title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:outline-none" readonly>
         </div>
-        <div class="form-group">
-          <label for="signup-password">密碼 (至少 6 位數)</label>
-          <input type="password" id="signup-password" class="form-control" placeholder="請設定密碼" required />
+        <div>
+          <label class="text-xs font-semibold text-slate-600 block mb-1">繳費金額 (Amount)</label>
+          <input type="text" id="pay-course-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-brand-coral focus:outline-none" readonly>
         </div>
-        <button type="submit" class="btn-submit" id="btn-signup-submit">註冊</button>
-      </form>
+        <div>
+          <label for="pay-student-name" class="text-xs font-semibold text-slate-600 block mb-1">學員姓名 (Name)</label>
+          <input type="text" id="pay-student-name" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-peach" value="林艾瑪">
+        </div>
+        <div>
+          <label for="pay-student-email" class="text-xs font-semibold text-slate-600 block mb-1">電子信箱 (Email)</label>
+          <input type="email" id="pay-student-email" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-peach" value="emma.lin@test.com">
+        </div>
+        <div>
+          <label for="pay-student-phone" class="text-xs font-semibold text-slate-600 block mb-1">手機號碼 (Phone)</label>
+          <input type="text" id="pay-student-phone" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-peach" value="0912345678">
+        </div>
+
+        <button class="w-full py-3 bg-brand-coral text-white rounded-xl text-xs font-bold shadow-md hover:bg-brand-coral/95 hover:scale-[1.01] transition-transform mt-6" onclick="submitECPayPayment()">
+          💳 確認資料，前往綠界金流刷卡支付
+        </button>
+
+        <div class="pt-3 border-t border-slate-100 text-center">
+          <button type="button" onclick="openLineModal('CHECKOUT_ASSIST')" class="text-xs text-[#06C755] hover:underline font-semibold flex items-center justify-center gap-1 mx-auto">
+            <span>💬 想先詢問課程細節？點此與 LINE 助教聊聊</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div id="checkout-loading-state" class="hidden flex-col items-center justify-center py-10 space-y-4">
+        <div class="w-10 h-10 border-4 border-slate-200 border-t-brand-coral rounded-full animate-spin"></div>
+        <p class="text-xs font-semibold text-slate-600">正在生成綠界加密校驗碼，前往安全支付頁面...</p>
+      </div>
+
     </div>
   </div>
 
-  <!-- Application Modal -->
-  <div class="modal-backdrop" id="modal-apply">
-    <div class="modal-container">
-      <button class="modal-close" id="modal-apply-close">&times;</button>
-      <h3 style="margin-bottom: 1.5rem; color: var(--color-primary);">線上報名與申辦</h3>
-      <form id="form-apply">
-        <div class="form-group">
-          <label for="apply-type">申辦類別</label>
-          <select id="apply-type" class="form-control" required>
-            <option value="">請選擇...</option>
-            <option value="seminar">耐震評估講習會報名</option>
-            <option value="structural_review">結構外審委託服務</option>
-            <option value="reconstruction">都更危老重建申辦</option>
-            <option value="bim_tech">BIM 技術服務與諮詢</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="apply-name">申請人姓名</label>
-          <input type="text" id="apply-name" class="form-control" placeholder="請輸入姓名" required />
-        </div>
-        <div class="form-group">
-          <label for="apply-phone">聯絡電話</label>
-          <input type="tel" id="apply-phone" class="form-control" placeholder="請輸入電話號碼" required />
-        </div>
-        <div class="form-group">
-          <label for="apply-project">專案名稱</label>
-          <input type="text" id="apply-project" class="form-control" placeholder="例：XX市大樓新建案" required />
-        </div>
-        <div class="form-group">
-          <label for="apply-details">備註與詳細說明</label>
-          <textarea id="apply-details" class="form-control" rows="3" placeholder="請填寫任何其他說明..."></textarea>
-        </div>
-        <button type="submit" class="btn-submit" id="btn-apply-submit">送出申請</button>
-      </form>
-    </div>
-  </div>
+  <!-- Hidden ECPay gateway submission form -->
+  <form id="ecpay-checkout-form" method="POST" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" style="display: none;">
+    <input type="hidden" name="MerchantID" id="ecpay-MerchantID">
+    <input type="hidden" name="MerchantTradeNo" id="ecpay-MerchantTradeNo">
+    <input type="hidden" name="MerchantTradeDate" id="ecpay-MerchantTradeDate">
+    <input type="hidden" name="PaymentType" id="ecpay-PaymentType">
+    <input type="hidden" name="TotalAmount" id="ecpay-TotalAmount">
+    <input type="hidden" name="TradeDesc" id="ecpay-TradeDesc">
+    <input type="hidden" name="ItemName" id="ecpay-ItemName">
+    <input type="hidden" name="ReturnURL" id="ecpay-ReturnURL">
+    <input type="hidden" name="ChoosePayment" id="ecpay-ChoosePayment">
+    <input type="hidden" name="EncryptType" id="ecpay-EncryptType">
+    <input type="hidden" name="ClientBackURL" id="ecpay-ClientBackURL">
+    <input type="hidden" name="CheckMacValue" id="ecpay-CheckMacValue">
+  </form>
+
+  <!-- Router and custom events controller scripts -->
+  <script type="text/javascript">
+    // Official LINE Account & Deep Linking Config
+    window.LINE_CONFIG = {
+      lineId: '@668cmiyv',
+      baseAddUrl: 'https://line.me/R/ti/p/@668cmiyv',
+      // Generate Deep Link URL that automatically opens LINE chat room with prefilled message
+      getMessageUrl: function(text) {
+        return `https://line.me/R/oaMessage/@668cmiyv/?${encodeURIComponent(text)}`;
+      }
+    };
+
+    function openLineModal(source) {
+      const modal = document.getElementById('line-modal');
+      const title = document.getElementById('line-modal-title');
+      const desc = document.getElementById('line-modal-desc');
+      const directBtn = document.getElementById('line-direct-btn');
+      const qrImg = document.getElementById('line-qrcode-img');
+      const idDisplay = document.getElementById('line-id-display');
+
+      if (idDisplay) idDisplay.innerText = window.LINE_CONFIG.lineId;
+
+      let prefilledText = '你好，我想了解 SOLMIÉ 課程！';
+
+      if (source === 'FREE_TRIAL_BANNER' || source === 'FREE_EXPERIENCE_HEADER') {
+        title.innerText = '🎁 領取新手免費體驗課';
+        desc.innerText = '點擊下方按鈕將自動跳轉 LINE 並預填「我想報名體驗課」，送出後 LINE 機器人將自動為您引導登記！';
+        prefilledText = '我想報名體驗課';
+      } else if (source === 'CHECKOUT_ASSIST') {
+        title.innerText = '💬 預約前諮詢 AI 助教';
+        desc.innerText = '點擊將自動跳轉 LINE 並預填「我想諮詢課程細節」，助教將立即為您解答！';
+        prefilledText = '我想諮詢課程細節';
+      } else {
+        title.innerText = '💃 SOLMIÉ 官方 LINE 機器人';
+        desc.innerText = '加入官方 LINE，可享 1 對 1 諮詢、即時查詢課表、領取限定體驗券，並隨時與助教互動！';
+        prefilledText = '我想了解 SOLMIÉ 肢體自覺課程';
+      }
+
+      const targetUrl = window.LINE_CONFIG.getMessageUrl(prefilledText);
+      if (directBtn) directBtn.href = targetUrl;
+      if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(targetUrl)}`;
+
+      if (modal) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+      }
+    }
+
+    function closeLineModal() {
+      const modal = document.getElementById('line-modal');
+      if (modal) {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.remove('opacity-100', 'pointer-events-auto');
+      }
+    }
+
+    function navigateTo(sectionId) {
+      // Hide all content sections
+      const sections = ['home', 'about', 'courses', 'community', 'portal'];
+      sections.forEach(sec => {
+        const el = document.getElementById(`section-${sec}`);
+        if (el) el.classList.add('hidden');
+        
+        // Remove active class from nav link
+        const link = document.getElementById(`nav-link-${sec}`);
+        if (link) {
+          link.classList.remove('text-brand-coral');
+          link.classList.add('text-brand-warmText/70');
+        }
+      });
+
+      // Show active section
+      const activeEl = document.getElementById(`section-${sectionId}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      // Set active style on nav link
+      const activeLink = document.getElementById(`nav-link-${sectionId}`);
+      if (activeLink) {
+        activeLink.classList.add('text-brand-coral');
+        activeLink.classList.remove('text-brand-warmText/70');
+      }
+
+      // Scroll to top of window smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function triggerFreeExperience() {
+      navigateTo('courses');
+      setTimeout(() => {
+        const banner = document.getElementById('free-experience-banner');
+        if (banner) {
+          banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          banner.classList.add('ring-2', 'ring-brand-coral', 'transition-all');
+        }
+      }, 350);
+    }
+
+    // Portal Simulators
+    function performPortalLogin() {
+      document.getElementById('portal-login-card').classList.add('hidden');
+      document.getElementById('portal-dashboard-card').classList.remove('hidden');
+    }
+
+    function performPortalLogout() {
+      document.getElementById('portal-login-card').classList.remove('hidden');
+      document.getElementById('portal-dashboard-card').classList.add('hidden');
+    }
+  </script>
 
   <script type="module" src="/script.js"></script>
 </body>

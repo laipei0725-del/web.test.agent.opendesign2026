@@ -1,328 +1,224 @@
-// script.js – Dynamic content loading, Supabase auth & application forms
-import { supabase } from './supabase.js'
+import { supabase } from './dance-creator-os/src/shared/supabase.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  // --- DOM Elements ---
-  const cardsContainer = document.getElementById('cards-container')
-  const categorySelect = document.getElementById('category-select')
-  const toastContainer = document.getElementById('toast-container')
+// DOM Elements
+const classesGrid = document.getElementById('booking-classes-grid');
+const checkoutModal = document.getElementById('checkout-modal');
+const payCourseTitle = document.getElementById('pay-course-title');
+const payCoursePrice = document.getElementById('pay-course-price');
+const studentNameInput = document.getElementById('pay-student-name');
+const studentEmailInput = document.getElementById('pay-student-email');
+const studentPhoneInput = document.getElementById('pay-student-phone');
 
-  // Auth elements
-  const authNavItem = document.getElementById('auth-nav-item')
-  const modalLogin = document.getElementById('modal-login')
-  const modalLoginClose = document.getElementById('modal-login-close')
+const ecpayForm = document.getElementById('ecpay-checkout-form');
+const checkoutFields = document.getElementById('checkout-fields');
+const checkoutLoading = document.getElementById('checkout-loading-state');
+
+let selectedCourse = null;
+
+// ECPay Official Test Credentials (Sandbox)
+const MERCHANT_ID = '3002607';
+const HASH_KEY = 'pwFHCqoQZGmho4w6';
+const HASH_IV = 'EkRm7iFT261dpevs';
+
+// Helper to format Date as yyyy/MM/dd HH:mm:ss
+function formatECPayDate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const MM = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const HH = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
+}
+
+// Generate CheckMacValue according to ECPay specification (.NET encoding format)
+function calculateCheckMacValue(params, hashKey, hashIV) {
+  // 1. Sort by key alphabetically A-Z
+  const sortedKeys = Object.keys(params).sort();
   
-  // Login Tabs & Forms
-  const tabLoginBtn = document.getElementById('tab-login-btn')
-  const tabSignupBtn = document.getElementById('tab-signup-btn')
-  const formLogin = document.getElementById('form-login')
-  const formSignup = document.getElementById('form-signup')
-
-  // Apply Modal & Form
-  const btnApplyTrigger = document.getElementById('btn-apply-trigger')
-  const modalApply = document.getElementById('modal-apply')
-  const modalApplyClose = document.getElementById('modal-apply-close')
-  const formApply = document.getElementById('form-apply')
-
-  let currentUser = null
-
-  // --- Helper: Toast Notification ---
-  function showToast(message, type = 'info') {
-    const toast = document.createElement('div')
-    toast.className = `toast toast-${type}`
-    toast.innerHTML = `
-      <span>${message}</span>
-      <button style="background:transparent;border:none;color:inherit;cursor:pointer;font-size:1.1rem;margin-left:1rem;">&times;</button>
-    `
+  // 2. Join as key=value string
+  let rawStr = sortedKeys
+    .map(key => `${key}=${params[key]}`)
+    .join('&');
     
-    // Close button inside toast
-    toast.querySelector('button').addEventListener('click', () => {
-      toast.remove()
-    })
+  // 3. Add HashKey at front and HashIV at end
+  rawStr = `HashKey=${hashKey}&${rawStr}&HashIV=${hashIV}`;
+  
+  // 4. URL Encode
+  let encodedStr = encodeURIComponent(rawStr);
+  
+  // 5. Replace standard URL encode characters with ECPay specific ones (.NET encoding style)
+  encodedStr = encodedStr
+    .replace(/%2D/g, '-')
+    .replace(/%5F/g, '_')
+    .replace(/%2E/g, '.')
+    .replace(/%21/g, '!')
+    .replace(/%2A/g, '*')
+    .replace(/%28/g, '(')
+    .replace(/%29/g, ')')
+    .replace(/%20/g, '+');
+    
+  // 6. Convert to lowercase
+  const lowerStr = encodedStr.toLowerCase();
+  
+  // 7. Calculate SHA256 and convert to UPPERCASE
+  const sha256 = CryptoJS.SHA256(lowerStr).toString(CryptoJS.enc.Hex).toUpperCase();
+  
+  return sha256;
+}
 
-    toastContainer.appendChild(toast)
+// Load and Render Classes from Supabase
+async function loadBookingClasses() {
+  try {
+    const { data: courses, error } = await supabase.from('courses').select('*').order('title');
+    if (error) throw error;
 
-    // Auto remove
-    setTimeout(() => {
-      if (toast.parentNode) {
-        toast.style.opacity = '0'
-        toast.style.transform = 'translateY(20px)'
-        toast.style.transition = 'all 0.3s ease'
-        setTimeout(() => toast.remove(), 300)
-      }
-    }, 4000)
-  }
+    const list = [...(courses || [])];
+    
+    // Add default One-on-One Private Lesson if not present
+    if (!list.some(c => c.title.includes('One-on-One'))) {
+      list.push({
+        id: 'one-on-one-private',
+        title: 'One-on-One Private Lesson',
+        style: 'Custom Style',
+        time_slot: '預約預定制 (By Appointment)',
+        location: 'Studio A / B',
+        student_count: 1
+      });
+    }
 
-  // --- Fetch & Render Announcements ---
-  async function fetchAnnouncements() {
-    try {
-      const { data, error } = await supabase
-        .from('announcements')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      if (!data || data.length === 0) {
-        cardsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-muted);">暫無最新公告或服務項目。</p>'
-        return
-      }
-
-      // Render cards
-      cardsContainer.innerHTML = data.map(item => {
-        // Fallback default image if image_url is empty
-        const imgUrl = item.image_url || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600'
-        return `
-          <article class="card" data-category="${item.category}">
-            <img src="${imgUrl}" alt="${item.title}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600'" />
-            <h3 class="card-title">${item.title}</h3>
-            <p class="card-desc">${item.description}</p>
-          </article>
-        `
-      }).join('')
-
-      // Initialize filter logic on the dynamic elements
-      applyFilter()
-
-    } catch (err) {
-      console.error('Error fetching announcements:', err)
-      showToast('無法載入公告與服務資訊，請稍後再試。', 'error')
-      cardsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ff5b5b;">資料載入失敗。</p>'
+    renderClasses(list);
+  } catch (err) {
+    console.error('Failed to load courses:', err);
+    if (classesGrid) {
+      classesGrid.innerHTML = `<p class="col-span-2 text-rose-500 text-xs font-semibold py-4">❌ 無法讀取課程課表，請重新整理頁面試試看。</p>`;
     }
   }
+}
 
-  // Filter logic: show cards matching selected category or all
-  function applyFilter() {
-    if (!categorySelect) return
-    const value = categorySelect.value
-    const cards = cardsContainer.querySelectorAll('.card')
-    cards.forEach(card => {
-      const cat = card.dataset.category
-      if (value === 'all' || value === cat) {
-        card.style.display = ''
-      } else {
-        card.style.display = 'none'
-      }
-    });
-  }
+function renderClasses(courses) {
+  if (!classesGrid) return;
+  classesGrid.innerHTML = '';
+  courses.forEach(c => {
+    // Determine price dynamically matching rules
+    let price = 450;
+    let priceDesc = '體驗單堂價';
+    if (c.title.includes('Choreography')) {
+      price = 600;
+      priceDesc = '常態單堂價';
+    } else if (c.title.includes('One-on-One') || c.title.includes('Private')) {
+      price = 2000;
+      priceDesc = '一對一單堂價';
+    }
 
-  if (categorySelect) {
-    categorySelect.addEventListener('change', applyFilter)
-  }
-
-  // --- Auth State UI Sync ---
-  function updateAuthUI(user) {
-    currentUser = user
-    if (user) {
-      // User is logged in
-      authNavItem.innerHTML = `
-        <div class="user-menu">
-          <span class="user-email" title="${user.email}">${user.email.split('@')[0]} (會員)</span>
-          <button class="btn-logout" id="btn-logout">登出</button>
+    const card = document.createElement('div');
+    card.className = 'bg-white/75 backdrop-blur-md border border-slate-200/50 p-6 rounded-3xl shadow-glassLight flex flex-col justify-between h-56 transition-transform hover:scale-[1.01]';
+    card.innerHTML = `
+      <div>
+        <h3 class="text-base font-bold text-slate-800">${c.title}</h3>
+        <div class="mt-3 space-y-1 text-xs text-slate-500">
+          <div>🏷️ 風格：${c.style}</div>
+          <div>⏰ 時段：${c.time_slot}</div>
+          <div>📍 教室：${c.location}</div>
         </div>
-      `
-      // Attach logout event
-      document.getElementById('btn-logout').addEventListener('click', handleLogout)
-    } else {
-      // User is logged out
-      authNavItem.innerHTML = `
-        <button class="btn-login" id="btn-login-trigger">會員快捷登入</button>
-      `
-      // Re-attach login trigger event
-      document.getElementById('btn-login-trigger').addEventListener('click', () => {
-        openModal(modalLogin)
-      })
-    }
+      </div>
+      <div class="flex justify-between items-baseline border-t border-slate-100 pt-3 mt-4">
+        <div>
+          <span class="text-[10px] text-slate-400 block">${priceDesc}</span>
+          <span class="text-lg font-bold text-brand-coral">NT$ ${price}</span>
+        </div>
+        <button class="px-4 py-2 bg-brand-coral text-white font-bold rounded-xl text-xs shadow-sm hover:bg-brand-coral/95 transition-transform" onclick="openCheckoutModal('${c.title.replace(/'/g, "\\'")}', ${price})">
+          ⚡ 立即預約
+        </button>
+      </div>
+    `;
+    classesGrid.appendChild(card);
+  });
+}
+
+function openCheckoutModal(title, price) {
+  selectedCourse = { title, price };
+  if (payCourseTitle) payCourseTitle.value = title;
+  if (payCoursePrice) payCoursePrice.value = `NT$ ${price}`;
+  
+  if (checkoutFields) checkoutFields.style.display = 'block';
+  if (checkoutLoading) checkoutLoading.style.display = 'none';
+  
+  if (checkoutModal) {
+    checkoutModal.classList.remove('opacity-0', 'pointer-events-none');
+    checkoutModal.classList.add('opacity-100', 'pointer-events-auto');
   }
+}
 
-  // Check initial session
-  async function checkSession() {
-    const { data: { session } } = await supabase.auth.getSession()
-    updateAuthUI(session?.user || null)
+function closeCheckoutModal() {
+  if (checkoutModal) {
+    checkoutModal.classList.add('opacity-0', 'pointer-events-none');
+    checkoutModal.classList.remove('opacity-100', 'pointer-events-auto');
   }
+}
 
-  // Listen to auth changes
-  supabase.auth.onAuthStateChange((event, session) => {
-    updateAuthUI(session?.user || null)
-  })
-
-  // --- Modal Utilities ---
-  function openModal(modal) {
-    modal.classList.add('show')
+function submitECPayPayment() {
+  if (!selectedCourse) return;
+  
+  const name = studentNameInput ? studentNameInput.value.trim() : '';
+  const email = studentEmailInput ? studentEmailInput.value.trim() : '';
+  const phone = studentPhoneInput ? studentPhoneInput.value.trim() : '';
+  
+  if (!name || !email || !phone) {
+    alert('⚠️ 請填寫完整的學員姓名、電子信箱與手機號碼！');
+    return;
   }
+  
+  if (checkoutFields) checkoutFields.style.display = 'none';
+  if (checkoutLoading) checkoutLoading.style.display = 'flex';
+  
+  // Prepare ECPay checkout parameters
+  const tradeDate = formatECPayDate();
+  const tradeNo = 'D' + new Date().getTime().toString().substring(3);
+  
+  const params = {
+    MerchantID: MERCHANT_ID,
+    MerchantTradeNo: tradeNo,
+    MerchantTradeDate: tradeDate,
+    PaymentType: 'aio',
+    TotalAmount: selectedCourse.price,
+    TradeDesc: `Dance Creator OS - ${selectedCourse.title}`,
+    ItemName: `${selectedCourse.title} 單堂約課`,
+    ReturnURL: window.location.origin + window.location.pathname,
+    ChoosePayment: 'Credit',
+    EncryptType: '1',
+    ClientBackURL: window.location.origin + window.location.pathname
+  };
+  
+  // Calculate CheckMacValue
+  const checkMacValue = calculateCheckMacValue(params, HASH_KEY, HASH_IV);
+  
+  // Set parameters into the hidden checkout form
+  document.getElementById('ecpay-MerchantID').value = params.MerchantID;
+  document.getElementById('ecpay-MerchantTradeNo').value = params.MerchantTradeNo;
+  document.getElementById('ecpay-MerchantTradeDate').value = params.MerchantTradeDate;
+  document.getElementById('ecpay-PaymentType').value = params.PaymentType;
+  document.getElementById('ecpay-TotalAmount').value = params.TotalAmount;
+  document.getElementById('ecpay-TradeDesc').value = params.TradeDesc;
+  document.getElementById('ecpay-ItemName').value = params.ItemName;
+  document.getElementById('ecpay-ReturnURL').value = params.ReturnURL;
+  document.getElementById('ecpay-ChoosePayment').value = params.ChoosePayment;
+  document.getElementById('ecpay-EncryptType').value = params.EncryptType;
+  document.getElementById('ecpay-ClientBackURL').value = params.ClientBackURL;
+  document.getElementById('ecpay-CheckMacValue').value = checkMacValue;
+  
+  // Submit the form to ECPay test environment
+  setTimeout(() => {
+    if (ecpayForm) ecpayForm.submit();
+  }, 1000);
+}
 
-  function closeModal(modal) {
-    modal.classList.remove('show')
-  }
+// Expose triggers to window global scope
+window.openCheckoutModal = openCheckoutModal;
+window.closeCheckoutModal = closeCheckoutModal;
+window.submitECPayPayment = submitECPayPayment;
 
-  // Close when clicking outside modal container
-  [modalLogin, modalApply].forEach(modal => {
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal(modal)
-      })
-    }
-  })
-
-  if (modalLoginClose) {
-    modalLoginClose.addEventListener('click', () => closeModal(modalLogin))
-  }
-  if (modalApplyClose) {
-    modalApplyClose.addEventListener('click', () => closeModal(modalApply))
-  }
-
-  // Login Tabs Switch
-  if (tabLoginBtn && tabSignupBtn) {
-    tabLoginBtn.addEventListener('click', () => {
-      tabLoginBtn.classList.add('active')
-      tabSignupBtn.classList.remove('active')
-      formLogin.style.display = 'block'
-      formSignup.style.display = 'none'
-    })
-
-    tabSignupBtn.addEventListener('click', () => {
-      tabSignupBtn.classList.add('active')
-      tabLoginBtn.classList.remove('active')
-      formSignup.style.display = 'block'
-      formLogin.style.display = 'none'
-    })
-  }
-
-  // --- Login & Registration Flow ---
-  if (formLogin) {
-    formLogin.addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const email = document.getElementById('login-email').value.trim()
-      const password = document.getElementById('login-password').value
-      const submitBtn = document.getElementById('btn-login-submit')
-
-      submitBtn.disabled = true
-      submitBtn.innerText = '登入中...'
-
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-
-        showToast('登入成功！歡迎回到建築師公會。', 'success')
-        closeModal(modalLogin)
-        formLogin.reset()
-      } catch (err) {
-        showToast(err.message || '登入失敗，請檢查您的帳號密碼。', 'error')
-      } finally {
-        submitBtn.disabled = false
-        submitBtn.innerText = '登入'
-      }
-    })
-  }
-
-  if (formSignup) {
-    formSignup.addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const email = document.getElementById('signup-email').value.trim()
-      const password = document.getElementById('signup-password').value
-      const submitBtn = document.getElementById('btn-signup-submit')
-
-      submitBtn.disabled = true
-      submitBtn.innerText = '註冊中...'
-
-      try {
-        const { data, error } = await supabase.auth.signUp({ email, password })
-        if (error) throw error
-
-        showToast('註冊成功！若設定了信箱驗證，請至信箱點擊驗證連結。', 'success')
-        closeModal(modalLogin)
-        formSignup.reset()
-      } catch (err) {
-        showToast(err.message || '註冊失敗，請稍後再試。', 'error')
-      } finally {
-        submitBtn.disabled = false
-        submitBtn.innerText = '註冊'
-      }
-    })
-  }
-
-  async function handleLogout() {
-    try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      showToast('您已成功登出。', 'success')
-    } catch (err) {
-      showToast('登出失敗：' + err.message, 'error')
-    }
-  }
-
-  // --- Apply Application Section ---
-  if (btnApplyTrigger) {
-    btnApplyTrigger.addEventListener('click', () => {
-      if (!currentUser) {
-        showToast('此服務僅限會員使用，請先登入會員。', 'error')
-        openModal(modalLogin)
-      } else {
-        openModal(modalApply)
-      }
-    })
-  }
-
-  if (formApply) {
-    formApply.addEventListener('submit', async (e) => {
-      e.preventDefault()
-      if (!currentUser) {
-        showToast('請先登入會員再行申辦。', 'error')
-        closeModal(modalApply)
-        openModal(modalLogin)
-        return
-      }
-
-      const type = document.getElementById('apply-type').value
-      const name = document.getElementById('apply-name').value.trim()
-      const phone = document.getElementById('apply-phone').value.trim()
-      const project = document.getElementById('apply-project').value.trim()
-      const details = document.getElementById('apply-details').value.trim()
-      const submitBtn = document.getElementById('btn-apply-submit')
-
-      submitBtn.disabled = true
-      submitBtn.innerText = '傳送中...'
-
-      try {
-        const { data, error } = await supabase
-          .from('applications')
-          .insert({
-            user_id: currentUser.id,
-            type,
-            applicant_name: name,
-            applicant_phone: phone,
-            project_name: project,
-            details
-          })
-
-        if (error) throw error
-
-        showToast('線上申辦成功！我們會盡快與您聯絡。', 'success')
-        closeModal(modalApply)
-        formApply.reset()
-      } catch (err) {
-        console.error('Submission error:', err)
-        showToast('送出失敗：' + (err.message || '請確認您是否有足夠權限。'), 'error')
-      } finally {
-        submitBtn.disabled = false
-        submitBtn.innerText = '送出申請'
-      }
-    })
-  }
-
-  // --- Smooth scroll for internal anchor links ---
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', e => {
-      const href = anchor.getAttribute('href')
-      const target = document.querySelector(href)
-      if (target) {
-        e.preventDefault()
-        target.scrollIntoView({ behavior: 'smooth' })
-      }
-    })
-  })
-
-  // --- Initialization ---
-  checkSession()
-  fetchAnnouncements()
-})
+// Run on load
+document.addEventListener('DOMContentLoaded', loadBookingClasses);
+export { loadBookingClasses };
