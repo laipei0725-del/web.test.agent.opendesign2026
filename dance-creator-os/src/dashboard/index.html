@@ -80,6 +80,9 @@
         <button onclick="switchTab('crm')" id="nav-crm" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:bg-white/5 hover:text-white">
           <span>👥</span> Student CRM
         </button>
+        <button onclick="switchTab('cms')" id="nav-cms" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:bg-white/5 hover:text-white">
+          <span>📝</span> 品牌文章編輯 (Journal CMS)
+        </button>
         <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:bg-white/5 hover:text-white">
           <span>⚙️</span> System Settings
         </button>
@@ -313,15 +316,61 @@
               <tbody id="crm-table-body">
                 <!-- CRM lists populated dynamically -->
                 <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td class="p-4 font-bold">林艾瑪 (Emma)</td>
+                  <td class="p-4 flex items-center gap-2 font-bold text-white"><span class="text-lg">👨</span> 王大明</td>
                   <td class="p-4">0912345678</td>
-                  <td class="p-4">emma.lin@test.com</td>
+                  <td class="p-4">daming.wang@test.com</td>
                   <td class="p-4 text-brand-cyan font-bold">6 堂</td>
                   <td class="p-4">92%</td>
                   <td class="p-4"><span class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded text-[10px]">正常</span></td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <!-- =================== 3.5 JOURNAL CMS EDITOR =================== -->
+        <section id="tab-cms" class="hidden space-y-6">
+          <div class="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-glass space-y-6">
+            <div class="flex justify-between items-center pb-4 border-b border-white/10">
+              <div>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">📝 品牌 Journal 文章線上編輯器 (Journal Article CMS)</h3>
+                <p class="text-xs text-gray-400 mt-1">發布與調整 SOLMIÉ 品牌日誌文章，設定 LINE 導流優惠與內容觀照。</p>
+              </div>
+              <button onclick="alert('已儲存文章草稿！')" class="px-4 py-2 bg-gradient-to-r from-brand-pink to-brand-blue text-white rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition-transform">
+                🚀 發布 / 更新文章
+              </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div>
+                  <label class="text-xs font-semibold text-gray-300 block mb-1">文章標題 (Title)</label>
+                  <input type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-blue" value="在動作中，找到不必被定義的安靜">
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-gray-300 block mb-1">文章分類 (Category)</label>
+                  <input type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-blue" value="Journal • 自信肢體養成">
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-gray-300 block mb-1">導流 LINE 優惠語句 (Lead Magnet Banner)</label>
+                  <input type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-blue" value="🎁 預約 $399 首堂自信肢體養成體驗課">
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-gray-300 block mb-1">文章摘要 (Excerpt)</label>
+                  <textarea class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-blue" rows="3">跳舞不是為了在鏡子前拼湊出完美的姿態，而是為了在流動的汗水與呼吸中，聽見心跳在說些什麼...</textarea>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="text-xs font-semibold text-gray-300 block mb-1">文章完整內文 HTML / Markdown (Body Content)</label>
+                  <textarea class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white font-mono focus:outline-none focus:border-brand-blue" rows="11">
+<p>來到 SOLMIÉ 的教室，許多學員一開始甚至不敢看著鏡子裡的自己。她們羞怯、拘謹，每一個跨步都像是被尺規量過一般小心翼翼...</p>
+<p>「在這裡，妳不必完美，也不必為了討好誰而收斂。」這是老師最常說的一句話。當妳不再把跳舞當作是一門功課，而是把手腳擺動當作是靈魂的宣洩時...</p>
+                  </textarea>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

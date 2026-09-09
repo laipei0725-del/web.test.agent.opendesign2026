@@ -10,17 +10,17 @@ const state = {
   chatThreads: [
     {
       id: 'emma-line',
-      name: '林艾瑪 (Emma)',
+      name: '王大明',
       channel: 'LINE 官方帳號',
-      avatar: '👩',
-      lastMessage: '我想預約今天下午兩點的雷鬼基礎班...',
+      avatar: '👨',
+      lastMessage: '我想預約這週的自信肢體養成體驗課...',
       time: '14:10',
       phone: '0912-345-678',
-      email: 'emma.lin@test.com',
+      email: 'daming.wang@test.com',
       points: '剩餘 6 堂',
       attendance: '92%',
       level: '基礎/入門',
-      notes: '學習熱情很高，雷鬼律動抓得不錯，著重核心律動。對編舞班表示有興趣。'
+      notes: '學習熱情很高，自信肢體養成律動抓得不錯，對編舞班表示有興趣。'
     }
   ],
   activeThreadId: 'emma-line'
@@ -48,10 +48,11 @@ function switchTab(tabId) {
 
   // Update top header label
   const labels = {
-    dashboard: 'Creator Dashboard',
-    chat: 'Customer Service Hub',
-    crm: 'Student CRM',
-    settings: 'System Settings'
+    dashboard: '創作者數據儀表板 (Creator Dashboard)',
+    chat: 'LINE 訊息與客服工作台 (Customer Service)',
+    crm: '學員管理與點數審核 (Student CRM)',
+    cms: '品牌文章編輯與發布 (Journal Article CMS)',
+    settings: '系統設定與 AI 大腦 (System Settings)'
   };
   document.getElementById('current-tab-label').textContent = labels[tabId] || tabId;
 }

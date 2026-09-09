@@ -24,14 +24,21 @@ app.post('/webhook/line', async (req, res) => {
     const userId = event.source.userId;
 
     if (event.type === 'message') {
-      const text = event.message.text;
+      const text = event.message.text || '';
       
-      // Auto-reply routing rules
-      if (text === '約課' || text === '線上約課') {
+      // Codex LINE Bot Auto-reply routing rules for offline class conversion
+      if (text.includes('399') || text.includes('日誌') || text.includes('首堂優惠')) {
         await replyLineMessage(event.replyToken, [
           {
             type: 'text',
-            text: '親愛的學員你好 🔥！點擊下方連結即可查看本週課表並直接進行預約付款喔：\n👉 https://laipei0725-del.github.io/web.test.agent.opendesign2026/dance-creator-os/src/portal/index.html'
+            text: '歡迎來到 SOLMIÉ 💃！很開心收到您的訊息，為您提供日誌讀者專屬的【$399 首堂自信肢體養成體驗禮遇】！\n\n✨ 實體體驗包含：\n1. 60 分鐘自信肢體養成律動體驗\n2. 課後 15 分鐘導師 1 對 1 肢體狀態觀照與交流\n\n歡迎點擊下方連結查看本週時段並進行預約：\n👉 https://laipei0725-del.github.io/web.test.agent.opendesign2026/dance-creator-os/src/portal/index.html'
+          }
+        ]);
+      } else if (text === '約課' || text === '線上約課' || text.includes('預約實體課')) {
+        await replyLineMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: '你好 💃！點擊下方連結即可查看本週實體自信肢體課表並進行預約：\n👉 https://laipei0725-del.github.io/web.test.agent.opendesign2026/dance-creator-os/src/portal/index.html'
           }
         ]);
       } else if (text === '查詢剩餘堂數') {
@@ -40,7 +47,14 @@ app.post('/webhook/line', async (req, res) => {
         await replyLineMessage(event.replyToken, [
           {
             type: 'text',
-            text: `您目前帳戶剩餘額度為：${points} 堂。要繼續約課或加購，可以直接告訴我喔 💃！`
+            text: `您目前帳戶剩餘額度為：${points} 堂。隨時告訴我您想預約的時段喔 💃！`
+          }
+        ]);
+      } else if (text.includes('諮詢') || text.includes('肢體')) {
+        await replyLineMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: 'SOLMIÉ 自信肢體養成課適合任何零舞蹈基礎的學員 🌿\n\n在課堂中，導師會透過音樂引導您舒展肩頸與建立自信肢體。若有任何想了解的細節，歡迎在此留下訊息，助教將於服務時間親切回覆您！'
           }
         ]);
       } else {
